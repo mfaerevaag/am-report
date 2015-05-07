@@ -51,6 +51,97 @@
 \section{Introduction}
 \label{sec:intro}
 \input{sections/intro.tex}
+% Motivation
+% Problem statements
+% Brief results
+% Structure of this thesis
+
+\section{Background}
+% Abstract machines
+%% Definition
+%%% Abstract machines vs. compilers
+%%% System vs. process
+%%% Stack vs. register
+%%% Instruction sets
+
+% Pros and cons
+%% Performance
+%% Portability
+
+% Existing implementation
+%% OOP focus
+%%% JVM
+%%% CLR
+%% Some experimental/theoretic ones (eg SECD)
+%% Issues and limitations of current industry standards
+
+\section{Multi-paradigm design}
+% Type system
+%% Representation (DWARF)
+%% Typed instructions
+%% Run-time type checking
+%% Dynamic types
+%%% !!!
+
+% Object model
+%% Virtual tables
+
+% Memory management
+%% Garbage collection
+
+% ISA
+
+% Closures
+
+\section{Implementation}
+% Assembler
+%% Simple parsing/emitting
+%% Label calculations (offsets)
+
+% Stack based
+%% Elements are (type, value) pairs
+%% Dynamically sized elements
+%%% Linked list
+
+% Object model
+%% Virtual tables
+%% (Un)boxing
+
+% Execution model
+%% Single stack
+%% Return values as output arguments
+%% No frame pointer(?)
+
+% Binary format (ELF)
+%% Sections
+%% Type encoding
+%% Instructions
+%%% Argument encoding
+
+% Exception handling
+
+% Debugging information
+
+\section{Evaluation}
+% Assembly generation
+%% Something about generating code for the machine
+
+% Performance
+%% Function calls
+%% Analysis
+
+\section{Related work}
+% Parrot VM
+% Da Vinci Machine (JVM `invokedynamic', maybe put this in the other JVM section)
+
+\section{Project management}
+% Risk assesment
+% Agile process
+%% Phases
+%% Backlogs
+%% Iterations
+% Technical management
+%% SCM
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -62,6 +153,8 @@
 \clearpage
 
 \section{Appendices}
+% Instruction set listing
+% Complete backlog
 \label{sec:appendix}
 \input{sections/appendix.tex}
 
