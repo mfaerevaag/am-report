@@ -2,6 +2,8 @@
 
 \usepackage{fullpage}
 \usepackage[utf8]{inputenc}
+\usepackage[american]{babel}
+\usepackage{csquotes}
 \usepackage{listings}
 \usepackage[table]{xcolor}
 \usepackage{amssymb}
@@ -20,6 +22,9 @@
 \usepackage{hyperref}
 \usepackage{makecell}
 
+\usepackage[backend=bibtex]{biblatex}
+\bibliography{report}
+
 
 % constants
 \newcommand{\COURSE}{Bachelor Thesis}
@@ -27,7 +32,7 @@
 \newcommand{\DATE}{June 2015}
 
 
-\input{macros.tex}
+\input{macros}
 
 
 \pagestyle{fancy}
@@ -42,7 +47,7 @@
 
 
 \begin{document}
-\input{./title.tex}
+\input{title}
 \clearpage
 
 \tableofcontents
@@ -50,7 +55,7 @@
 
 \section{Introduction}
 \label{sec:intro}
-\input{sections/intro.tex}
+\input{sections/intro}
 % Motivation
 % Problem statements
 % Brief results
@@ -145,19 +150,18 @@
 
 \section{Conclusion}
 \label{sec:conclusion}
-\input{sections/concl.tex}
+\input{sections/concl}
 
-\section{Bibliography}
-\label{sec:biblio}
-\bibliographystyle{abbrv}
-\bibliography{report}
-\clearpage
+\newpage
+\nocite{*}
+\printbibliography[heading=bibintoc]
 
+\newpage
 \section{Appendices}
+\label{sec:appendix}
+\input{sections/appendix}
 % Instruction set listing
 % Complete backlog
-\label{sec:appendix}
-\input{sections/appendix.tex}
 
 \end{document}
 

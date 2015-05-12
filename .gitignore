@@ -6,3 +6,6 @@
 *.pdf
 *.bbl
 *.blg
+/report-blx.bib
+/report.bcf
+/report.run.xml
