@@ -21,6 +21,7 @@
 \usepackage[bottom]{footmisc}
 \usepackage{hyperref}
 \usepackage{makecell}
+\usepackage{ifthen}
 
 \usepackage[backend=bibtex]{biblatex}
 \bibliography{report}
@@ -45,6 +46,7 @@
 \rhead{\DATE}
 \cfoot{Page \thepage{} of~\pageref{LastPage}}
 
+\addbibresource{report.bib}
 
 \begin{document}
 \input{title}
@@ -62,25 +64,12 @@
 % Structure of this thesis
 
 \section{Background}
-% Abstract machines
-%% Definition
-%%% Abstract machines vs. compilers
-%%% System vs. process
-%%% Stack vs. register
-%%% Instruction sets
+\label{sec:background}
+\input{sections/background.tex}
 
-% Pros and cons
-%% Performance
-%% Portability
-
-% Existing implementation
-%% OOP focus
-%%% JVM
-%%% CLR
-%% Some experimental/theoretic ones (eg SECD)
-%% Issues and limitations of current industry standards
 
 \section{Multi-paradigm design}
+\label{sec:design}
 % Type system
 %% Representation (DWARF)
 %% Typed instructions
@@ -99,6 +88,7 @@
 % Closures
 
 \section{Implementation}
+\label{sec:implementation}
 % Assembler
 %% Simple parsing/emitting
 %% Label calculations (offsets)

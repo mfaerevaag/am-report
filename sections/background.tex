@@ -1,0 +1,102 @@
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../report"
+%%% End:
+
+\subsection{Computer architectures}
+\label{sec:background:computer-architectures}
+An architecture is was describes the organization and programming model of a
+computer, including the functionality provided by and capabilities of a computer
+system\cite[ch. 1]{clements06}. The architecture does not dictate how individual
+system are constructed whether software- or hardware-wise. Virtually all modern
+general-purpose computer systems are based on the von Neumann architecture
+originating from papers by John von Neumann in 1945\cite{riley87}, in which he
+describes the design of a computing machine using now well-known concepts such
+as the arithmetic unit (ALU), control unit, memory, and input/output.
+%TODO is basically still the same, single CPU type
+
+One of the components of such an architecture is that of the instruction set
+architecture (ISA). Modern CPUs all read and execute a predefined set of
+instructions producing output in the form of bits which can be stored into the
+memory unit.
+%TODO more about ISA and memory
+
+The hardware implemented computer architectures can execute instructions very
+fast.\cite{NEEDED} Being this performant means that the instructions available
+to the programmer are generally very low-level and specialized for a given
+CPU. This is where an abstract machine becomes relevant.
+%TODO some numbers
+
+\subsection{Abstract machines}
+\label{sec:background:abstract-machines}
+
+When talking about abstract machines\footnote{Some use the term ``abstract
+  machine'' for a purely theoretical machine and ``virtual machine'' for the
+  corresponding implementation. In this thesis we define the terms to mean the
+  same.}, there are two overarching types that serve two very different
+purposes. First there is the \texttt{system} abstract machine, which is a
+program that emulates a full operating system, effectively running a copy of one
+operating system in another. The program which executes the guest operating
+system is called a HyperVisor\cite{NEEDED}. The other type is the
+\texttt{process} abstract machine which runs like a regular program in the host
+operating system and executes a single program. Typically when the execution of
+the program stops, the abstract machine also exists. In this thesis we are
+concerned solely with the process type.
+
+Abstract machines are essentially computer architectures implemented in
+sofware. They are developed and run just as regular programs which take some
+input arguments and produce corresponding output (whether in the form of
+graphical interfaces, textual output, network activity, etc.).
+
+An abstract machines differs from a \textit{compiler} in that a compiler
+translates source code from one language to another without executing
+anything. The target language of compilers are typically an assembly language
+understood by a CPU, regardless whether it is a hardware CPU or, as is more
+relevant to this thesis, an abstract CPU implemented by an abstract machine. In
+other words, the abstract machine is concerned with executing source code where
+the compiler translates it.
+
+The components of an abstract machine differ wildly with each implementation,
+but there are common concepts that are present in most. We will briefly outline
+those here, but will describe each in much more detail through
+Section~\ref{sec:design} and Section~\ref{sec:implementation}.
+
+The \textbf{instructions set} is as mentioned the language that the abstract CPU
+understands. Typically each instruction has an opcode and a mnemonic name which
+eases documentating, reading and writing assembly code for human beings. Further
+some instructions can take arguments of varying types, e.g.~literal numbers or
+strings, memory references, register names, stack indices, etc.
+
+The \textbf{object model} defines the way in which the machine works with data,
+and the grouping thereof. Classes, interfaces, methods and structures are
+examples of such mechanism that aid the organization and development of
+programs. We define an \texttt{object} to be an entity comprised of a collection
+of data fields of arbitrary kind, and potentially including methods which are
+functions that are executed in the context of the data contained in the object.
+
+Every computing system involves an \textbf{execution model} which describes how
+code is executed during runtime. It includes a specification of how and where
+arguments are passed to subroutines, how values are returned from subroutines,
+how branching or jumping in the code is performed and similar operations. In
+relation to the execution model there are generally two schools of
+implementation namely stack and register based.%GO
+
+
+%% Definition
+%%% Abstract machines vs. compilers
+%%% System vs. process
+%%% Stack vs. register
+%%% Instruction sets
+
+% Pros and cons
+% ``Its purpose is to provide a platform-independent programming environment that abstracts away details of the underlying hardware or operating system, and allows a program to execute in the same way on any platform.''
+%% Performance
+%% Portability
+
+% Existing implementation
+%% OOP focus
+%%% JVM
+%%% CLR
+%%% Examples of how functional code is translated to an object model (such as F# on .NET)
+%% Some experimental/theoretic ones (eg SECD)
+%% Issues and limitations of current industry standards
