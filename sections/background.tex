@@ -7,7 +7,7 @@
 \label{sec:background:computer-architectures}
 An architecture is was describes the organization and programming model of a
 computer, including the functionality provided by and capabilities of a computer
-system\cite[ch. 1]{clements06}. The architecture does not dictate how individual
+system\cite{clements06}. The architecture does not dictate how individual
 system are constructed whether software- or hardware-wise. Virtually all modern
 general-purpose computer systems are based on the von Neumann architecture
 originating from papers by John von Neumann in 1945\cite{riley87}, in which he
@@ -63,7 +63,7 @@ Section~\ref{sec:design} and Section~\ref{sec:implementation}.
 
 The \textbf{instructions set} is as mentioned the language that the abstract CPU
 understands. Typically each instruction has an opcode and a mnemonic name which
-eases documentating, reading and writing assembly code for human beings. Further
+eases documentation, reading and writing assembly code for human beings. Further
 some instructions can take arguments of varying types, e.g.~literal numbers or
 strings, memory references, register names, stack indices, etc.
 
@@ -75,18 +75,68 @@ of data fields of arbitrary kind, and potentially including methods which are
 functions that are executed in the context of the data contained in the object.
 
 Every computing system involves an \textbf{execution model} which describes how
-code is executed during runtime. It includes a specification of how and where
+code is executed during run-time. It includes a specification of how and where
 arguments are passed to subroutines, how values are returned from subroutines,
-how branching or jumping in the code is performed and similar operations. In
-relation to the execution model there are generally two schools of
-implementation namely stack and register based.%GO
+how branching or jumping in the code is performed and similar operations.
 
+\subsubsection{Stack and register based implementations}
 
-%% Definition
-%%% Abstract machines vs. compilers
-%%% System vs. process
-%%% Stack vs. register
-%%% Instruction sets
+In relation to the execution model there are generally two schools of
+implementation strategy which dictates how code is written for the system.
+
+One is the \textit{register} based implementation, in which data is handled
+through registers. Values are moved between registers and instructions take
+registers as arguments and typically also produce output to registers. This
+model closely resembles common assembly code and thus the underlying hardware,
+which can make it easier to optimize the code for execution on hardware. The
+``Parrot VM'' (details in Section \ref{sec:related-work:parrot}) is an example
+of a register based abstract machine. The other model is the \textit{stack}
+based implementation. As usual, implementation details differ widely from
+project to project but generally it involves a single stack dedicated to
+operations on values, passing arguments, returning values and everything else
+that the machine might support. Many instructions do not accept any arguments
+but rather consume values from the stack which is expected to contain ordered
+values of the correct type. The ``Java Virtual Machine'' (details in Section
+\ref{sec:related-work:jvm}) is an example of a stack based abstract machine.
+
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}[t]{.45\textwidth}
+    \begin{lstlisting}[label={lst:background:stack}, caption=Stack based addition, frame=tlrb, numbers=none]{Name}
+      push 1
+      push 2
+      add
+    \end{lstlisting}
+  \end{subfigure}
+  \begin{subfigure}[t]{.45\textwidth}
+    \begin{lstlisting}[label={lst:background:register}, caption=Register based addition, frame=tlrb, numbers=none]{Name}
+      mov r1, $1
+      mov r2, $2
+      add r1, r2, r3
+    \end{lstlisting}
+  \end{subfigure}
+\end{figure}
+
+Listing~\ref{lst:background:stack} shows an example of simple addition using the
+stack based model. After execution of the three instructions the value
+\texttt{3} will be on top of the stack and the values \texttt{1} and \texttt{2}
+will have been consumed by the \texttt{add}
+instruction. Listing~\ref{lst:background:register} shows the same computation
+but using registers, where the result is the value \texttt{3} contained in
+register 3 (\texttt{r3}) and the two operands remaining in \texttt{r1} and
+\texttt{r2}.
+
+There is no definitive answer to which is best, it is largely a matter of
+preference and style. Research has shown that a register machine requires 47\%
+less executed instructions, is 32\% faster in total, but requires 25\% more
+code\cite{shi05}. This is probably not the general case, but it gives an
+indication of the pros and cons of each.
+
+%% ---Definition
+%%% ---Abstract machines vs. compilers
+%%% ---System vs. process
+%%% ---Stack vs. register
+%%% ---Instruction sets
 
 % Pros and cons
 % ``Its purpose is to provide a platform-independent programming environment that abstracts away details of the underlying hardware or operating system, and allows a program to execute in the same way on any platform.''
