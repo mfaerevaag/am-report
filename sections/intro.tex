@@ -3,4 +3,44 @@
 %%% TeX-master: "../report"
 %%% End:
 
-INTRO~\cite{itanium}
+% Motivation
+
+Abstract machines are used in all possible scenarios where executable code is to
+be executed. They are used in web browsers, smart cards, IDEs and even
+compilers, to name a few. The current abstract machines, like the Java Virtual
+Machine (JVM) or Microsoft's Common Language Runtime (CLR), are heavily focused
+on a sub-set of languages, primarily object-oriented. Although one can get by
+with `hacking` a program written in an unsupported language, into an
+object-oriented model, it is neither an efficient or eloquent solution.
+
+
+\subsection{The problem}
+
+% Problem statements
+The main goals of this project is to provide a generic abstract machine which
+can handle a multitude of programming languages and programming paradigms, for
+instance traditional programming paradigms such as object orientation and
+functional programming as well as emerging paradigms such as dynamic
+languages. With this we want to provide low enough primitives for system
+programming, yet and by default provide a secure high-level programming
+environment.
+
+This involves:
+\begin{itemize}
+\item Defining an instruction set which can handle a wide range of paradigms
+\item Defining an execution model which can support the aforementioned paradigms
+\item Implementing an interpreter supporting the instruction set and the execution model
+\item Evaluating the performance of the interpreter
+\end{itemize}
+
+% Brief results
+The result is awesome (TODO).
+
+
+\subsection{Structure of the report}
+
+In this report we will start with laying the ground works of knowledge and
+concepts by describing the background of abstract machines and multi-paradigm
+designs. Thereafter we will describe our design and it's implementation. Lastly
+we will evaluate the result, while also discussing related work and the
+management of the project.
