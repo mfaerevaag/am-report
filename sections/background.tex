@@ -3,37 +3,85 @@
 %%% TeX-master: "../report"
 %%% End:
 
-\subsection{Computer architectures}
+\subsection{Computer Architectures}
 \label{sec:background:computer-architectures}
 An architecture is was describes the organization and programming model of a
 computer, including the functionality provided by and capabilities of a computer
-system\cite{clements06}. The architecture does not dictate how individual
-system are constructed whether software- or hardware-wise. Virtually all modern
+system\cite{clements06}. The architecture does not dictate how individual system
+are constructed whether software- or hardware-wise. Virtually all
 general-purpose computer systems are based on the von Neumann architecture
 originating from papers by John von Neumann in 1945\cite{riley87}, in which he
 describes the design of a computing machine using now well-known concepts such
-as the arithmetic unit (ALU), control unit, memory, and input/output.
-%TODO is basically still the same, single CPU type
+as the arithmetic unit (nowadays known as the CPU), control unit, memory, and
+input/output. The structure of modern hardware machines is still surprisingly
+similar to this design, even though they are vastly more powerful and have added
+myriads of improvements.
 
-One of the components of such an architecture is that of the instruction set
-architecture (ISA). Modern CPUs all read and execute a predefined set of
-instructions producing output in the form of bits which can be stored into the
-memory unit.
-%TODO more about ISA and memory
+To interact with such a system a so-called instruction set is provided, which
+essentially is the language that the CPU understands. It is by use of this
+predefined set of actions that the programmer can control the whole machinery
+and ``tell'' the computer how to perform algorithms, read from and write to
+memory, communicate with peripheral devices and so on.
 
-The hardware implemented computer architectures can execute instructions very
-fast.\cite{NEEDED} Being this performant means that the instructions available
-to the programmer are generally very low-level and specialized for a given
+Modern hardware implemented computer architectures can execute instructions very
+fast\cite{NEEDED}. Being this fast comes at the cost of expressiveness in the
+instruction set, they are generally very low-level and specialized for a given
 CPU. This is where an abstract machine becomes relevant.
 %TODO some numbers
 
-\subsection{Abstract machines}
+\subsection{Abstract Machines}
 \label{sec:background:abstract-machines}
 
-When talking about abstract machines\footnote{Some use the term ``abstract
-  machine'' for a purely theoretical machine and ``virtual machine'' for the
-  corresponding implementation. In this thesis we define the terms to mean the
-  same.}, there are two overarching types that serve two very different
+Abstract machines are essentially computer architectures implemented in
+software. They are developed and run just as regular programs which take some
+input arguments and produce corresponding output, be it graphical interfaces,
+textual output, network activity, etc.
+
+\subsubsection{Related Concepts}
+
+To define what an abstract machine is, it helps to compare it with other similar
+systems. There are many related technologies and concepts which have mixed
+definitions and can stir up confusions. We present the most notable examples and
+give our own definitions.
+
+An \textbf{interpreter} is a program which reads source code and directly
+executes the code without translation into another language or native
+code. Interpreters are easy to implement but generally suffer from poor
+performance\cite{NEEDED}. Examples include Python\footnote{The Python
+  Programming Language: \url{https://www.python.org}} and Ruby\footnote{The
+  Ruby Programming Language: \url{https://www.ruby-lang.org}}.
+
+An abstract machines differs from a \textbf{compiler} in that a compiler
+translates source code from one language to another without executing
+anything. The target language of compilers is typically an assembly language
+understood by a CPU, regardless whether it is a hardware CPU or as is more
+relevant to this thesis, an abstract CPU implemented by an abstract machine. In
+other words, the abstract machine is concerned with executing code where the
+compiler translates it. Examples include GCC\footnote{The GNU Compiler
+  Collection: \url{https://gcc.gnu.org}} and GHC\footnote{The Glasgow Haskell
+  Compiler: \url{https://www.haskell.org/ghc}}.
+
+Further there is the concept of \textbf{Just-in-Time} (JIT) and
+\textbf{Ahead-of-Time} (AOT) compilation, which is often misunderstood as being
+part of a compiler. JIT and AOT compilation is concerned with \texttt{when}
+compilation takes place, not how. JIT compilers are implemented as part of
+abstract machines or runtimes, and will compile an \term{intermediate
+  representation} into native code during run-time. For instance a language X
+may be compiled into language Y which is understood by an abstract machine. Upon
+execution, language Y will be translated into native code and only executed on
+the hardware.
+
+The term \textbf{virtual machine} is where some heavy debate can sparked as to
+how it relates to abstract machines. Some distinguish the terms by defining an
+abstract machine to be a purely theoretical machine and virtual machine for the
+corresponding implementation. Others define the virtual machine as being a
+virtualization of an existing physical system and abstract machines as being a
+purely software implemented machine. For the purpose of this thesis we define
+the term ``abstract machine'' and ``virtual machine'' to cover both.
+
+% TODO: runtime?
+
+Two overarching types of abstract machines exist, that serve two very different
 purposes. First there is the \texttt{system} abstract machine, which is a
 program that emulates a full operating system, effectively running a copy of one
 operating system in another. The program which executes the guest operating
@@ -41,20 +89,9 @@ system is called a HyperVisor\cite{NEEDED}. The other type is the
 \texttt{process} abstract machine which runs like a regular program in the host
 operating system and executes a single program. Typically when the execution of
 the program stops, the abstract machine also exists. In this thesis we are
-concerned solely with the process type.
+concerned solely with the process machine type.
 
-Abstract machines are essentially computer architectures implemented in
-sofware. They are developed and run just as regular programs which take some
-input arguments and produce corresponding output (whether in the form of
-graphical interfaces, textual output, network activity, etc.).
-
-An abstract machines differs from a \textit{compiler} in that a compiler
-translates source code from one language to another without executing
-anything. The target language of compilers are typically an assembly language
-understood by a CPU, regardless whether it is a hardware CPU or, as is more
-relevant to this thesis, an abstract CPU implemented by an abstract machine. In
-other words, the abstract machine is concerned with executing source code where
-the compiler translates it.
+\subsubsection{Components of an Abstract Machine}
 
 The components of an abstract machine differ wildly with each implementation,
 but there are common concepts that are present in most. We will briefly outline
@@ -102,17 +139,17 @@ values of the correct type. The ``Java Virtual Machine'' (details in Section
 \begin{figure}[h]
   \centering
   \begin{subfigure}[t]{.45\textwidth}
-    \begin{lstlisting}[label={lst:background:stack}, caption=Stack based addition, frame=tlrb, numbers=none]{Name}
-      push 1
-      push 2
-      add
+    \begin{lstlisting}[label={lst:background:stack}, caption=Stack based addition]
+push 1
+push 2
+add
     \end{lstlisting}
   \end{subfigure}
   \begin{subfigure}[t]{.45\textwidth}
-    \begin{lstlisting}[label={lst:background:register}, caption=Register based addition, frame=tlrb, numbers=none]{Name}
-      mov r1, $1
-      mov r2, $2
-      add r1, r2, r3
+    \begin{lstlisting}[label={lst:background:register}, caption=Register based addition]
+mov r1, $1
+mov r2, $2
+add r1, r2, r3
     \end{lstlisting}
   \end{subfigure}
 \end{figure}
@@ -127,26 +164,98 @@ register 3 (\texttt{r3}) and the two operands remaining in \texttt{r1} and
 \texttt{r2}.
 
 There is no definitive answer to which is best, it is largely a matter of
-preference and style. Research has shown that a register machine requires 47\%
-less executed instructions, is 32\% faster in total, but requires 25\% more
-code\cite{shi05}. This is probably not the general case, but it gives an
-indication of the pros and cons of each.
+preference and style. However, research done by rewriting the Java Virtual
+Machine into a register machine has shown that register machines require 47\%
+less executed instructions, is 32\% faster at executing programs, but requires
+25\% more code\cite{shi05}. This is probably not the general case, but it gives
+an indication of the pros and cons of each.
 
-%% ---Definition
-%%% ---Abstract machines vs. compilers
-%%% ---System vs. process
-%%% ---Stack vs. register
-%%% ---Instruction sets
+\subsection{Advantages and Disadvantages}
 
-% Pros and cons
-% ``Its purpose is to provide a platform-independent programming environment that abstracts away details of the underlying hardware or operating system, and allows a program to execute in the same way on any platform.''
-%% Performance
-%% Portability
+As with most things, there are both strengths and weaknesses of using abstract
+machines. One of the most powerful aspects is that they are by definition
+platform independent; programs written for the abstract machine can run on any
+platform for which an implementation of the machine is provided. And given that
+the machine is written in a popular and widely supported language, such as C or
+C++, then it means the machine can be compiled for use on a lot of
+platforms. Even embedded systems can be supported by porting the machine, and
+potentially by exposing only a subset of the full instruction set.
 
-% Existing implementation
-%% OOP focus
-%%% JVM
-%%% CLR
-%%% Examples of how functional code is translated to an object model (such as F# on .NET)
-%% Some experimental/theoretic ones (eg SECD)
+Another compelling thing, arguably the main one, is that the instruction set
+provided by the abstract machine is much more expressive than regular assembly
+code. The details of hardware is abstracted away from the programmer (or
+compiler), and a more high-level and easy-to-use ISA is provided. However, some
+abstract machines define are or were designed for a specific language or
+language paradigm, resulting in a system which is hard to use as a code
+generation target for other types of languages. An example is the Java Virtual
+Machine in which the underlying tools and mechanisms of the machine are not
+exposed, making it difficult to fit languages outside the original paradigm into
+the machinery.
+
+It is easy to assume that abstract machines must suffer performance-wise because
+of added abstraction layer, but interestingly that is not necessarily the
+case. With an added JIT compiler the performance may be as good or even better
+than languages that are compiled to native code\cite{mangione98, qwertie11}. One
+reason for this is that very aggressive optimization algorithms can be
+implemented for the respective ISA, giving very effective performance
+improvements for free regardless which platform the code will be executed on.
+
+\subsection{Existing Implementations}
+
+There are scores of abstract machine implementations, ranging from small
+research projects to widely used industrial strength systems. Some of today's
+most popular languages run on abstract machines, the two most well-known being
+Java and C\#\cite{langpop}. We have selected some additional examples to discuss
+due to their influence or otherwise interesting nature.
+
+\subsubsection{The Java Virtual Machine}
+
+The Java Virtual Machine (JVM) executes programs written in the Java Bytecode
+format and is available on a huge amount of platforms, everything from TVs
+through cell phones and media players to desktop PCs and Internet
+browsers\cite{aboutjava}. JVM was developed specifically for the Java
+programming language, hence the name, but a large amount of languages now target
+the JVM as their main run-time.
+
+The JVM is a stack based machine and is heavily tied to the object oriented
+language paradigm. Most of the low-level mechanism are inaccesible through the
+ISA, which forces language implementors to fit everything into the Java object
+model, which is inherently \term{Object-Oriented} and statically typed. As a
+result it is not a straightforward task to implement dynamically typed or
+functional languages on the JVM. That said, a lot of languages do, such as
+Scala, Clojure and Python (Jython), which are all either or both functional and
+dynamic.
+
+\subsubsection{Common Language Runtime}
+
+Microsoft's Common Language Runtime (CLR) is the abstract machine that executes
+the Microsoft Common Intermediate Language (CIL). Like the JVM it is stack based
+and widely used on Microsoft Windows devices. An open-source port called
+Mono\footnote{The Mono Project: \url{http://www.mono-project.com}} is developed
+maintained for Mac OSX and Linux machines.
+
+Like the JVM, the CLR is Object-Oriented by design and consequently suffers from
+the same flexibility issues.
+% TODO: more?
+
+\subsubsection{Turing Machines}
+
+Arguably the most fundamental and influential theorical (more precisely
+mathematical) abstract machines are Turing machines. First described by Alan
+Turing in 1937\cite{sep-turing-machine}, they were devised to help describe what
+it means for an arbitrary task to be computable. They are essentially simple
+state machines which operate on a (fictional and infinite) tape of cells of
+value 0 or 1, and a read-write head that can either read or write the value of
+the cell currently being scanned\cite{sep-turing-machine}. The machines acts
+according to transition rules which describe what action will be performed,
+given a machine state and current cell value. The action can be either a read or
+write or a movement of the tape to the right or the left.
+
+Given these simple mechanisms it is possible to perform any imaginable
+computation however complex. Because of this, systems that can do so are called
+Turing complete systems\cite{NEEDED}.
+
+%TODO
+%% SECD Machine
+%% Examples of how functional code is translated to an object model (such as F# on .NET)
 %% Issues and limitations of current industry standards
