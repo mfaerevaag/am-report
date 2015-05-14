@@ -28,16 +28,17 @@
 
 \usepackage[citestyle=alphabetic,backend=biber]{biblatex}
 \bibliography{report}
+\addbibresource{report.bib}
 
+\setcounter{secnumdepth}{3} % only chapter and sections will be numbered
+\setcounter{tocdepth}{3}    % entries down to \subsubsections in the TOC
 
 % constants
 \newcommand{\COURSE}{Bachelor Thesis}
 \newcommand{\TITLE}{Abstract Machine}
 \newcommand{\DATE}{June 2015}
 
-
 \input{macros}
-
 
 \pagestyle{fancy}
 \fancyhf{}
@@ -46,10 +47,8 @@
 \setlength{\headsep}{25pt}
 \lhead{\COURSE}
 \chead{\TITLE}
-\rhead{\DATE}
+\rhead{\leftmark}
 \cfoot{Page \thepage{} of~\pageref{LastPage}}
-
-\addbibresource{report.bib}
 
 \begin{document}
 \input{title}
