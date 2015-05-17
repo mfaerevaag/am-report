@@ -63,7 +63,7 @@ compiler translates it. Examples include GCC\footnote{The GNU Compiler
 
 Further there is the concept of \textbf{Just-in-Time} (JIT) and
 \textbf{Ahead-of-Time} (AOT) compilation, which is often misunderstood as being
-part of a compiler. JIT and AOT compilation is concerned with \texttt{when}
+part of a compiler. JIT and AOT compilation is concerned with \textit{when}
 compilation takes place, not how. JIT compilers are implemented as part of
 abstract machines or runtimes, and will compile an \term{intermediate
   representation} into native code during run-time. For instance a language X
@@ -222,9 +222,9 @@ language paradigm. Most of the low-level mechanism are inaccesible through the
 ISA, which forces language implementors to fit everything into the Java object
 model, which is inherently \term{Object-Oriented} and statically typed. As a
 result it is not a straightforward task to implement dynamically typed or
-functional languages on the JVM. That said, a lot of languages do, such as
-Scala, Clojure and Python (Jython), which are all either or both functional and
-dynamic.
+functional languages on the JVM. Efforts have been made to asses this, most
+notably the introduction of the \texttt{invokedynamic} instruction through the
+Da Vinci project (see Section~\ref{sec:related:davinci} for details).
 
 \subsubsection{Common Language Runtime}
 
@@ -236,7 +236,7 @@ maintained for Mac OSX and Linux machines.
 
 Like the JVM, the CLR is Object-Oriented by design and consequently suffers from
 the same flexibility issues.
-% TODO: more?
+% TODO: more!
 
 \subsubsection{Turing Machines}
 

@@ -25,8 +25,9 @@
 \usepackage{listings}
 \usepackage{parcolumns}
 \usepackage{subcaption}
+\usepackage{drawstack}
 
-\usepackage[citestyle=alphabetic,backend=biber]{biblatex}
+\usepackage[backend=biber]{biblatex}
 \bibliography{report}
 \addbibresource{report.bib}
 
@@ -37,6 +38,8 @@
 \newcommand{\COURSE}{Bachelor Thesis}
 \newcommand{\TITLE}{Abstract Machine}
 \newcommand{\DATE}{June 2015}
+
+\addto\captionsamerican{\renewcommand{\contentsname}{Table of Contents}}
 
 \input{macros}
 
@@ -54,6 +57,12 @@
 \input{title}
 \clearpage
 
+\section{Abstract}
+\clearpage
+
+\section{Acknowledgements}
+\clearpage
+
 \tableofcontents
 \clearpage
 
@@ -65,7 +74,7 @@
 \label{sec:background}
 \input{sections/background}
 
-\section{Multi-paradigm design}
+\section{A Multi-Paradigm Approach}
 \label{sec:design}
 % Type system
 %% Representation (DWARF)
@@ -86,33 +95,7 @@
 
 \section{Implementation}
 \label{sec:implementation}
-% Assembler
-%% Simple parsing/emitting
-%% Label calculations (offsets)
-
-% Stack based
-%% Elements are (type, value) pairs
-%% Dynamically sized elements
-%%% Linked list
-
-% Object model
-%% Virtual tables
-%% (Un)boxing
-
-% Execution model
-%% Single stack
-%% Return values as output arguments
-%% No frame pointer(?)
-
-% Binary format (ELF)
-%% Sections
-%% Type encoding
-%% Instructions
-%%% Argument encoding
-
-% Exception handling
-
-% Debugging information
+\input{sections/implementation}
 
 \section{Evaluation}
 % Assembly generation
@@ -121,6 +104,11 @@
 % Performance
 %% Function calls
 %% Analysis
+
+\section{Future development}
+% What's missing
+% What could be different
+% What would next steps be
 
 \section{Related work}
 \label{sec:related}
