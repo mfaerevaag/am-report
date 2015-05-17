@@ -9,3 +9,48 @@
 % JVM section)
 
 \subsection{Parrot VM}
+
+The Parrot Virtual Machine\footnote{\url{http://www.parrot.org}} is a project
+that attempts to solve similar issues as \thename{}. Most importantly almost solely
+focuses on efficient support of dynamically typed languages. Moreover it aims to
+provide very flexible interoperability between any language ported to Parrot; as
+the docs say: ``In theory, you will be able to write a class in Perl, subclass
+it in Python and then instantiate and use that subclass in a Tcl
+program.''\cite{parrot-docs}.
+
+An interesting aspect of Parrot is that it completely hides the lowest-level
+representation of executable code, called Parrot Bytecode (PBC), which is what
+the virtual machine ultimately executes. Instead various layers of abstraction
+are provided to ease the task of generating and reading code. One level above
+PBC there is Parrot Assembly (PASM) which is more akin to regular assembly, and
+provides little to no syntactic sugar. A level further up the abstraction
+hierarchy there is Parrot Intermediate Representation (PIR), that is the main
+language of interaction with Parrot, whether for code generating by a compiler
+or authored by human beings. Compared to other interface languages for abstract
+machines, it is a high-level language with constructs such as conditional
+control structures, infix operators (e.g. \texttt{=}, \texttt{>},
+\texttt{\&\&}), local variable and parameter declarations (effectively hiding
+calling convention mechanisms), and even classes.
+
+This hierarchy of abstraction makes it easy to port language implementations to
+Parrot because a lot of the boilerplate code (calling conventions, variable
+declarations, etc.) is hidden, and if fine-grained control is required PASM is
+available.
+
+Parrot uses the so-called Polymorphic Container (PMC) type that is, as the name
+suggest, a polymorphic type theoretically capable of holding any type of
+data. They are however by design object-oriented and class like, because
+``languages that are built on top of Parrot are typically
+object-oriented''\cite{parrot-docs}. A set of common PMCs are provided by
+Parrot, but new ones can be implemented using a super set of C (as to ensure
+efficiency).
+
+What Parrot does not provide is an efficient platform for statically typed
+languages. For instance, it offers no support for storing and retrieving type
+information, which is a very significant shortcoming in terms of statically
+optimized dispatches.
+
+In summary Parrot is to dynamically typed languages, what JVM and CLR are for
+statically typed languages. That means it does not bridge the gap between the
+two, but merely provides facilities for the dynamic (and mostly object-oriented)
+paradigm.
