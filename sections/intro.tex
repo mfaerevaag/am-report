@@ -5,42 +5,87 @@
 
 % Motivation
 
-Abstract machines are used in all possible scenarios where executable code is to
-be executed. They are used in web browsers, smart cards, IDEs and even
-compilers, to name a few. The current abstract machines, like the Java Virtual
-Machine (JVM) or Microsoft's Common Language Runtime (CLR), are heavily focused
-on a sub-set of languages, primarily object-oriented. Although one can get by
-with `hacking` a program written in an unsupported language, into an
-object-oriented model, it is neither an efficient or eloquent solution.
+New programming languages are coming into existence at a very rapid pace. Tools
+for creating languages are in abundance, and even the beginning student of
+computer science will most likely posses the knowledge to use them. When
+languages become pass\'e or fundamental shortcomings are discovered, the
+prevalent solution seems to be the creation of new and improved languages
+instead of updating the existing. All of this has resulted in hundreds, if not
+thousands, of available languages in a myriad of styles and paradigms for just
+as many different purposes.
 
+The world of language paradigms has become something of a religious matter for
+many. Some swear by the functional approach, others by object orientation and
+some insist on procedural languages, the rest on something in between. Each
+require distinct and often very complex implementations that are inherently
+difficult to optimize and evolve as the feature sets expand. Static or dynamic
+typing is another question that divides people that of like pineapple on
+pizza. Strong arguments exist for both and it often comes down to a matter of
+taste and preference.
 
-\subsection{The problem}
+Intrinsic to a language is a platform on which to be executed, be it a desktop
+computer, cell phone, embedded device or essentially any other digital
+device. Historically, languages where developed to be used on a single platform,
+often written for a particular processor architecture. Nowadays only the most
+domain specific languages can make due with that. Any language that desires
+widespread adaptation must work on a multitude of devices, and not only are
+there scores of architectures on the market, they are also very different in
+terms of execution models and what technical primitives they provide.
 
-% Problem statements
-The main goals of this project is to provide a generic abstract machine which
-can handle a multitude of programming languages and programming paradigms, for
-instance traditional programming paradigms such as object orientation and
-functional programming as well as emerging paradigms such as dynamic
-languages. With this we want to provide low enough primitives for system
-programming, yet and by default provide a secure high-level programming
+Altogether language and platform diversity has grown beyond what most would have
+believed when the first programmable machines appeared. That is why abstract
+machines are becoming increasingly relevant to modern computer science.
+
+In brief, an abstract machine relieves language creators of the burden of
+architecture specific implementation. By providing a unified platform they
+abstract away the underlying hardware specifics and can moreover provide a
+higher level of expressiveness than the bare-metal counterpart.
+
+There are many abstract machines available today, and several are industrial
+strength systems that are in use on billions of devices. What they generally
+lack however, is flexibility in terms of language support. Usually they are
+designed with a specific language, or family or languages, in mind which
+obviously comes at the cost of adaptability by other languages. Emerging
+paradigms such as dynamic and functional\footnote{Functional languages have been
+  around for a long time, but are becoming increasingly popular} languages are
+not well suited for the currently available abstract machines.
+
+Having written a compiler for a functional language\footnote{In the course
+  ``02122 Software Technology Project F14''} we are aware of the issues faced by
+compiling code to traditional platforms, and have felt the need for something
+better.
+
+\subsection{The Multi-Paradigm Abstract Machine}
+
+In response to the issues of today's available systems, the main ambition of
+this project is to provide an abstract machine that is well suited for a
+multitude of programming languages of different paradigms. The system exposes
+low level primitives that are relevant for system programming while being
+efficient, expressive and secure enough as a higher level programming
 environment.
 
-This involves:
-\begin{itemize}
-\item Defining an instruction set which can handle a wide range of paradigms
-\item Defining an execution model which can support the aforementioned paradigms
-\item Implementing an interpreter supporting the instruction set and the execution model
-\item Evaluating the performance of the interpreter
-\end{itemize}
+To facilitate the above, an instruction set has been defined that covers the
+requirements of many language paradigms in a solid, compact fashion, with the
+support of a corresponding execution model.
 
-% Brief results
-The result is awesome (TODO).
-
+The instruction set and execution model have been implemented in the abstract
+machine that we have named \thename{}.
 
 \subsection{Structure of the report}
 
-In this report we will start with laying the ground works of knowledge and
-concepts by describing the background of abstract machines and multi-paradigm
-designs. Thereafter we will describe our design and it's implementation. Lastly
-we will evaluate the result, while also discussing related work and the
-management of the project.
+To provide the foundational knowledge required to satisfy the ambition of the
+project, Section~\ref{sec:background} describes what components make up an
+abstract machine, and what existing solutions there are along with their
+shortcomings. Section~\ref{sec:design} presents the design of the abstract
+machine as well as the defined instruction set and a detailed explanation of the
+problems we believe it solves. Section~\ref{sec:implementation} describe the
+actual implementation of the machine and how we have dealt with various issues
+through process.
+
+Section~\ref{sec:evaluation} and Section~\ref{sec:further-development} evaluates
+the status of the project and discusses what the next steps towards a better
+product are.
+
+Section~\ref{sec:related-work} presents some related work from which we have
+drawn inspiration and finally Section~\ref{sec:project-management} describe how
+we have managed the project, both technically and personally.
