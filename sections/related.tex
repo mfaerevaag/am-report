@@ -3,10 +3,9 @@
 %%% TeX-master: "../report"
 %%% End:
 
-
-% Parrot VM
-% Da Vinci Machine (JVM `invokedynamic', maybe put this in the other
-% JVM section)
+There are other projects, previous and current, that attempt to solve the same
+or similar problems as we are with \thename{}. Here we present the ones we find
+most interesting and from which we have drawn inspiration.
 
 \subsection{Parrot VM}
 
@@ -54,3 +53,52 @@ In summary Parrot is to dynamically typed languages, what JVM and CLR are for
 statically typed languages. That means it does not bridge the gap between the
 two, but merely provides facilities for the dynamic (and mostly object-oriented)
 paradigm.
+
+\subsection{JVM's \texttt{invokedynamic}}
+
+From its inception in 1996\cite{java-1.0-press} the JVM was a very statically
+typed system that did not provide any support for dynamic languages. With its
+rising popularity several non-Java languages were made available for
+it. Scala\footnote{\url{http://www.scala-lang.org}} and
+Groovy\footnote{\url{http://groovy-lang.org}} were among the first
+\textit{dynamic} languages that were designed to be run on the JVM. They handled
+dynamic typing and dispatch by ``[including] wrapper type classes, using hash
+tables to provide dynamic symbol resolution, and so on''\cite{friesen14}.
+
+The Da Vinci Machine Project\cite{da-vinci} was an effort to solve the issue of
+implementing dynamic language features on the JVM. It was adopted in Java 7 in
+2011, with the most essential addition (in terms of dynamic language support)
+being the \texttt{invokedynamic} Java Bytecode instruction. Previous to
+\texttt{invokedynamic} a caller had to know the fully qualified name and type
+signature of a method that it wanted to dispatch to.
+
+With \texttt{invokedynamic} and by use of so-called method handles, it is
+possible to defer the look-up of the dispatch target to run-time and do it by
+providing either a class object (for static methods) or a class instance (for
+instance methods) along with the types of arguments that are given. A method
+handle is comparable to what is known as a function pointer in
+C\cite{friesen14}, i.e. something that designates a callable entity to which
+dispatches (or invocation) can be made. A method handle is looked up during
+run-time. Because a method can be looked up not only by the type of the object
+on which it resides, but also by the type of the arguments that it accepts, that
+naturally enables \term{multimethods}, which is similar to method overloading
+with the significant difference of relying on the types of arguments given
+rather than the static type of the object.
+
+%TODO: clearer and more
+
+% \begin{lstlisting}[language=Java]
+%   public class A {
+%     public void foo(int i) { ... }
+%   }
+
+%   public class B extends A {
+%     public void foo(float f) { ... }
+%   }
+%   ...
+%   public static void main() {
+%     // The declared type is A but the actual type is B
+%     A objA = new B();
+%     objA.foo(2);
+%   }
+% \end{lstlisting}
