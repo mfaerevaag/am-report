@@ -26,6 +26,7 @@
 \usepackage{parcolumns}
 \usepackage{subcaption}
 \usepackage{drawstack}
+\usepackage{pdfpages}
 
 \usepackage[backend=biber]{biblatex}
 \bibliography{report}
@@ -34,14 +35,15 @@
 \setcounter{secnumdepth}{3} % only chapter and sections will be numbered
 \setcounter{tocdepth}{3}    % entries down to \subsubsections in the TOC
 
+% TODO: line spacing
+
 % constants
 \newcommand{\COURSE}{Bachelor Thesis}
 \newcommand{\TITLE}{Abstract Machine}
 \newcommand{\DATE}{June 2015}
+\newcommand{\thename}{The \"Uber Machine} % TODO
 
 \addto\captionsamerican{\renewcommand{\contentsname}{Table of Contents}}
-
-\newcommand{\thename}{The \"Uber Machine}
 
 \input{macros}
 
