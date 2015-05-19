@@ -1,0 +1,158 @@
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../report"
+%%% End:
+
+With every software engineering project comes the challenge of management, with
+respect to both time, development (coding) and personal resources. There are
+several aspects to managing each and there are a many ways to go about it. We
+have obviously not had the luxury of a dedicated project manager who can take
+care of planning tasks, handle communication, keep track of loose ends and
+continuously assess the status of the project. Thus we need to do this ourselves
+in parallel with development which encourages a rigorous system that ``gets out
+of the way'', while still providing a flexible work flow that supports the
+inevitable change that is part of all software development; designs change as
+flaws are discovered, inefficiencies must be optimized, refactoring of sloppy
+code is required and so.
+
+A system that has become very popular among software developer in recent years
+is the so-called agile method. It is based on the Agile
+Manifesto\cite{agile-manifesto} which is a collection of twelve principles that
+guides the method of work. The central focus is on response to change over
+following a plan and working software over extensive documentation.
+
+``Agile'' became so popular and widespread that it has now degraded to something
+of a clich\'e that everyone seems to have their own definition of and is a
+buzzword that is unavoidable in the industry. However, we find that it is still
+a strong basis for project management and have chosen to use it for the
+development of \thename{}.
+
+\subsection{Phases and Iterations}
+
+The agile process works in a set of four phases from the inception of the
+project to the transition into production. The following is a description of
+each of the phases and what is to be the result of each. The phases are in
+accordance with the work of Scott W. Ambler\cite{aup}.
+
+\begin{description}
+\item[Inception] is the initial phase of the project. The vision and scope of
+  the product is identified and corresponding use cases are defined. An
+  overarching development plan is laid out. The result of the inception is a
+  so-called inception artifact which can be found in
+  Appendix~\ref{appendecies:inception-artifact}.
+
+\item[Elaboration] of the design and overall implementation is defined and the
+  development plan is updated accordingly. The goal is to prove that the project
+  can succeed and that the planned architecture will suffice.
+
+\item[Construction] is the phase in which construction of the product takes
+  off. Implementation of features happen in iterations (see below) and
+  continuous evaluation of state and quality is applied.
+
+\item[Transition] involves evaluating the result and deploying it to
+  production. In our case the deployment is irrelevant since there is not
+  anything or anyone to which we are delivering the product per s\'e.
+
+\end{description}
+
+The implementation is done in iterations of one to two weeks each, in which a
+clear goal is defined for the iteration. At the end of each iteration the goal
+is assessed and a new goal for the next iteration is defined. In this way
+changes to both the fundamental ambition of the project and more concrete
+details can be addressed in a very flexible way without ruining a master plan,
+as would be the case if we were working under the \term{waterfall method}.
+
+\subsection{Risk Assessment}
+\label{sec:project-mgmt:risk-assessment}
+
+The project involves a set of risks that characterizes potential pitfalls and
+shortcomings that might be encountered during the course of design and
+development. We have tried to capture them in the initial phase of the project
+to be able to better cope with any such issues and hopefully avoid them
+altogether.
+
+The risk assessment has been established with inspiration from Dr. Wall\"uller's
+paper ``Risk Management for IT and Software
+Projects''\cite{risk-assessment}. Table~\ref{tbl:risk-assessment} is an excerpt
+from the complete risk assessment which can be found in
+Appendix~\ref{appendices:risk-assessment}.
+
+\begin{table}[h]
+  \centering
+    \begin{tabular}{p{0.2\textwidth} p{0.7\textwidth}}
+      \textit{Risk} & Fundamental design flaws \\
+      \textit{Severity} & High \\
+      \textit{Description} & The fundamental design could be found to not \textit{efficiently} solve the problems that it intents to. \\
+      \textit{Preventive measures} & Continuous review and adjustment to the design must be applied. \\ \Xhline{2\arrayrulewidth}
+
+      \textit{Risk} & Technical implementation difficulties \\
+      \textit{Severity} & Medium \\
+      \textit{Description} & It is a possibility that the complexity of the system will be a significant challenge in terms of actual implementation. \\
+      \textit{Preventive} measures & Favor simplicity over optimization and follow to the \term{KISS} principle. Further accept that everything will most likely not be state-of-the-art and industrial strength software, but rather a proof-of-concept. \\ \Xhline{2\arrayrulewidth}
+
+      \textit{Risk} & Platform dependencies \\
+      \textit{Severity} & Low \\
+      \textit{Description} & To facilitate efficient work flow we might have to depend on third-party libraries which do not work on some platforms, such as microprocessors and mobile devices. \\
+      \textit{Preventive measures} & Evaluate whether a feature of the system can be implemented platform-independent or if it too much work compared to the benefits of using existing libraries that work on limited platforms.
+    \end{tabular}
+    \caption{Excerpt from risk assessment}
+    \label{tbl:risk-assessment}
+\end{table}
+
+
+\subsection{The Backlog}
+\label{sec:project-mgmt:backlog}
+
+The tool that lays the foundation for the agile work flow is the backlog. It is
+a collection of work that needs to be done ordered by priority. The work is
+described in the form of user stories which are small and optimally completely
+independent chunks of work that can be processed separately. The term user story
+comes from the fact that projects are usually done with an end-user in mind and
+the description is of the form. While there is certainly meant to be users of
+\thename{} it is not in the same strict sense that it is for say a website or
+game. User stories are meant to be defined in the form ``As an X I want to Y''
+where X could be a user and Y would be an action, such as ``log in to the
+website'' or ``send an email''. We have not followed this principle because we
+do not think it provides any value for our purposes, and have therefore been
+more loose in the formulation of tasks.
+
+Before any work is done on a user story it is estimated in terms of the
+approximate amount of work in involves. Points are awarded to each story
+resulting in an overview of how much is done and how much is to be done at any
+given time.
+
+Instead of having a single collection of all tasks we split the work into
+categories such as ``Testing'', ``Documentation'', ``Design'' and ``Core
+development'' and have essentially kept track of each category of work
+separately. That enabled us to flexibly select which area of the project to
+focus on.
+
+\subsection{Tools}
+\label{sec:project-mgmt:tools}
+
+\subsection{Technical Management}
+
+When working in a team with multiple developers it is of paramount importance to
+efficiently manage the codebase. When multiple people are writing code in the
+same source tree it is virtually impossible to manually maintain and apply
+changes from each other. Specifically designed for this purpose are Source Code
+Management (SCM) tools. Without going into excessive details, there two general
+forms of SCMs which differ fundamentally in the way files can be edited
+concurrently. The \textit{centralized} model (Microsoft TFS, Subversion) uses a
+central code repository from which everyone edits files and is the single source
+of truth. With \textit{decentralized} SCMs every developer has her own
+repository and can merge changes from servers or other developers
+directly. There is no single source of truth in this model, but the a mainline
+tree is almost always maintained.
+
+The SCMs handle merging of files which have been edited by multiple people, and
+are very good at doing this automatically. They can obviously not resolve merges
+where the same lines of code have been changed differently, and so the developer
+has to resolve the conflicting parts manually.
+
+We have used the git\footnote{Git Source Control Management:
+  \url{http://git-scm.com}} SCM tool together with the code hosting service
+GitHub\footnote{\url{https://github.com}}. git is fully decentralized which we
+find to be the most convenient model.
+
+%TODO derp? more?

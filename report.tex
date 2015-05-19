@@ -27,6 +27,7 @@
 \usepackage{subcaption}
 \usepackage{drawstack}
 \usepackage{pdfpages}
+\usepackage{makecell}
 
 \usepackage[backend=biber]{biblatex}
 \bibliography{report}
@@ -87,6 +88,9 @@
 \input{sections/implementation}
 
 \section{Evaluation}
+% Usage evaluation
+%% Have the problems been solved
+
 % Assembly generation
 %% Something about generating code for the machine
 
@@ -104,13 +108,8 @@
 \input{sections/related}
 
 \section{Project management}
-% Risk assesment
-% Agile process
-%% Phases
-%% Backlogs
-%% Iterations
-% Technical management
-%% SCM
+\label{sec:project-mgmt}
+\input{sections/project-mgmt}
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -122,7 +121,7 @@
 
 \newpage
 \section{Appendices}
-\label{sec:appendix}
+\label{sec:appendices}
 \input{sections/appendix}
 % Instruction set listing
 % Complete backlog
