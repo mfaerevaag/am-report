@@ -65,16 +65,20 @@
 
 Throughout the project we have made heavy use of testing to ensure the
 correctness of the implementation, i.e. whether it strictly follows the machine
-specification~\ref{sec:spec}. We have both made use of {\it unit}- and {\it
-  integration}-tests. Here unit-tests have the purpose of testing a single
-isolated component, for instance a function. Here we mock a specific state of
-the machine, or the state of a component in the machine, and then run isolated
+specification~\ref{sec:spec}. We have both made use of \term{unit}- and
+\term{integration-tests}. Here unit-tests have the purpose of testing a single
+isolated component, typically a function. Here we mock a specific state of the
+machine, or the state of a component in the machine, and then run isolated
 functions where we {\it know} what the result should be, for which we can easily
-test. By comparison, the integration-tests have had a much larger scope. They
-have tested all components together, in result ensuring their interfacing or
-integration.
+test. By comparison, the integration-tests have a much larger scope. Their
+purpose is to test the whole program without any regard to any specific
+component. This effectively ensures each component is wired together correctly.
 
-TODO: test-driven development
+For parts of the implementation we have made use of \term{test-driven
+  development} (TDD). Here we write the tests prior to implementing the actual
+functionality being tested. This eliminates the danger of false positives, where
+tests pass when they are not supposed to. It also offers a efficient work flow,
+where the minimum functionality is implemented to make the tests pass.
 
 \subsubsection{Unit-tests}
 Unit-testing in C is a fairly simple process and essentially does not require
@@ -82,7 +86,7 @@ any framework or library. While not required, a simple set of \term{macros} will
 greatly improve the readability and ease of writing tests.
 
 % cmocka
-In spite of this, We chose to use a unit-testing library called {\it
+In spite of this, we have chosen to use a unit-testing library called {\it
   cmocka}~\cite{cmocka}. It is a well tested and documented library, also used
 by large projects like {\it libssh}~\footnote{Implemenation of the SSH protocol:
   \url{http://libssh.org/}}. It offers several features which makes unit-testing
@@ -93,7 +97,7 @@ thereafter checking that the correct transformations and output has occurred.
 
 Cmocka also allows the test program to recover from signaled exceptions,
 e.g. {\tt SIGSEGV}, {\tt SIGILL}, etc. If a test in the test program triggers a
-segmentation fault exception, for instance, it will dot exit, but rather show
+segmentation fault exception, for instance, it will not exit, but rather show
 where the exception occurred and print useful debugging information like the
 call stack.
 
@@ -102,7 +106,7 @@ of the C library. This makes it possible to use the library on embedded
 platforms and with different compilers.
 
 % example
-As an example, we will describe how we test the stack implementation.
+As an example, we will describe how we test parts of the stack implementation.
 
 Firstly, we create a mocked state of a stack which we can use for our tests.
 \begin{lstlisting}[language={[ANSI]C},caption={Unit-test setup procedure}]
@@ -149,24 +153,24 @@ After having retrieved the stack for the {\tt state} parameter, we create an XOR
 sum of the stack. When having tested the specific function, we assert that the
 new XOR sum is the same as before, making sure that there is no unexpected
 changes to the stack. Due to the simple nature of our {\tt stack\_sum} function,
-this is not a guarantee as different states of the stack may compute the same
+this is not a guarantee, as different states of the stack may compute the same
 sum. % TODO: more on stack sum?
-In the body of our test case, the {\tt stack\_pop} function, in this case, we
-push several elements to the stack and assert that they are popped again in the
-correct order.
+In the body of our test case, the {\tt stack\_pop} function in this case, we
+push several elements to the stack and assert that they are popped off again in
+the correct order.
 
 After all test cases has completed, a teardown function is run, reversing that
 of the setup function. In the case of the stack tests, it simply frees the
-memory allocated to the state of the stack:
-\begin{lstlisting}[language={[ANSI]C},caption={Unit-test teardown procedure}]
-static int teardown(void **state)
-{
-    stack_t *s = *state;
-    stack_free(s);
-
-    return 0;
-}
-\end{lstlisting}
+memory allocated to the state of the stack.
+% \begin{lstlisting}[language={[ANSI]C},caption={Unit-test teardown procedure}]
+% static int teardown(void **state)
+% {
+%     stack_t *s = *state;
+%     stack_free(s);
+%
+%     return 0;
+% }
+% \end{lstlisting}
 
 
 \subsubsection{Integration-tests}
@@ -174,11 +178,11 @@ We want our integration tests to test the implementation in the fashion of
 black-box testing, i.e. given some input, the program should produce a specific
 output, regardless of how the program works internally. The easiest way of
 accomplishing this is by taking the actual machine executable and running it
-with certain programs and parameters. We have therefor created several different
-programs, which we know the desired output.
+with certain programs and arguments. We have therefor created several different
+programs, from which we know the desired output.
 
 As an example we can check that the machine fails when stack underflow occurs,
-i.e. popping more values from the stack then there are actual values. A program
+i.e. popping more values off the stack then there are actual values. A program
 doing exactly this could be:
 % TODO: update with actual
 \begin{lstlisting}[language={bytecode},caption={Machine program producing
@@ -206,16 +210,9 @@ program and checking the output.
 
 shUnit2 enables us to have an alias for the actual machine binary, letting us
 set the target binary through our build system and piping standard error to
-standard out, like so:
-\begin{lstlisting}[language={sh},caption={Machine binary alias}]
-am()
-{
-    ./${TARGET} $@ 2>&1
-}
-\end{lstlisting}
-
-In our test cases we can then, by using the alias, store the output and exit
-code in variables and do assertions based on their expected values.
+standard out. In our test cases we can then, by using the alias, store the
+output and exit code in variables and do assertions based on their expected
+values.
 % TODO: update return code
 \begin{lstlisting}[language={sh},caption={shUnit2 underflow test case}]
 test_stack_underflow()
@@ -231,4 +228,4 @@ test_stack_underflow()
 
 In the above test case we run the machine with the underflow program, asserting
 that the process exits with the correct code and that the output contains the
-word underflow.
+word `underflow`.
