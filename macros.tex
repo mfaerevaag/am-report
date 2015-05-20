@@ -64,5 +64,13 @@
   morestring=[b]"
 }
 
+\lstnewenvironment{bytecode}[1][]
+ {\lstset{language={bytecode},#1}}
+ {}
+
+\lstnewenvironment{ccode}[1][]
+ {\lstset{language={[ANSI]C},#1}}
+ {}
+
 \let\oldcite=\cite
 \renewcommand\cite[1]{\ifthenelse{\equal{#1}{NEEDED}}{[citation~needed]}{\oldcite{#1}}}
