@@ -74,3 +74,18 @@
 
 \let\oldcite=\cite
 \renewcommand\cite[1]{\ifthenelse{\equal{#1}{NEEDED}}{[citation~needed]}{\oldcite{#1}}}
+
+\newenvironment{stackops}
+{%
+  \newcommand{\op}[2]{
+    \texttt{##1} & $\rightarrow$ & \{##2\} \\
+  }%
+  \begin{table}[H]%
+    \centering%
+    \setlength{\tabcolsep}{12pt}%
+    \begin{tabular}{rcl}%
+}
+{%
+    \end{tabular}%
+  \end{table}%
+}
