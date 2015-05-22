@@ -61,9 +61,10 @@ done by popping, storing the value and pushing it back to the stack. Other
 operations can be implemented in a similar fashion.
 
 \subsubsection{Stack vs. Register Machine}
-Machines can both implement the stack model physically and virtually, but as we
-are designing an abstract machine, we will only discuss the virtual
-aspect. Regardless, such a machine is commonly called a \term{stack machine}.
+Machines can implement the stack model virtually and execute it directly in
+hardware, but as we are designing an abstract machine, we will only discuss the
+virtual aspect. Regardless, such a machine is commonly called a \term{stack
+  machine}.
 
 The most common notation in arithmetic formulas and statements are the infix
 notation, where the operator is written between its operands: $1 + 2$. One can
@@ -95,7 +96,7 @@ time, rather than just concurrently where multiple processes actually share the
 same processor.
 
 A thread is typically the smallest unit of executable instructions by a
-processor. A process being run by an operating system therefor had one thread
+processor. A process being run by an operating system therefore had one thread
 which the operating systems scheduler delegated CPU time to. With multi-core
 processors, the notion of a single process having multiple threads arose, making
 it possible for a process to compute several things concurrently (not
@@ -104,14 +105,15 @@ supported by most modern operating systems.
 
 Although multi-threading is a very interesting feature, it also raises a lot of
 challenges when designing machines. Different threads cannot directly read and
-write to the same, without taking data races into account, which is a common
-mistake when writing multi-threaded programs. If multiple threads are accessing
-the same memory, it can change at any time and therefor cannot be TODO
+write to the same place, or address, in memory without taking data races into
+account, which is a common mistake when writing multi-threaded programs. If
+multiple threads are accessing the same memory, it can change at any time and
+therefore cannot be TODO
 
 As with our stack machine, each thread has to have its own state, including its
 own stack. In other words, all stacks are private and cannot be shared across
-threads. This can though be simulated using heap object which are referenced
-from multiple threads' stack.
+threads. This can though be facilitated by using heap object which are
+referenced from multiple threads' stack.
 
 TODO: tasks and transactions
 % Multiple executables may execute simultaneously.
@@ -130,12 +132,12 @@ TODO: tasks and transactions
 \subsubsection{Stack Organization}
 % All stacks will initially have a single activation frame
 
-The stacks will not be limited in size, as the compilers will be able to
-implement stacks as heap object which can grow dynamically. Through out this
-report, we will say that the stacks \term{grows downwards}. This is because
-physically, the top most element of the stack is located at a low address in the
-host computers memory. Therefor, as more elements are pushed to the stack, they
-will get higher addresses, making the stack grow downwards in memory.
+The stacks will not be limited in size, as the stacks can be implemented as heap
+object which can grow dynamically. Through out this report, we will say that the
+stacks \term{grows downwards}. This is because physically, the top most element
+of the stack is located at a low address in the host computers
+memory. Therefore, as more elements are pushed to the stack, they will get
+higher addresses, making the stack grow downwards in memory.
 
 A stack element will consist of some type information and a reference to its
 content, or data. The type information will include its declared type, but also
@@ -151,8 +153,8 @@ these two instructions alone will be very limiting, and make the job of writing
 a compiler very tedious. Therefor, we will need more instructions, making more
 complex manipulations more convenient.
 
-Later, when we will describe the execution model of the machine, we will see
-that instructions for pushing an popping elements further up the stack. For
+When we later describe the execution model of the machine, we will see that we
+need instructions for pushing an popping elements further up the stack. For
 instance, if we want to access the arguments given to a subroutine, they will be
 located up the stack. The compiler will therefor need an effective method of
 duplicating that element onto the top of the stack, making is accessible for
@@ -166,17 +168,19 @@ meaning displacement 0 will be the top of the stack. Exception handling will
 have to be utilized when using a displacement which is not allowed, for instance
 outside the stack or its own scope.
 
-Lets call these two instructions {\tt pushElement} and {\tt popElement}. Unlike
-{\tt push}, which adds a new element to the stack, we have chosen that {\tt
-  pushElement} will overwrite the element at the given displacement. This is
-more convenient as this does not change the displacement of the following
-elements, though it requires some planning, as there will have to be an element
-on the stack with the purpose of being overwritten.
+Lets call these two instructions {\tt pushElement} and {\tt
+  storeElement}. Unlike {\tt push}, which adds a new element to the stack, the
+specification defines {\tt pushElement} to overwrite the element at the given
+displacement. This is more convenient as this does not change the displacement
+of the following elements, though it requires some planning, as there will have
+to be an element on the stack with the purpose of being overwritten. {\tt
+  storeElement} will pop of the top-most element and place it at the given
+displacement.
 
 Also, unlike our previous stack example, the {\tt push} instruction, or rather
 the {\tt pushElement} instruction, will not take a value as an argument. Rather
-it will take the top element and push it to the place of the given displacement
-argument. There will be separate instructions for adding new elements onto the
+it will take the element at the given displacement and push onto the top of the
+stack. There will be separate instructions for adding new elements onto the
 stack, for instance {\tt pushConstant}.
 
 Here we can see some simple operations using the {\tt pushElement} and {\tt
