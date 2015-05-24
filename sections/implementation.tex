@@ -3,9 +3,187 @@
 %%% TeX-master: "../report"
 %%% End:
 
-\subsection{Core architecture}
+\subsection{Core Infrastructure}
+
+The infrastructure of \thename{} is the code that lays the basis for interaction
+between the individual parts of the system and is responsible for handling the
+flow of control. There is no ``infrastructure'' module or structures, but rather
+there is a hierarchy of responsibilities where control is handed back and forth
+as tasks are performed.
+
+The top-most control unit is the \texttt{engine}, which
+
+memory layout (stack per thread, heap area, code area)
+vm initialization
+instruction cycle
+thread
+
+% Very general architecture (theres a vm, a file reader, instruction codes, etc)
+% What's in the VM state and Thread state?
+% How code bytes are handled
+% Instruction cycles
+% Internal error handling
+% Logging/debugging facilities
+% Graceful exits / clean up
+% Command line arguments
 
 \subsection{Stacks}
+
+A stack is in itself a fairly simple construction that allows values
+to be pushed to an popped from an allocated memory region. Usually
+stack elements are stored and retrieved by the last in, first out
+method, but to better facilitate the implementation of the
+specification for \thename{} there are additional operators which
+opposes that rule (see Section~\ref{NEEDED}).
+
+\subsubsection{Memory Layout}
+
+Arguably the most intuitive way to construct a stack is to use a
+simple array of a fixed initial size and handle operations by keeping
+track of the number of elements in the stack. A push operation thus
+increments the number of elements and assigns a value to the new
+top-most slot. A pop operation will correspondingly decrement the
+number of elements in the stack and potentially return the element
+that is being removed. When the number of elements in the stack
+exceeds the initial size of the containing array more memory must be
+allocated. This can be done simply by use of \code{realloc} where the
+common approach is to double the amount of allocated memory, to adapt
+to quickly growing stacks. However, \code{realloc} can be a
+performance issue and since the stack is by far the most frequently
+used means of operation in \thename{} it is critical that it performs
+well.
+
+\begin{remark}
+  Stacks can also be implemented as linked lists where each element is
+  allocated upon creation and freed upon removal, but this poses an
+  even greater performance impact due to the heavy use of allocation
+  and deallocation mechanism.
+\end{remark}
+
+To mitigate the memory allocation issue we have modelled the stack as
+a linked list of allocated regions which we call \textit{chunks}. Each
+chunk is essentially a stack in itself and is implemented almost
+exactly as described above. The benefit is that when a chunk becomes
+full, a new chunk is simply allocated and wired into the linked list,
+thus preventing the need for a reallocation. The exposed interface
+consists of a set of stack operation functions that essentially maps
+operations onto chunks by computing which chunk, and potentially what
+index of its elements, that will be the target of a given
+operation. Thus the chunks are hidden in the implementation and are
+solely internal data structures which users need not know
+of. Figure~\ref{fig:implementation:stack:layout} shows how the chunks
+and stack elements (described below) are laid out in memory.
+
+A chunk is modelled as a doubly linked list node with the common
+\code{next} and \code{prev} pointers to other chunks (which can be
+\code{NULL}), and includes an additional four fields presented in
+listing~\ref{lst:implementation:stack:chunk}.
+
+\begin{lstlisting}[language={[ANSI]C},%
+  caption={Structure defining a chunk of the stack},%
+  label={lst:implementation:stack:chunk}]
+struct stack_chunk {
+    int capacity;
+    int length;
+    int peak;
+    stack_element_t *elements;
+    struct stack_chunk *next;
+    struct stack_chunk *prev;
+}
+\end{lstlisting}
+
+The \code{capacity} field denotes the maximum number of elements
+containable in the chunk, and is computed from the macro value
+\code{STACK\_CHUNK\_SIZE}, which as the name suggests defines the byte
+size of a chunk. The chunk size is simply divided by the size of a
+stack element, \code{stack\_element\_t}, but is padded with enough
+bytes to make room for an exact number of elements thus prevent wasted
+memory.
+
+The \code{length} simply represents the current number of elements
+stored in the chunk. When the \code{length} equals the \code{capacity}
+it is time to allocate a new chunk. The \code{peak} field is the
+maximum \code{length} that the chunk has reached at any time, and is
+used to keep track of elements that must be freed.
+
+The \code{elements} points to the memory region used for storing the
+actual stack elements and is allocated upon creation of a new chunk. A
+chunk has a limited number of slots for elements but the stack itself
+is unbounded as a result of the chunk list; there is no limit to how
+many chunks can be allocated, except the amount of physical or virtual
+memory available to the machine.
+
+\subsubsection{Administering Memory Usage}
+
+A new chunk is allocated when the last active chunk becomes full, but
+is not immediately freed when it becomes empty. Instead a number of
+chunks, defined by the macro value
+\code{STACK\_CHUNK\_BUFFER\_LENGTH}, are cached for series of stack
+operations that operate right between the limit of two
+chunks. Consider a loop of code that repeatedly pushes four elements
+to the stack only to pop them off moments after. If there are two
+slots left in the last chunk when the loop begins, a new chunk must be
+allocated during the course of one loop iteration. However when the
+iteration pops the values off again the new chunk will become empty,
+which without the cached chunks would result in the chunk being
+freed. With the cached chunks the newly allocated chunk is saved and
+is simply rewired into the stack when it is needed again.
+% TODO: this could be further optimized by detecting such loops and
+% increasing the size of the current chunk. aint nobody got time for
+% that.
+
+However when there are more than inactive chunks than defined by
+\code{STACK\_CHUNK\_BUFFER\_LENGTH} a chunk will be freed. Each
+element of the stack must be freed individually because they contain
+pointers to their content (see
+Section~\ref{sec:implementation:stack:elements}). This is where the
+\code{peak} field of a chunk is used, as it represents the maximal
+index into the \code{elements} field that can be expected to be a
+stack element. Otherwise the fields of the chunk and the chunk itself
+is freed normally using \code{free}.
+% TODO: confusing? might not be true anymore if we switch to using
+% unions or something else
+
+\subsubsection{Displacement Adjustment}
+
+Certain instructions use \textit{displacements} into the stack, where
+a displacement is a number of elements upward into the stack, where
+the top element is at displacement 0. Since the stack in practice is
+made up of a series of smaller stacks, a displacement is not
+guaranteed to reference a value into the latest chunk, i.e. if the
+displacement is larger than the current chunks \code{length}. Thus we
+must compute the correct chunk to use and adjust the index into it. It
+is a simple algorithm presented in pseudo code in
+Algorithm~\ref{algo:implementation:stack:displacement}.
+
+\begin{algorithm}[H]
+  \caption{Displacement adjustment}
+  \label{algo:implementation:stack:displacement}
+
+  \begin{algorithmic}
+    \Require Stack \Comment{The stack into which the displacement is computed}
+    \Require Displacement \Comment{The displacement value (integer)}
+
+    \Ensure SelectedChunk \Comment{The chunk into the the displacement points}
+    \Ensure AdjustedIndex \Comment{The adjusted index into the selected chunk}
+
+    \Procedure{AdjustDisplacement}{Stack,Displacement}
+      \State $chunk\gets$ last chunk of Stack
+      \State $index\gets$ Displacement
+      \While{$index \ge$ chunk.length}
+         \State $index\gets$ index $-$ chunk.length
+         \State $chunk \gets$ chunk.next
+      \EndWhile
+      \State $SelectedChunk\gets$ chunk
+      \State $AdjustedIndex\gets$ index
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+
+\subsubsection{Stack element structure}
+%TODO: write when confirmed
+%TODO: all ops run O(1) amortized, except freeing
 
 \begin{figure}[h]
   \centering
@@ -13,9 +191,9 @@
   \caption{Stack memory layout}
 \end{figure}
 
-\subsection{Execution model}
+\subsection{Execution Model}
 
-\subsection{Heap objects}
+\subsection{Heap Objects}
 
 \begin{figure}[h]
   \centering
@@ -58,6 +236,7 @@
 % gprof?
 
 \subsection{Testing}
+
 % Test-Driven Development (not strictly)
 % unit tests
 % black box testing
@@ -77,7 +256,7 @@ component. This effectively ensures each component is wired together correctly.
 For parts of the implementation we have made use of \term{test-driven
   development} (TDD). Here we write the tests prior to implementing the actual
 functionality being tested. This eliminates the danger of false positives, where
-tests pass when they are not supposed to. It also offers a efficient work flow,
+tests pass when they are not supposed to. It also offers an efficient work flow,
 where the minimum functionality is implemented to make the tests pass.
 
 \subsubsection{Unit-tests}
@@ -88,7 +267,7 @@ greatly improve the readability and ease of writing tests.
 % cmocka
 In spite of this, we have chosen to use a unit-testing library called {\it
   cmocka}~\cite{cmocka}. It is a well tested and documented library, also used
-by large projects like {\it libssh}~\footnote{Implemenation of the SSH protocol:
+by large projects like {\it libssh}~\footnote{Implementation of the SSH protocol:
   \url{http://libssh.org/}}. It offers several features which makes unit-testing
 more powerful and simpler to write. For instance, it offers test suites and
 \term{mocking} of objects which enabled us to set up a specific state of the

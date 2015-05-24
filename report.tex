@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[11pt]{article}
 
 \usepackage{fullpage}
 \usepackage[utf8]{inputenc}
@@ -29,10 +29,11 @@
 \usepackage{pdfpages}
 \usepackage{makecell}
 \usepackage{setspace}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 
 \usepackage[backend=biber]{biblatex}
 \bibliography{report}
-\addbibresource{report.bib}
 
 \setcounter{secnumdepth}{3} % only chapter and sections will be numbered
 \setcounter{tocdepth}{3}    % entries down to \subsubsections in the TOC
@@ -63,7 +64,7 @@
 \input{title}
 \clearpage
 
-% \onehalfspacing
+\onehalfspacing{}
 
 \section*{Abstract}
 \clearpage
@@ -101,10 +102,10 @@
 %% Function calls
 %% Analysis
 
-\section{Future development}
-% What's missing
-% What could be different
-% What would next steps be
+% Future development
+%% What's missing
+%% What could be different
+%% What would next steps be
 
 \section{Related work}
 \label{sec:related}
@@ -114,12 +115,12 @@
 \label{sec:project-mgmt}
 \input{sections/project-mgmt}
 
-\section{Conclusion}
-\label{sec:conclusion}
+\section{Conclusions}
+\label{sec:conclusions}
 \input{sections/concl}
 
 \newpage
-\nocite{*}
+% \nocite{*}
 \printbibliography[heading=bibintoc]
 
 \newpage

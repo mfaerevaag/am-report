@@ -135,15 +135,18 @@ focus on.
 When working in a team with multiple developers it is of paramount importance to
 efficiently manage the codebase. When multiple people are writing code in the
 same source tree it is virtually impossible to manually maintain and apply
-changes from each other. Specifically designed for this purpose are Source Code
-Management (SCM) tools. Without going into excessive details, there two general
-forms of SCMs which differ fundamentally in the way files can be edited
-concurrently. The \textit{centralized} model (Microsoft TFS, Subversion) uses a
-central code repository from which everyone edits files and is the single source
-of truth. With \textit{decentralized} SCMs every developer has her own
-repository and can merge changes from servers or other developers
-directly. There is no single source of truth in this model, but the a mainline
-tree is almost always maintained.
+changes from each other. Further it is an invaluable tool to be able to revert
+changes and work on different branches of the system in a unified manner.
+
+Specifically designed for this purpose are Source Code Management (SCM)
+tools. Without going into excessive details, there two general forms of SCMs
+which differ fundamentally in the way files can be edited concurrently. The
+\textit{centralized} model (Microsoft TFS, Subversion) uses a central code
+repository from which everyone edits files and is the single source of
+truth. With \textit{decentralized} SCMs every developer has her own repository
+and can merge changes from servers or other developers directly. There is no
+single source of truth in this model, but the a mainline tree is almost always
+maintained.
 
 The SCMs handle merging of files which have been edited by multiple people, and
 are very good at doing this automatically. They can obviously not resolve merges

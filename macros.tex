@@ -3,6 +3,9 @@
 %%% TeX-master: "report"
 %%% End:
 
+\usepackage[framemethod=tikz]{mdframed}
+\usepackage[many]{tcolorbox}
+
 % generalized stuff
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\term}[1]{\textit{#1}}
@@ -89,3 +92,25 @@
     \end{tabular}%
   \end{table}%
 }
+
+% Remark box
+\newtcolorbox{remark}[1][]{
+  breakable,
+  title=#1,
+  colback=lightgray,
+  colbacktitle=white,
+  coltitle=black,
+  fonttitle=\bfseries,
+  bottomrule=0pt,
+  toprule=0pt,
+  leftrule=0pt,
+  rightrule=0pt,
+  titlerule=0pt,
+  arc=0pt,
+  outer arc=0pt,
+  colframe=lightgray,
+}
+
+% algorithmic package setup
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
