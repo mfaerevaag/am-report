@@ -82,14 +82,14 @@ listing~\ref{lst:implementation:stack:chunk}.
 \begin{lstlisting}[language={[ANSI]C},%
   caption={Structure defining a chunk of the stack},%
   label={lst:implementation:stack:chunk}]
-struct stack_chunk {
+  struct stack_chunk {
     int capacity;
     int length;
     int peak;
     stack_element_t *elements;
     struct stack_chunk *next;
     struct stack_chunk *prev;
-}
+  }
 \end{lstlisting}
 
 The \code{capacity} field denotes the maximum number of elements
@@ -168,38 +168,86 @@ Algorithm~\ref{algo:implementation:stack:displacement}.
     \Ensure AdjustedIndex \Comment{The adjusted index into the selected chunk}
 
     \Procedure{AdjustDisplacement}{Stack,Displacement}
-      \State $chunk\gets$ last chunk of Stack
-      \State $index\gets$ Displacement
-      \While{$index \ge$ chunk.length}
-         \State $index\gets$ index $-$ chunk.length
-         \State $chunk \gets$ chunk.next
-      \EndWhile
-      \State $SelectedChunk\gets$ chunk
-      \State $AdjustedIndex\gets$ index
+    \State $chunk\gets$ last chunk of Stack
+    \State $index\gets$ Displacement
+    \While{$index \ge$ chunk.length}
+    \State $index\gets$ index $-$ chunk.length
+    \State $chunk \gets$ chunk.next
+    \EndWhile
+    \State $SelectedChunk\gets$ chunk
+    \State $AdjustedIndex\gets$ index
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
 
 
 \subsubsection{Stack element structure}
-%TODO: write when confirmed
-%TODO: all ops run O(1) amortized, except freeing
+% TODO: write when confirmed
+% TODO: all ops run O(1) amortized, except freeing
 
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
   \input{figures/stack-layout}
   \caption{Stack memory layout}
 \end{figure}
 
+
 \subsection{Execution Model}
+
 
 \subsection{Heap Objects}
 
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
   \input{figures/heap-object-layout}
   \caption{Heap object memory layout}
 \end{figure}
+
+
+\subsection{Threading}
+% Abstraction
+% Structure (tree)
+%% Main thread
+
+To support concurrent programming fundamental mechanisms of threading has to be
+supported. These include creating and destroying threads while also having
+synchronization structures for mutual exclusion, such as mutexes.
+
+We have done this by wrapping existing implementations of threading libraries.
+This way we can easily change the threading back-end by choosing which library
+wrapper to be compiled with the executable. The interface for threads will
+therefor be the same, regardless of which library is handling the logic.
+
+The thread interface is defines in {\tt thread.h}, while the back-ends will live
+in {\tt thread\_<lib>.c}.
+
+The abstract machine itself utilizes threading by always running programs
+through threads. That way, all error will safely be handled without crashing the
+main process. This is paramount, as machine crashes are considered critical
+errors and should never occur.
+
+Threads will be structured in a tree fashion, where a thread can spawn multiple
+child threads.
+% TODO: update
+\begin{ccode}
+struct thread_state {
+    struct thread_state *parent;
+    struct thread_state *children;
+
+    void *thread;
+
+    uint32_t pc;
+    stack_t stack;
+
+    ...
+};
+\end{ccode}
+
+As shown above, each thread state has a void pointer called {\tt thread}
+(TODO). This is used by the chosen threading library, where itself needs to
+create the necessary structures and track the data. This will likely consist of
+some internal thread identifier and possible mutex variables.
+
 
 \subsection{Binary file}
 
@@ -289,8 +337,8 @@ As an example, we will describe how we test parts of the stack implementation.
 
 Firstly, we create a mocked state of a stack which we can use for our tests.
 \begin{lstlisting}[language={[ANSI]C},caption={Unit-test setup procedure}]
-static int setup(void **state)
-{
+  static int setup(void **state)
+  {
     stack_t *s = malloc(sizeof(stack_t));
     stack_init(s, 100);
 
@@ -301,7 +349,7 @@ static int setup(void **state)
     *state = s;
 
     return 0;
-}
+  }
 \end{lstlisting}
 
 In the above code listing, we initialize a stack object, do some
@@ -310,8 +358,8 @@ with the setup function. As we see below, this state is given as
 argument to all test cases which easily allows us to retrieve it by
 dereferencing.
 \begin{lstlisting}[language={[ANSI]C},caption={Unit-test of {\tt stack\_pop}}]
-static void test_pop(void **state)
-{
+  static void test_pop(void **state)
+  {
     stack_t *s = *state;
 
     uint32_t sum = sum_stack(s);
@@ -325,7 +373,7 @@ static void test_pop(void **state)
     assert_int_equal(1, SE_INT(stack_pop(s)));
 
     assert_int_equal(sum, sum_stack(s));
-}
+  }
 \end{lstlisting}
 
 After having retrieved the stack for the {\tt state} parameter, we create an XOR
@@ -342,12 +390,12 @@ After all test cases has completed, a teardown function is run, reversing that
 of the setup function. In the case of the stack tests, it simply frees the
 memory allocated to the state of the stack.
 % \begin{lstlisting}[language={[ANSI]C},caption={Unit-test teardown procedure}]
-% static int teardown(void **state)
-% {
-%     stack_t *s = *state;
-%     stack_free(s);
+%   static int teardown(void **state)
+%   {
+%   stack_t *s = *state;
+%   stack_free(s);
 %
-%     return 0;
+%   return 0;
 % }
 % \end{lstlisting}
 
@@ -365,11 +413,11 @@ i.e. popping more values off the stack then there are actual values. A program
 doing exactly this could be:
 % TODO: update with actual
 \begin{lstlisting}[language={bytecode},caption={Machine program producing
-stack underflow}]
-fn main
-{
-	pop
-}
+    stack underflow}]
+  fn main
+  {
+    pop
+  }
 \end{lstlisting}
 
 The above machine program will try to pop an element off the stack without there
@@ -394,15 +442,15 @@ output and exit code in variables and do assertions based on their expected
 values.
 % TODO: update return code
 \begin{lstlisting}[language={sh},caption={shUnit2 underflow test case}]
-test_stack_underflow()
-{
+  test_stack_underflow()
+  {
     output=$(am --file ${PDIR}/underflow.amb)
     ret=$?
 
     assertEquals "return code should be 4" 4 $ret
     assertTrue "output should include underflow" \
-               "contains \"$output\" \"underflow\""
-}
+    "contains \"$output\" \"underflow\""
+  }
 \end{lstlisting}
 
 In the above test case we run the machine with the underflow program, asserting
