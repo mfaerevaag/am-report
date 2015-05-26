@@ -87,18 +87,10 @@ rather than the static type of the object.
 
 %TODO: clearer and more
 
-% \begin{lstlisting}[language=Java]
-%   public class A {
-%     public void foo(int i) { ... }
-%   }
+\subsection{Microsoft DLR and Roslyn Compiler}
 
-%   public class B extends A {
-%     public void foo(float f) { ... }
-%   }
-%   ...
-%   public static void main() {
-%     // The declared type is A but the actual type is B
-%     A objA = new B();
-%     objA.foo(2);
-%   }
-% \end{lstlisting}
+% Compiler-as-a-Service
+%% Also exposed API see http://stackoverflow.com/questions/7852926/microsoft-roslyn-vs-codedom
+% LINQ expression trees https://msdn.microsoft.com/en-us/library/bb882637.aspx
+% Interaction with other language (IronRuby, IronPython, etc. SCSS compiler was ``ported'')
+% btw DLR is dead
