@@ -6,17 +6,35 @@
 \subsection{Core Infrastructure}
 
 The infrastructure of \thename{} is the code that lays the basis for interaction
-between the individual parts of the system and is responsible for handling the
-flow of control. There is no ``infrastructure'' module or structures, but rather
-there is a hierarchy of responsibilities where control is handed back and forth
-as tasks are performed.
+between the individual parts of the system. It is a collection of machinery
+which hand control back and forth between each other, such as the instruction
+cycle, thread management and exception handling. Besides the machine's exposed
+exception handling system there is an internal error handling mechanism which
+allows errors within the machine to be handled as gracefully.
 
-The top-most control unit is the \texttt{engine}, which
+\subsubsection{Instruction Cycle}
 
-memory layout (stack per thread, heap area, code area)
-vm initialization
-instruction cycle
-thread
+The fundamental means of operation in the machine is the execution of
+instructions parsed and interpreted from byte code. Each thread runs their own
+cycle, the essence of which is shown in
+Listing~\ref{lst:implementation:instruction-cycle}
+
+\begin{lstlisting}[%
+  caption={Pseudo representation of the instruction cycle},%
+  label={lst:implementation:instruction-cycle}]
+while (machine is running) {
+  fetch opcode
+  fetch potential arguments
+  execute instruction corresponding to opcode
+  update program counter
+}
+\end{lstlisting}
+
+
+% vm initialization
+% instruction cycle
+% memory layout (stack per thread, heap area, code area)
+% thread
 
 % Very general architecture (theres a vm, a file reader, instruction codes, etc)
 % What's in the VM state and Thread state?
@@ -29,131 +47,139 @@ thread
 
 \subsection{Stacks}
 
-A stack is in itself a fairly simple construction that allows values
-to be pushed to an popped from an allocated memory region. Usually
-stack elements are stored and retrieved by the last in, first out
-method, but to better facilitate the implementation of the
-specification for \thename{} there are additional operators which
-opposes that rule (see Section~\ref{NEEDED}).
+A stack is in itself a fairly simple construction that allows values to be
+pushed to an popped from an allocated memory region. Usually stack elements are
+stored and retrieved by the last in, first out method, but to better facilitate
+the implementation of the specification for \thename{} there are additional
+operators which opposes that rule (see Section~\ref{NEEDED}).
 
 \subsubsection{Memory Layout}
 
-Arguably the most intuitive way to construct a stack is to use a
-simple array of a fixed initial size and handle operations by keeping
-track of the number of elements in the stack. A push operation thus
-increments the number of elements and assigns a value to the new
-top-most slot. A pop operation will correspondingly decrement the
-number of elements in the stack and potentially return the element
-that is being removed. When the number of elements in the stack
-exceeds the initial size of the containing array more memory must be
-allocated. This can be done simply by use of \code{realloc} where the
-common approach is to double the amount of allocated memory, to adapt
-to quickly growing stacks. However, \code{realloc} can be a
-performance issue and since the stack is by far the most frequently
-used means of operation in \thename{} it is critical that it performs
-well.
+Arguably the most intuitive way to construct a stack is to use a simple array of
+a fixed initial size and handle operations by keeping track of the number of
+elements in the stack. A push operation thus increments the number of elements
+and assigns a value to the new top-most slot. A pop operation will
+correspondingly decrement the number of elements in the stack and potentially
+return the element that is being removed. When the number of elements in the
+stack exceeds the initial size of the containing array more memory must be
+allocated. This can be done simply by use of \code{realloc} where the common
+approach is to double the amount of allocated memory, to adapt to quickly
+growing stacks. However, \code{realloc} can be a performance issue because it
+create a new allocation, copy the current data and free the old
+allocation\cite{man-realloc}. Since the stack is by far the most frequently used
+means of operation in \thename{} it is critical that it performs well.
 
 \begin{remark}
-  Stacks can also be implemented as linked lists where each element is
-  allocated upon creation and freed upon removal, but this poses an
-  even greater performance impact due to the heavy use of allocation
-  and deallocation mechanism.
+  Stacks can also be implemented as linked lists where each element is allocated
+  upon creation and freed upon removal, but this poses an even greater
+  performance impact due to the heavy use of allocation and deallocation
+  mechanism.
 \end{remark}
 
-To mitigate the memory allocation issue we have modelled the stack as
-a linked list of allocated regions which we call \textit{chunks}. Each
-chunk is essentially a stack in itself and is implemented almost
-exactly as described above. The benefit is that when a chunk becomes
-full, a new chunk is simply allocated and wired into the linked list,
-thus preventing the need for a reallocation. The exposed interface
-consists of a set of stack operation functions that essentially maps
-operations onto chunks by computing which chunk, and potentially what
-index of its elements, that will be the target of a given
-operation. Thus the chunks are hidden in the implementation and are
-solely internal data structures which users need not know
-of. Figure~\ref{fig:implementation:stack:layout} shows how the chunks
-and stack elements (described below) are laid out in memory.
+To mitigate the memory allocation issue we have modelled the stack as a linked
+list of allocated regions which we call \textit{chunks}. Each chunk is
+essentially a stack in itself and is implemented almost exactly as described
+above. The benefit is that when a chunk becomes full, a new chunk is simply
+allocated and wired into the linked list, thus preventing the need for a
+reallocation. The exposed interface consists of a set of stack operation
+functions that essentially maps operations onto chunks by computing which chunk,
+and potentially what index of its elements, that will be the target of a given
+operation. Thus the chunks are hidden in the implementation and are solely
+internal data structures which users need not know
+of. Figure~\ref{fig:implementation:stack:layout} shows how the chunks and stack
+elements (described below) are laid out in memory.
 
-A chunk is modelled as a doubly linked list node with the common
-\code{next} and \code{prev} pointers to other chunks (which can be
-\code{NULL}), and includes an additional four fields presented in
+A chunk is modelled as a doubly linked list node with the common \code{next} and
+\code{prev} pointers to other chunks (which can be \code{NULL}), and includes an
+additional four fields as presented in
 listing~\ref{lst:implementation:stack:chunk}.
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}[a]{.5\textwidth}
+    \begin{lstlisting}[language={[ANSI]C},%
+  caption={Structure defining the stack},%
+  label={lst:implementation:stack:chunk}]
+struct stack {
+    int chunk_length;
+    int chunk_cursor;
 
-\begin{lstlisting}[language={[ANSI]C},%
+    stack_chunk_t *first_chunk;
+    stack_chunk_t *last_chunk;
+}
+    \end{lstlisting}
+  \end{subfigure}
+  \begin{subfigure}[a]{.5\textwidth}
+    \begin{lstlisting}[language={[ANSI]C},%
   caption={Structure defining a chunk of the stack},%
   label={lst:implementation:stack:chunk}]
-  struct stack_chunk {
+struct stack_chunk {
     int capacity;
     int length;
     int peak;
     stack_element_t *elements;
     struct stack_chunk *next;
     struct stack_chunk *prev;
-  }
-\end{lstlisting}
+}
+    \end{lstlisting}
+  \end{subfigure}
+\end{figure}
 
-The \code{capacity} field denotes the maximum number of elements
-containable in the chunk, and is computed from the macro value
-\code{STACK\_CHUNK\_SIZE}, which as the name suggests defines the byte
-size of a chunk. The chunk size is simply divided by the size of a
-stack element, \code{stack\_element\_t}, but is padded with enough
-bytes to make room for an exact number of elements thus prevent wasted
-memory.
+The \code{capacity} field denotes the maximum number of elements containable in
+the chunk, and is computed from the macro value \code{STACK\_CHUNK\_SIZE}, which
+as the name suggests defines the byte size of a chunk. The chunk size is simply
+divided by the size of a stack element, \code{stack\_element\_t}, but is padded
+with enough bytes to make room for an exact number of elements thus prevent
+wasted memory.
 
-The \code{length} simply represents the current number of elements
-stored in the chunk. When the \code{length} equals the \code{capacity}
-it is time to allocate a new chunk. The \code{peak} field is the
-maximum \code{length} that the chunk has reached at any time, and is
-used to keep track of elements that must be freed.
+The \code{length} simply represents the current number of elements stored in the
+chunk. When the \code{length} equals the \code{capacity} it is time to allocate
+a new chunk. The \code{peak} field is the maximum \code{length} that the chunk
+has reached at any time, and is used to keep track of elements that must be
+freed.
 
-The \code{elements} points to the memory region used for storing the
-actual stack elements and is allocated upon creation of a new chunk. A
-chunk has a limited number of slots for elements but the stack itself
-is unbounded as a result of the chunk list; there is no limit to how
-many chunks can be allocated, except the amount of physical or virtual
-memory available to the machine.
+The \code{elements} points to the memory region used for storing the actual
+stack elements and is allocated upon creation of a new chunk. A chunk has a
+limited number of slots for elements but the stack itself is unbounded as a
+result of the chunk list; there is no limit to how many chunks can be allocated,
+except the amount of physical or virtual memory available to the machine.
 
 \subsubsection{Administering Memory Usage}
 
-A new chunk is allocated when the last active chunk becomes full, but
-is not immediately freed when it becomes empty. Instead a number of
-chunks, defined by the macro value
-\code{STACK\_CHUNK\_BUFFER\_LENGTH}, are cached for series of stack
-operations that operate right between the limit of two
-chunks. Consider a loop of code that repeatedly pushes four elements
-to the stack only to pop them off moments after. If there are two
-slots left in the last chunk when the loop begins, a new chunk must be
-allocated during the course of one loop iteration. However when the
-iteration pops the values off again the new chunk will become empty,
-which without the cached chunks would result in the chunk being
-freed. With the cached chunks the newly allocated chunk is saved and
-is simply rewired into the stack when it is needed again.
+A new chunk is allocated when the last active chunk becomes full, but is not
+immediately freed when it becomes empty. Instead a number of chunks, defined by
+the macro value \code{STACK\_CHUNK\_BUFFER\_LENGTH}, are cached for series of
+stack operations that operate right between the limit of two chunks. Consider a
+loop of code that repeatedly pushes four elements to the stack only to pop them
+off moments after. If there are two slots left in the last chunk when the loop
+begins, a new chunk must be allocated during the course of one loop
+iteration. However when the iteration pops the values off again the new chunk
+will become empty, which without the cached chunks would result in the chunk
+being freed. With the cached chunks the newly allocated chunk is saved and is
+simply rewired into the stack when it is needed again.
 % TODO: this could be further optimized by detecting such loops and
 % increasing the size of the current chunk. aint nobody got time for
 % that.
 
 However when there are more than inactive chunks than defined by
-\code{STACK\_CHUNK\_BUFFER\_LENGTH} a chunk will be freed. Each
-element of the stack must be freed individually because they contain
-pointers to their content (see
-Section~\ref{sec:implementation:stack:elements}). This is where the
-\code{peak} field of a chunk is used, as it represents the maximal
-index into the \code{elements} field that can be expected to be a
-stack element. Otherwise the fields of the chunk and the chunk itself
-is freed normally using \code{free}.
+\code{STACK\_CHUNK\_BUFFER\_LENGTH} a chunk will be freed. Each element of the
+stack must be freed individually because they contain pointers to their content
+(see Section~\ref{sec:implementation:stack:elements}). This is where the
+\code{peak} field of a chunk is used, as it represents the maximal index into
+the \code{elements} field that can be expected to be a stack element. Otherwise
+the fields of the chunk and the chunk itself is freed normally using
+\code{free}.
 % TODO: confusing? might not be true anymore if we switch to using
 % unions or something else
 
 \subsubsection{Displacement Adjustment}
 
-Certain instructions use \textit{displacements} into the stack, where
-a displacement is a number of elements upward into the stack, where
-the top element is at displacement 0. Since the stack in practice is
-made up of a series of smaller stacks, a displacement is not
-guaranteed to reference a value into the latest chunk, i.e. if the
-displacement is larger than the current chunks \code{length}. Thus we
-must compute the correct chunk to use and adjust the index into it. It
-is a simple algorithm presented in pseudo code in
+Certain instructions use \textit{displacements} into the stack, where a
+displacement is a number of elements upward into the stack, where the top
+element is at displacement 0. Since the stack in practice is made up of a series
+of smaller stacks, a displacement is not guaranteed to reference a value into
+the latest chunk, i.e. if the displacement is larger than the current chunks
+\code{length}. Thus we must compute the correct chunk to use and adjust the
+index into it. It is a simple algorithm presented in pseudo code in
 Algorithm~\ref{algo:implementation:stack:displacement}.
 
 \begin{algorithm}[H]
@@ -191,6 +217,39 @@ Algorithm~\ref{algo:implementation:stack:displacement}.
   \caption{Stack memory layout}
 \end{figure}
 
+\subsubsection{Operations}
+
+Stack operations are implemented as functions with a \code{stack\_} prefix and
+their first parameter is a pointer to the stack on which the operation is to be
+performed. To give sense of how it works in practice,
+Listing~\ref{lst:implementation:stack:operations} shows the source code for the
+\code{push} operation.
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language={[ANSI]C},
+  caption={Source code of the \code{push} stack operation},
+  label={lst:implementation:stack:operations}]
+void stack_push(stack_t *s, stack_element_t i)
+{
+    if (stack_is_full(s)) (*@\label{code:stack-push:is-full}@*)
+        stack_push_chunk(s);
+
+    stack_chunk_t *ch = s->last_chunk; (*@\label{code:stack-push:last-chunk}@*)
+
+    ch->elements[ch->length++] = i;
+
+    ch->peak = max(ch->length, ch->peak);
+}
+\end{lstlisting}
+\end{minipage}
+
+Line~\ref{code:stack-push:is-full} checks if the stack is currently full,
+i.e. whether the last allocated chunk is full, and if so a new chunk is
+pushed. Line~\ref{code:stack-push:last-chunk} selects the currently active chunk
+which at this point is guaranteed to be able to contain another element. Then
+the next available slot in the chunk's \code{elements} array is assigned the
+stack element. The length of the chunk is incremented and finally the peak value
+of the chunk is recomputed.
 
 \subsection{Execution Model}
 
