@@ -87,10 +87,44 @@ rather than the static type of the object.
 
 %TODO: clearer and more
 
-\subsection{Microsoft DLR and Roslyn Compiler}
-
+\subsection{Dynamic Language Runtime} % and Roslyn Compiler
 % Compiler-as-a-Service
 %% Also exposed API see http://stackoverflow.com/questions/7852926/microsoft-roslyn-vs-codedom
 % LINQ expression trees https://msdn.microsoft.com/en-us/library/bb882637.aspx
 % Interaction with other language (IronRuby, IronPython, etc. SCSS compiler was ``ported'')
 % btw DLR is dead
+
+The Dynamic Language Runtime~\cite{dlr} was developed by Microsoft and ran on
+top of the Dynamic Language Runtime. It provided support for several dynamic
+language features such as a dynamic type system, method dispatch and code
+generation.
+
+When handling method calls in a dynamic language, the machine is forced to do
+some extra look-ups to find the correct method, as it is unable to statically
+deduce which function is to be used. This creates some overhead and can easily
+make the running time of dynamic languages slow. DLR remedies this by using
+dynamic call sites with method caching. This technique is often referred to as
+inline caching, where the results of a method look-ups are stored in an limited
+data-structure. This saves the machine of many consecutive look-ups. This
+optimization technique was first developed by Smalltalk 80~\cite{deutsch}.
+
+Dynamic types are handled by the meta class {\tt DynamicMetaObject}. These
+classes provide dynamic functionality to objects by having several virtual
+methods handling setting, getting and method invocation. DLR offers even higher
+abstraction and convenience with the two sub-classes {\tt DynamicObject} and
+{\tt ExpandoObject}. Methods include {\tt TryCreateInstance} and {\tt
+  TryInvoke}.
+
+Through the .NET Framework DLR was used by implementations popular dynamic
+languages such as Python and Ruby, named
+IronPython~\footnote{\url{http://ironpython.net/}} and
+IronRuby~\footnote{\url{http://ironruby.net/}}. The development of DLR har been
+discontinued since 2010. According to a former Microsoft developer, this has to
+do with Microsoft's lack of commitment towards dynamic languages~\cite{NEEDED}
+(source as tex comment).
+% "Microsoft Tires of IronRuby; Jimmy Schementi Jumps Ship".
+% rubyinside.com. 2010-08-07. Retrieved 2012-02-26.
+% A year ago the team shrunk by half and our agility was severely limited. [..]
+% Overall, I see a serious lack of commitment to IronRuby, and dynamic
+% language[s] on .NET in general.
+% http://www.rubyinside.com/microsoft-tires-of-ironruby-jimmy-schementi-jumps-ship-3639.html
