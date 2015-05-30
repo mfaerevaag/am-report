@@ -5,14 +5,49 @@
 
 \subsection{Tools and Languages}
 
-% vi bruger C cause yolo and speed and control++
-% vi bruger gcc
-% vi bruger gdb omg
-% vi bruger doxy dauda se appendix wow
+We have implemented \thename{} in the C programming language, more specifically
+using the C99 standard with GNU extensions by use of GCC\footnote{The GNU
+  Compiler Collection: \url{https://gcc.gnu.org}}. There are both pros and cons
+of using a relatively low-level language (as compared to other available
+languages), but we found that the benefits outweighed the disadvantages.
 
-% notes: not all code snippets correspond directly to the implementation to
-% avoid unnecessary details
+First of all C is extremely portable; GCC is available on \textit{a lot} of
+architectures, and all modern operating systems ship with a C compiler which
+essentially is all that is required to build \thename{} for a new platform. The
+standard libraries and architecture specific functions available differ with
+each machine and device, so we aim at relying on as few external libraries as
+possible and provide wrappers for the ones we use so that the implementation can
+be ported quickly.
 
+Secondly we do not want to rely on a garbage collector provided by languages
+like C++ and Java. We need to full control over where each bit of data is
+stored, mostly for performance reasons both in terms of memory footprint and
+execution speed.
+
+Third, speed is of the essence and C is notoriously fast, given that the code is
+written in a good manner.
+
+There are however downsides to using C. Because we are not veterans of C and due
+to its low-level nature it is inherently more complex to develop features that
+could be implemented in a few lines of code in a high-level language. Memory has
+to be tracked meticulously to prevent memory leaks. We have found that it is a
+great exercise for becoming proficient with programming in general because it
+provides us with knowledge of the mechanisms that lie behind concepts that are
+generally taken for granted.
+
+For debugging we use gdb via GNU Emacs\footnote{GNU Emacs:
+  \url{http://www.gnu.org/software/emacs}} and for analyzing memory usage and
+fixing memory leaks we use the Valgrind instrumentation tool\footnote{Valgrind:
+  \url{http://valgrind.org}}.
+
+The code is extensively documented using Doxygen\footnote{Doxygen:
+  \url{http://www.stack.nl/~dimitri/doxygen}} style comments.
+
+\textbf{Note:} The code snippets presented in the following sections does not
+always correspond directly with the code found in the actual
+implementation. They carry the gist of what we want to communicate but generally
+avoids unnecessary and redundant information not relevant to the individual
+cases.
 
 \subsection{Core Infrastructure}
 
@@ -99,8 +134,15 @@ elements in the linked list must all reside one after another in memory. The
 actual content of an element is stored \textit{in between} the linked list
 nodes, and the \code{next} pointer simply points to the memory address following
 its content data bytes (if there is another element following
-it). Figure~\ref{fig:implementation:stack:element} shows how the stack elements
+it). Figure~\ref{fig:implementation:stack-layout} shows how the stack elements
 are laid out.
+
+\begin{figure}[H]
+  \centering
+  \input{figures/stack-layout}
+  \caption{Stack memory layout}
+  \label{fig:implementation:stack-layout}
+\end{figure}
 
 The C language does not support variable length arrays, which means that an
 array must have its length declared, otherwise the type is regarded as
@@ -203,16 +245,6 @@ When there are more inactive segments than defined by
 \code{STACK\_NUM\_CACHED\_SEGMENTS} a segment will be freed. This is trivial
 because all of the segments and its elements' data lies within the region
 pointed to by \code{content}, so it is simply freed.
-
-\subsubsection{Stack element structure}
-% TODO: write when confirmed
-% TODO: all ops run O(1) amortized, except freeing
-
-\begin{figure}[H]
-  \centering
-  \input{figures/stack-layout}
-  \caption{Stack memory layout}
-\end{figure}
 
 \subsubsection{Operations}
 

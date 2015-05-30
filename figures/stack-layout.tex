@@ -1,23 +1,55 @@
-\begin{drawstack}[every initial by arrow/.style={*->}]
+\begin{tikzpicture}[scale=.8]
+
+  % Segments
+  \drawstruct{(-10,0)}
+  \structcell[freecell]{\code{size}}         \coordinate (seg_start) at (currentcell.east);
+  \structcell[freecell]{\code{length}}
+  \structcell[freecell]{\code{content}}      \coordinate (seg_content) at (currentcell.east);
+  \structcell[freecell]{\code{head}}         \coordinate (seg_head) at (currentcell.east);
+  \structcell[freecell]{\code{data\_cursor}} \coordinate (seg_cursor) at (currentcell.east);
+  \structcell[freecell]{\code{next}}         \coordinate (seg_next) at (currentcell.east);
+  \structcell[freecell]{\code{prev}}
+  \structname{Stack segment}
+
+  \drawstruct{(-10,-10)}
+  \structcell[freecell]{\code{size}}         \coordinate (seg1_start) at (currentcell.east);
+  \structcell[freecell]{\code{...}}
+  \structcell[freecell]{\code{prev}}         \coordinate (seg1_prev) at (currentcell.east);
+  \structname{Stack segment}
+
+  % Segment content
   \startframe{}
-  \cell{Declared type} \cellcom{\texttt{rtti*}} \coordinate (next) at (currentcell.east);
-  \cell{Actual type} \cellcom{\texttt{rtti*}}
-  \cell{Next} \cellcom{\texttt{stack\_element*}}
-  \cell{Content size} \cellcom{\texttt{int}}
-  \padding{2}{Content}  \cellcom{\texttt{char[]}}
-  \finishframe{\texttt{stack\_element}}
+  \cell{\code{declared\_type}} \coordinate (stack_el1_e) at (2,\value{cellnb});
+                               \coordinate (stack_el1_w) at (-2,\value{cellnb});
+  \cell{\code{actual\_type}}
+  \cell{\code{next}}
+  \padding{3}{\code{data}}
+  \finishframe{Stack element}
+
 
   \startframe{}
-  \cell{Declared type}  \cellcom{\texttt{rtti*}}
-  \cell{Actual type}  \cellcom{\texttt{rtti*}}
-  \cell{Next} \cellcom{\texttt{stack\_element*}} \coordinate (el2) at (currentcell.east);
-  \cell{Content size} \cellcom{\texttt{int}}
-  \padding{2}{Content}  \cellcom{\texttt{char[]}}
-  \finishframe{\texttt{stack\_element}}
-  \startframe{}
+  \cell{\code{declared\_type}} \coordinate (stack_el0_start) at (-2,\value{cellnb});
+  \cell{\code{actual\_type}}
+  \cell{\code{next}}           \coordinate (stack_el0_e) at (2,\value{cellnb});
+  \padding{1}{\code{data}}
+  \finishframe{Stack element}
 
-  \draw[->, thick, bend right=20] (el2) edge (next);
-\end{drawstack}
+  \cell{...} \coordinate (stack_cursor) at (-2,\value{cellnb});
+
+  % element next ptr
+  \draw[*->, thick, bend right=20] (stack_el0_e) to (stack_el1_e);
+  % segment content ptr
+  \draw[*->, thick] (seg_content) to (stack_el1_w);
+  % segment cursor ptr
+  \draw[*->, thick] (seg_cursor) to (stack_cursor);
+  % segment head ptr
+  \draw[*->, thick] (seg_head) to (stack_el0_start);
+  % segment ll
+  \draw[*->, thick] (seg_next) to (seg1_start);
+  \draw[*->, thick, bend right=30] (seg1_prev) to (seg_start);
+
+\end{tikzpicture}
+
 
 % \begin{drawstack}
 %   \startframe
@@ -65,133 +97,138 @@
 % \begin{tikzpicture}
 %   \draw (3, -1) node (Otm) {
 %   \begin{tabular}{c}
-      %       Object\\vtable
-      %     \end{tabular}
-      %       };
+  %       Object\\vtable
+  %     \end{tabular}
+  %       };
 
-      %       \drawstruct{(0,0)}
-      %       \structcell[freecell]{~} \coordinate (Atm) at (currentcell.east);
-      %       \structcell[freecell]{\texttt{@Object.equals()}}
-      %       \structcell[freecell]{\texttt{@code A.m()}}
-      %       \structcell[freecell]{\texttt{@code A.p()}} \coordinate (A) at (currentcell.west);
-      %       \structname{
-      %       \begin{tabular}{c}
-      %       A's vtable
-      %     \end{tabular}
-      %       }
+  %       \drawstruct{(0,0)}
+  %       \structcell[freecell]{~} \coordinate (Atm) at (currentcell.east);
+  %       \structcell[freecell]{\texttt{@Object.equals()}}
+  %       \structcell[freecell]{\texttt{@code A.m()}}
+  %       \structcell[freecell]{\texttt{@code A.p()}} \coordinate (A) at (currentcell.west);
+  %       \structname{
+  %       \begin{tabular}{c}
+  %       A's vtable
+  %     \end{tabular}
+  %       }
 
-      %       \drawstruct{(-4,-3)}
-      %       \structcell[freecell]{} \coordinate (Btm) at (currentcell.east);
-      %       \structcell[freecell]{\texttt{@Object.equals()}}
-      %       \structcell[freecell]{\texttt{@code A.m()}}
-      %       \structcell[freecell]{\texttt{@code B.p()}}
-      %       \structcell[freecell]{\texttt{@code B.q()}}
-      %       \structname{B's vtable}
+  %       \drawstruct{(-4,-3)}
+  %       \structcell[freecell]{} \coordinate (Btm) at (currentcell.east);
+  %       \structcell[freecell]{\texttt{@Object.equals()}}
+  %       \structcell[freecell]{\texttt{@code A.m()}}
+  %       \structcell[freecell]{\texttt{@code B.p()}}
+  %       \structcell[freecell]{\texttt{@code B.q()}}
+  %       \structname{B's vtable}
 
-      %       \draw[->] (Btm) -- (A);
-      %       \draw[->] (Atm) -- (Otm);
-      %       \end{tikzpicture}
+  %       \draw[->] (Btm) -- (A);
+  %       \draw[->] (Atm) -- (Otm);
+  %       \end{tikzpicture}
 
-      %       \section{Structures and stack together}
+  %       \section{Structures and stack together}
 
-      %       \begin{tikzpicture}[scale=.8]
+  %       \begin{tikzpicture}[scale=.8]
 
-      %       \stacktop{}
-      %       \separator
-      %       \cell{\texttt{p3}}        \cellcomL{11(GB)} \coordinate (p3) at (currentcell.east);
-      %       \separator
-      %       \cell{\texttt{p2}}        \cellcomL{10(GB)} \coordinate (p2) at (currentcell.east);
-      %       \separator
-      %       \cell{\texttt{p1}}        \cellcomL{ 9(GB)} \coordinate (p1) at (currentcell.east);
-      %       \separator
-      %       \cell{\texttt{@P3D.diag}} \cellcomL{ 8(GB)}
-      %       \cell{\texttt{\footnotesize @Object.equals}} \cellcomL{ 7(GB)}
-      %       \cell{\texttt{3(GB)}}     \cellcomL{ 6(GB)} \coordinate (T1) at (currentcell.east);
-      %       \separator
-      %       \cell{\texttt{@P2D.diag}} \cellcomL{ 5(GB)}
-      %       \cell{\texttt{\footnotesize @Object.equals}} \cellcomL{ 4(GB)}
-      %       \cell{\texttt{1(GB)}}     \cellcomL{ 3(GB)} \coordinate (T2) at (currentcell.east);
-      %       \separator
-      %       \cell{\texttt{\footnotesize @Object.equals}} \cellcomL{ 2(GB)}
-      %       \cell{\texttt{null}}      \cellcomL{ 1(GB)}
-      %       \cell[draw=none]{Stack}
-
-
-      %       \drawstruct{(5,1)})
-      %       \structcell{z=2,5}
-      %       \structcell{y=2,5}
-      %       \structcell{x=2,5}
-      %       \structcell{.} \coordinate (O1) at (currentcell.west);
-      %       \coordinate (O1l) at (currentcell.south);
-
-      %       \drawstruct{(9,-3)}
-      %       \structcell{y=1}
-      %       \structcell{x=1}
-      %       \structcell{.} \coordinate (O2) at (currentcell.west);
-      %       \coordinate (O2l) at (currentcell.south);
-
-      %       \draw[->] (p3) -- (O1);
-      %       \draw[->] (p2) -- (O1);
-      %       \draw[->] (p1) -- (O2);
-
-      %       \draw[->] (O1l) .. controls (O1 |- T1) .. (T1);
-      %       \draw[->] (O2l) .. controls (O2 |- T2) .. (T2);
-
-      %       \draw (10,-10) node{Heap};
-
-      %       \end{tikzpicture}
+  %       \stacktop{}
+  %       \separator
+  %       \cell{\texttt{p3}}        \cellcomL{11(GB)} \coordinate (p3) at (currentcell.east);
+  %       \separator
+  %       \cell{\texttt{p2}}        \cellcomL{10(GB)} \coordinate (p2) at (currentcell.east);
+  %       \separator
+  %       \cell{\texttt{p1}}        \cellcomL{ 9(GB)} \coordinate (p1) at (currentcell.east);
+  %       \separator
+  %       \cell{\texttt{@P3D.diag}} \cellcomL{ 8(GB)}
+  %       \cell{\texttt{\footnotesize @Object.equals}} \cellcomL{ 7(GB)}
+  %       \cell{\texttt{3(GB)}}     \cellcomL{ 6(GB)} \coordinate (T1) at (currentcell.east);
+  %       \separator
+  %       \cell{\texttt{@P2D.diag}} \cellcomL{ 5(GB)}
+  %       \cell{\texttt{\footnotesize @Object.equals}} \cellcomL{ 4(GB)}
+  %       \cell{\texttt{1(GB)}}     \cellcomL{ 3(GB)} \coordinate (T2) at (currentcell.east);
+  %       \separator
+  %       \cell{\texttt{\footnotesize @Object.equals}} \cellcomL{ 2(GB)}
+  %       \cell{\texttt{null}}      \cellcomL{ 1(GB)}
+  %       \cell[draw=none]{Stack}
 
 
+  %       \drawstruct{(5,1)})
+  %       \structcell{z=2,5}
+  %       \structcell{y=2,5}
+  %       \structcell{x=2,5}
+  %       \structcell{.} \coordinate (O1) at (currentcell.west);
+  %       \coordinate (O1l) at (currentcell.south);
 
-      %       \section{Using tikzpicture instead of drawstack}
+  %       \drawstruct{(9,-3)}
+  %       \structcell{y=1}
+  %       \structcell{x=1}
+  %       \structcell{.} \coordinate (O2) at (currentcell.west);
+  %       \coordinate (O2l) at (currentcell.south);
 
-      % %       The environment drawstack is basically a syntactic sugar for
-      % %
-      % %       \begin{tikzpicture}[#1]
-      % %         \stacktop{}
-      % %         ...
-      % %         \stackbottom
-      % %       \end{tikzpicture}
-      % %
-      % %       You can use the above syntax for more flexibility.
+  %       \draw[->] (p3) -- (O1);
+  %       \draw[->] (p2) -- (O1);
+  %       \draw[->] (p1) -- (O2);
 
-      %       \begin{tikzpicture}[scale=0.8]
-      %       \small
-      %       \stacktop{}
-      %       \cell{My cell}
-      %       \stackbottom{}
-      %       \end{tikzpicture}
+  %       \draw[->] (O1l) .. controls (O1 |- T1) .. (T1);
+  %       \draw[->] (O2l) .. controls (O2 |- T2) .. (T2);
 
-      %       \section{Changing style}
+  %       \draw (10,-10) node{Heap};
 
-      %       {% tikzstyle will be local to this {...}
-      %       \tikzstyle{freecell}=[fill=blue!10,draw=blue!30!black]
-      %       \tikzstyle{occupiedcell}=[fill=blue!10!orange!10,draw=blue!30!black]
-      %       \tikzstyle{padding}=[fill=yellow!20,draw=blue!30!black]
-      %       \tikzstyle{highlight}=[draw=orange!50!black,text=orange!50!black]
+  %       \end{tikzpicture}
 
-      %       \begin{drawstack}
-      %       \cell{Uninteresting cell}
-      %       \cell{Interesting cell} \cellround{Yes, this one!}
-      %       \bcell{bcell}
-      %       \padding{2}{Padding}
-      %       \end{drawstack}
-      %       }
 
-      %       \section{Example: Computing Factorial}
 
-      %       \begin{drawstack}[scale=0.8]
-      %       \startframe
-      %       \cell{N = 1}
-      %       \cell{...}
-      %       \finishframe{fact(1)}
-      %       \startframe
-      %       \cell{N = 2}
-      %       \cell{...}
-      %       \finishframe{fact(2)}
-      %       \cell{$\vdots$}
-      %       \startframe
-      %       \cell{N = 5}
-      %       \cell{...}
-      %       \finishframe{fact(5)}
-      %       \end{drawstack}
+  %       \section{Using tikzpicture instead of drawstack}
+
+  % %       The environment drawstack is basically a syntactic sugar for
+  % %
+  % %       \begin{tikzpicture}[#1]
+  % %         \stacktop{}
+  % %         ...
+  % %         \stackbottom
+  % %       \end{tikzpicture}
+  % %
+  % %       You can use the above syntax for more flexibility.
+
+  %       \begin{tikzpicture}[scale=0.8]
+  %       \small
+  %       \stacktop{}
+  %       \cell{My cell}
+  %       \stackbottom{}
+  %       \end{tikzpicture}
+
+  %       \section{Changing style}
+
+  %       {% tikzstyle will be local to this {...}
+  %       \tikzstyle{freecell}=[fill=blue!10,draw=blue!30!black]
+  %       \tikzstyle{occupiedcell}=[fill=blue!10!orange!10,draw=blue!30!black]
+  %       \tikzstyle{padding}=[fill=yellow!20,draw=blue!30!black]
+  %       \tikzstyle{highlight}=[draw=orange!50!black,text=orange!50!black]
+
+  %       \begin{drawstack}
+  %       \cell{Uninteresting cell}
+  %       \cell{Interesting cell} \cellround{Yes, this one!}
+  %       \bcell{bcell}
+  %       \padding{2}{Padding}
+  %       \end{drawstack}
+  %       }
+
+  %       \section{Example: Computing Factorial}
+
+  %       \begin{drawstack}[scale=0.8]
+  %       \startframe
+  %       \cell{N = 1}
+  %       \cell{...}
+  %       \finishframe{fact(1)}
+  %       \startframe
+  %       \cell{N = 2}
+  %       \cell{...}
+  %       \finishframe{fact(2)}
+  %       \cell{$\vdots$}
+  %       \startframe
+  %       \cell{N = 5}
+  %       \cell{...}
+  %       \finishframe{fact(5)}
+  %       \end{drawstack}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../report"
+%%% End:
