@@ -3,16 +3,43 @@
 %%% TeX-master: "../report"
 %%% End:
 
-Preliminaries
-The is based on the spec
+In the following we will outline out design of \thename{} and give a detailed
+description of each area of concern. The design is heavily tied to the
+\thename{} specification, but further includes some considerations for
+implementation, i.e.~the design of the implementation.
 
-% Detailed description of goals
-%% Brief recap of WHAT we want to solve
-%% Details of HOW we gon do dat
-%% What do we want to support
-% facilitate multiple paradigms
-% do it by providing access to low level primitives (vtables)
-% dynamic types (actual)
+As previously mentioned, the primary aim of \thename{} is to provide an abstract
+machine that is capable of supporting most of the modern programming paradigms
+in an efficient manner. The overarching idea is that by exposing much of the
+underlying low-level constructs we provide very flexible means for compilers to
+do things the way that is most suitable for their particular requirements,
+without having to conform to a tight object-model or strict type system. This
+involves exposing constructs like virtual tables (see Section~\ref{NEEDED}) and
+thread management (see Section~\ref{NEEDED}). Further the type system is aimed
+at being strict enough to guarantee type safety but flexible enough for dynamic
+languages. Compilers are free to select which features to utilize, meaning for
+instance that for a strictly statically typed language, the dynamic typing
+mechanisms can be disregarded and method dispatches can be wired statically thus
+avoiding dynamic run-time lookups.
+%TODO more?
+
+\textbf{Note:} Because the specification is such a central document to the
+design we will not cite the specification directly. Instead we refer to
+Appendix~\ref{appendix:spec} where the full specification is included.
+
+\subsection{Memory}
+
+\thename{} uses the common stack and heap memory model. Stacks are local to the
+thread that it belongs to, and cross-thread references between stack elements
+are illegal. The heap is a globally shared memory region in which values reside
+until they are deallocated or cleaned by the garbage collector. Threads store
+and retrieve value on the heap using the same addresses, thus facilitating
+shared data. Machine type values such as \code{Int8} and \code{Boolean}
+(Section~\ref{NEEDED} details the available types and type system) typically
+reside on the stack but can be boxed (see Section~\ref{NEEDED}) and placed on
+the heap.
+%TODO more!
+
 \subsection{Stack Management}
 %% Basic
 %% Stack vs. Register
@@ -235,3 +262,8 @@ Here we can see some simple operations using the {\tt pushElement} and {\tt
 
 % ISA
 %% Highlight the most important instructions, explain how they facilitate the above
+
+
+% Mem model
+%% Standard heap and stack, stack per thread, global heap
+%%
