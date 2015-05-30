@@ -53,10 +53,10 @@ Stack is an abstract data type, fundamental in the fields of algorithms and
 computer science. It is a very simple model only requiring two essential
 functions, {\it push} and {\it pop}, as visualized in
 figure~\ref{fig:stack}. Push adds an element to a stack of elements, while pop
-removes the top most element. As an analogy, imagine a spring loaded tray of
-clean dishes where one can only take from the top. When adding a new dish it
-becomes the new top-most dish in the stack. This sequence of adding and taking
-from a collection of element is called Last In, First Out (LIFO).
+removes the top most element. As an analogy, imagine a pile of dishes. When
+adding a new dish it becomes the new top-most dish in the stack. This sequence
+of adding and taking from a collection of element is called Last In, First Out
+(LIFO).
 \begin{figure}[h]
   \centering
   \includegraphics[scale=0.6]{images/stack.png}
@@ -118,50 +118,6 @@ the result back onto the stack.
 As briefly discussed in the~\ref{sec:background} section, a register machine
 TODO
 
-\subsubsection{Threading}
-Big chip manufacturers like Intel, have always been under big pressure to
-deliver ever faster processors, year after year. For around the last decade, the
-technological development of processors has been focused adding cores rather
-than increasing the clock speed, which already started to stagnate around
-2004~\cite{sutter}. With multiple processors, or popularly called a multi-core
-processor, processes may actually run in parallel, i.e. running at the same
-time, rather than just concurrently where multiple processes actually share the
-same processor.
-
-A thread is typically the smallest unit of executable instructions by a
-processor. A process being run by an operating system therefore had one thread
-which the operating systems scheduler delegated CPU time to. With multi-core
-processors, the notion of a single process having multiple threads arose, making
-it possible for a process to compute several things concurrently (not
-necessarily in parallel). This is known as multi-threading, and is commonly
-supported by most modern operating systems.
-
-Although multi-threading is a very interesting feature, it also raises a lot of
-challenges when designing machines. Different threads cannot directly read and
-write to the same place, or address, in memory without taking data races into
-account, which is a common mistake when writing multi-threaded programs. If
-multiple threads are accessing the same memory, it can change at any time and
-therefore cannot be TODO
-
-As with our stack machine, each thread has to have its own state, including its
-own stack. In other words, all stacks are private and cannot be shared across
-threads. This can though be facilitated by using heap object which are
-referenced from multiple threads' stack.
-
-TODO: tasks and transactions
-% Multiple executables may execute simultaneously.
-% Task and transaction semantics is supported. A transaction is considered
-% executed by the thread starting it. A spawned task is independent of the spawn-
-% ing thread and may be executed by the spawning thread or some other thread.
-% However, tasks will not migrate between threads so the thread which started
-% execution of a task will also complete the task.
-
-% Tasks do not share stacks with the spawning thread, spawning task, or any
-% other task. Implementations may, however, execute tasks using the stack of the
-% executing thread. The executed task is not allowed to access any stack space
-% beyond its initial set of stack elements. The implementation must throw an
-% exception if any such offending access is attempted.
-
 \subsubsection{Stack Organization}
 % All stacks will initially have a single activation frame
 
@@ -220,9 +176,95 @@ Here we can see some simple operations using the {\tt pushElement} and {\tt
   popElement} operations.
 \begin{stackops}
   \op{-}{3,\ 1,\ 1}
-  \op{pushElement 0}{3,\ 1,\ 3}
+  \op{pushElement 0}{3,\ 1,\ 1,\ 3}
 \end{stackops}
 
+
+\subsection{Threading}
+Big chip manufacturers like Intel, have always been under big pressure to
+deliver ever faster processors, year after year. For around the last decade, the
+technological development of processors has been focused adding cores rather
+than increasing the clock speed, which already started to stagnate around
+2004~\cite{sutter}. With multiple processors, or popularly called a multi-core
+processor, processes may actually run in parallel, i.e. running at the same
+time, rather than just concurrently where multiple processes actually share the
+same processor.
+
+A thread is typically the smallest unit of executable instructions by a
+processor. A process being run by an operating system therefore had one thread
+which the operating systems scheduler delegated CPU time to. With multi-core
+processors, the notion of a single process having multiple threads arose, making
+
+Although multi-threading is a very interesting feature, it also raises a lot of
+challenges when designing machines. Different threads cannot directly read and
+write to the same place, or address, in memory without taking data races into
+account, which is a common mistake when writing multi-threaded programs. If
+multiple threads are reading and writing to the same memory, it is impossible
+for the threads to base any logic on it, as another thread can change its value
+at any time, effectively pulling the rug from under you. This problem as been
+named the mutual exclusion problem, and is solved by using synchronization
+structures.
+
+Our machine will both support threading and synchronization structures
+therefor. As we are using a stack machine, each thread has to have its own
+state, including its own stack. In other words, all stacks are private and
+cannot be shared across threads. This can though be facilitated by using heap
+object which are referenced from multiple threads' stack.
+
+\subsubsection{Tasks and Transactions}
+TODO
+% Multiple executables may execute simultaneously.
+% Task and transaction semantics is supported. A transaction is considered
+% executed by the thread starting it. A spawned task is independent of the spawn-
+% ing thread and may be executed by the spawning thread or some other thread.
+% However, tasks will not migrate between threads so the thread which started
+% execution of a task will also complete the task.
+
+% Tasks do not share stacks with the spawning thread, spawning task, or any
+% other task. Implementations may, however, execute tasks using the stack of the
+% executing thread. The executed task is not allowed to access any stack space
+% beyond its initial set of stack elements. The implementation must throw an
+% exception if any such offending access is attempted.
+
+\subsubsection{Thread Pool}
+Creating and destroying system threads is not free. If a new thread is created
+on demand, it would create significant overhead. Another problem with this model
+is the risk of resource thrashing. If there is no limit on the number of threads
+that can be created, it can intentionally or unintentionally be exposed to heavy
+abuse. A solution to both of these challenges is having what is called a
+\term{thread pool}. On machine initialization, a set number of threads is
+pre-initialized and stored in a data structure. When a thread tries to spawn a
+new thread, it is given one from the thread pool. If the thread pool is empty,
+it has to wait for a thread to become vacant.
+
+This model, although effective, also brings with it some
+challenges. Specifically, when the thread pool is empty. The spawning thread
+cannot stop and wait until a new thread is vacant, as this would block the whole
+thread. Rather, the machine will use a work queue. A work queue manages the
+thread pool so other threads does not need to wait for a thread to become
+vacant, and thereafter fight with each other of whom gets to take it. The
+spawning threads would give the task which it wants run in a new thread, to the
+work queue. The queue would monitor the thread pool and as soon as a thread
+becomes free, it would take the task first in the work queue and run in.
+
+\subsubsection{Errors and Exceptions}
+Two types of errors can occur; internal errors in the machine and errors
+produced by the program the machine is executing. Internal errors will most
+likely occur in some child thread and not in the process' original thread. If
+that is the case we would stop that thread and gracefully stop the machine if it
+cannot safely continue. If the error occurs in the process' original thread, we
+will in most cases still be able to catch the signal sent by the OS and
+gracefully stop.
+
+When the program being executed produces an \term{exception} it will percolate
+up through a defined set of exception handlers until it is handled. If there is
+no way of handling the exception it called an uncaught exception. It that case
+the machine will print some information on the exception and stop. It will not
+attempt to join all threads (TODO) as it cannot know how long this will
+take. Therefore all threads are exited and memory is freed, ensuring no memory
+leaks.
+
+TODO: Exception handling
 
 
 % Examples of how to map things to our model ()
@@ -254,6 +296,8 @@ Here we can see some simple operations using the {\tt pushElement} and {\tt
 %% Tasks and transactions
 %%% Shared stack elements
 %% ?!
+%% Thread Pool
+%%% Resource thrashin
 
 % Closures
 

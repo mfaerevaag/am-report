@@ -308,8 +308,8 @@ The thread interface is defines in {\tt thread.h}, while the back-ends will live
 in {\tt thread\_<lib>.c}.
 
 The abstract machine itself utilizes threading by always running programs
-through threads. That way, all error will safely be handled without crashing the
-main process. This is paramount, as machine crashes are considered critical
+through threads. That way, all errors will safely be handled without crashing
+the main process. This is paramount, as machine crashes are considered critical
 errors and should never occur.
 
 Threads will be structured in a tree fashion, where a thread can spawn multiple
@@ -542,3 +542,8 @@ values.
 In the above test case we run the machine with the underflow program, asserting
 that the process exits with the correct code and that the output contains the
 word `underflow`.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../report"
+%%% End:
