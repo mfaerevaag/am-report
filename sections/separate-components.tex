@@ -1,0 +1,240 @@
+A complete abstract machine implementation is not only made up of the system
+that interprets byte code. It can include various components that either work
+completely isolated or interfaces with the byte code interpreter. Exactly what
+other components are part of the system varies widely with among machines. In
+the following we will describe three such components that we have either made a
+phony implementation of or that would have been essential additions to the
+system.
+
+\subsection{Garbage Collector}
+%TODO: needs citations
+Garbage is defined as heap objects to which there are no references, and so are
+unreachable. Such regions of memory can never be used again and have no useful
+purpose, hence the name. In languages that manually manage memory (e.g. C), such
+objects are regarded as a \textit{leak}, because the memory they inhibit can
+never be reclaimed and used for other things, but will continue to take up
+memory until the program exits. The garbage collector's responsibility is to
+\textit{automatically} keep track of which heap objects are in use, and which
+can be safely freed, relieving the programmer of the task of manually freeing
+allocations.
+
+% TODO something about circular deps in ref counting
+There are generally two types of garbage collectors: reference counters and
+tracing garbage collectors. Reference counting simply keeps track of how many
+references there are to a given object and when that count becomes zero, the
+object is regarded as garbage and will be freed. Tracing garbage collectors work
+by maintaining a graph representation of allocated objects that it can use to
+infer which objects are garbage and which are still in use. This is known as
+mark-and-sweep collection because the collector, upon collection, traverses the
+graph and marks objects that are still on use. It then sweeps the heap and
+reclaims the resources used by the objects that were not marked as being in use.
+
+\thename{} uses a garbage collector through the interface defined in
+\code{gc.h}, which essentially exposes four functions:
+
+% TODO i dont think this is accurate
+\begin{description}
+\item[allocate] Allocates memory for a new heap object
+\item[release] Releases a heap object for tracking by garbage collection,
+  essentially marking the object ``ready'' to be tracked. This does \textit{not}
+  release the memory used by the object.
+\item[de\_ref] Tells the garbage collector that a dereference of the object has
+  occured, indicating that it is use.
+\item[re\_ref] Tells the garbage collector that an object is no longer
+  referenced.
+\end{description}
+
+We have made a phony implementation of that interface using \code{malloc} for
+allocation and left the rest of the functions unimplemented, which basically
+means that all allocations are leaked. This is not a big issue when developing
+the machine, because we do not need to run memory heavy programs, but for any
+actual use it is critical that the garbage collector works.
+
+The biggest advantage of using a garbage collector is that it prevents most
+memory leaks and can significantly simplify development. It does however come
+with a set of disadvantages, most prominently a performance overhead. Depending
+on the type of garbage collector used, it is not known when and how often the
+collector kicks in and frees memory, which can result in undesirable hang-ups
+during run-time.
+
+\subsection{Byte Code Verifier}
+
+The job of the byte code verifier is to, as far as possible, prevent run-time
+errors by detecting illegal or invalid byte codes \emph{statically}, that is,
+before the code is executed by the interpreter. The verifier is a completely
+separate system and the interpreter itself does not need to interface with it at
+any time, nor is verifier aware of the interpreter. It is however usually
+implemented as a tier above the interpreter in the complete machine meaning that
+code must pass the verifier before it is allowed to be executed.
+
+The byte code verifier is different from the system that generates the byte
+code. A compiler is responsible for verifying the semantics and syntax of a
+particular language, which is something the machine and byte code verifier is
+obviously ignorant of.
+
+In theory the interpreter could assume that any code fed to it is valid, but in
+practice this is not viable. There are issues that the verifier cannot or might
+not detect, such as certain type errors (see below) and issues related to
+dynamic language features. In addition there are some things that we
+intentionally re-verify during run-time because of security critical
+reasons. For instance, we check that stack operations never reference the
+activation element of sub-routines.
+
+There are a lot of things that the verifier can or must check to ensure code
+validity. Some are specific to abstract machine specifications and
+implementations, but some are common inspections that apply to most kinds of
+byte code, or indeed code in general. We have selected some that are either
+specific to \thename{} or general-purpose verifications that would be suitable
+for a verifier for \thename{}, and give a brief description of each. Some of the
+below are inspired by the Java Virtual Machine's specification of byte code
+verifier\cite{jvm-spec}.
+
+%TODO maybe more on each?
+
+\subsubsection{Instructions Prefixes and Arguments}
+
+Section 8.4 of \thename{} specification constrains the order and composability
+of some op-code prefixes. For instance \code{vtable} and \code{static} cannot be
+composed and \code{unsafe} must directly proceed the instruction op-code.
+
+Arguments to instructions can be verified in terms of size, type and
+existence. Instructions take an argument, \emph{must} do so because the
+interpreter will parse the next byte(s) as argument. It can be difficult to tell
+where an argument is missing because an op-code is a valid numeric value, but at
+some point (most likely in the end of a sub-routine) it will be possible to
+detect an unbalanced ratio of arguments to op-codes. For instance if the
+\code{large} prefix is used then the argument(s) must be four bytes long.
+
+\subsubsection{Stack Verification}
+
+The stack can be verified to never reference illegal elements, such as the
+activation element. Neither is it allowed to reference or modify elements
+outside the range of the current sub-routine.
+
+Because stacks are unbounded, stack overflows are not possible, but stack
+underflows can occur if an instruction attempts to pop more elements than are
+currently on the stack.
+
+\subsubsection{Branching and Sub-routines}
+
+Branching instructions take an arbitrary offset argument, which must be verified
+to not lie outside the bounds of the current sub-routine. Further, each
+\code{call} and \code{invoke} instruction must have a corresponding
+\code{return} instruction so as not to accumulate activation elements on the
+stack.
+
+\subsubsection{Data-Flow Analysis}
+
+One of the most common programming errors is to attempt to dereference an
+uninitialized reference. Another is to use an index of an statically sized array
+which is outside the bounds of the array. Analysis of the flow of data in a
+program can reveal many such errors, usually by constructing a so-called
+Control-Flow Graph, which represents what code paths might be taken during
+execution.
+
+\subsubsection{Type Checking}
+
+Type checking is a complex task that attempts to verify that the types of
+parameters to instructions and sub-routines match the ones provided as
+argument. Statically typed languages are superior in this context because all
+variables must either have a type annotation or the type must be
+inferrable. Dynamically typed languages can make no compile-time guarantees for
+type safety, exactly because the types are determined and sometimes constructed
+at run-time. The verifier must thus do ``what it can'', and remaining mismatched
+types will result in run-time errors.
+
+\subsection{Byte Code Optimizer}
+
+Compilers that generates byte code will almost always do heavy optimizations of
+the generated byte code, but optimization can also be a part of the machine
+itself. It can either be an isolated component sitting in between the verifier
+and the interpreter or it can be integrated in the machine where it optimizes
+code when it is found to be suitable. When integrated in the machine, code that
+is executed repeatedly (known as a Hot-Spot) can be further optimized because
+even small optimizations in a Hot-Spot can result in great overall run-time cost
+reductions.
+
+Code optimization is a whole research area in itself, and so there are
+multitudes of algorithms for detecting and optimizing certain constructs of
+code. We have again selected a few that we believe are fundamental.
+
+It is possible to write code that can never be reached in any execution path,
+known as dead code. A simple example is any code following a return instruction
+which will be dead because the return instruction jumps away. A more complex
+example (in terms of detection at least) is presented in
+Listing~\ref{lst:separate-components:dead-code} in high-level pseudo code for
+readability. Dead code is redundant and can safely be removed from the program,
+a process known as \textbf{dead code elimination}.
+
+\begin{ccode}[
+  caption={Example of dead code},
+  label={lst:separate-components:dead-code}]
+if (x) {
+  statement 1
+}
+else if (!x) {
+  statement 2
+}
+else {
+  // This block is dead code since one of the above conditionals will always be true
+  statement 3
+}
+\end{ccode}
+
+Sub-routine calls carry significant overhead, especially when small code blocks
+are frequently executed. This can be mitigated by \textbf{inlining} sub-routine
+code directly into the call-site, thus preventing the function call, but usually
+resulting in more lines of code because the sub-routine's code is duplicated
+whenever it is used.
+
+Some expressions are so-called constant expressions, that is, they do not depend
+on any user provided input and will always evaluate to the same result. Such
+expressions can be calculated at compile-time, avoiding the run-time
+computation. This is known as \textbf{constant
+  folding}. Listing~\ref{lst:separate-components:inline-constant-folding} shows
+and example of inlining and constant folding.
+
+\begin{ccode}[
+  caption={Sub-routine inlining and constant folding},
+  label={lst:separate-components:inline-constant-folding}]
+function double (x) { return x + x }
+
+// Standard call to `double'
+x = double(2);
+y = double(x);
+
+// `double' inlined
+x = 2 + 2;
+y = x + x;
+
+// Constant folding
+x = 4;
+y = x + x;
+
+// `x' can be inlined
+y = 4 + 4
+
+// Resulting in another case of constant folding
+y = 8
+\end{ccode}
+
+A lot of so-called \textbf{peephole optimizations} can be done on small snippets
+of code. They are generally very isolated cases of optimization that either
+reduce the number of instructions or replace instructions with faster ones. For
+instance \code{x * 2} can be replaced with \code{x << 2} since shifting is
+much faster than multiplication.
+
+Another trivial optimization is to remove unused sub-routines. If a sub-routine
+is never called it is redundant and can be safely removed from the program,
+saving space and file loading time.
+
+Looping constructs can, among other transformations, be optimized by detecting
+\textbf{loop-invariant code}, i.e. code that is evaluated in each loop
+iteration, but always evaluates to the same value. Such code can be moved
+outside the body of the loop so as only to evaluate the code once.
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../report"
+%%% End:
