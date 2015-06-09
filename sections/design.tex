@@ -21,7 +21,7 @@ languages. Compilers are free to select which features to utilize, meaning for
 instance that for a strictly statically typed language, the dynamic typing
 mechanisms can be disregarded and method dispatches can be wired statically thus
 avoiding dynamic run-time lookups.
-%TODO more?
+% TODO more?
 
 \textbf{Note:} Because the specification is such a central document to the
 design we will not cite the specification directly. Instead we refer to
@@ -38,7 +38,7 @@ shared data. Machine type values such as \code{Int8} and \code{Boolean}
 (Section~\ref{NEEDED} details the available types and type system) typically
 reside on the stack but can be boxed (see Section~\ref{NEEDED}) and placed on
 the heap.
-%TODO more!
+% TODO more!
 
 \subsection{Stack Management}
 %% Basic
@@ -265,6 +265,69 @@ take. Therefore all threads are exited and memory is freed, ensuring no memory
 leaks.
 
 TODO: Exception handling
+
+
+\subsection{Types}
+The machine will have a built-in set of types. These are broken into simple
+types, arrays, reference types, composite types and meta types. These will
+effectively lay the foundation for arbitrary new types new to be mapped upon.
+
+The simple types are will consist of:
+\begin{description}
+\item[Integer] Will include all combinations of 8-bit, 16-bit and 32-bit, signed
+  or unsigned, integer numbers. E.g. {\tt Int32} and {\tt UInt16}.
+\item[Boolean] A {\tt Boolean} type with the values `true` or `false`.
+\item[Float] 32-bit or 64-bit floating point numbers, in the IEEE 753-1985 or
+  IEEE 755-1985 standard representation, respectively named {\tt Ieee32} and
+  {\tt Ieee64}.
+\item[Address] Unsigned integer value representing a memory address, named {\tt
+    Address}. This is considered unsafe, and will therefore only be possible in
+  code declared as `unsafe`.
+\item[Abstract] Type which can take any value at run-time, named {\tt
+    AnyType}. Large values will be boxed on the heap to make space for it.
+\end{description}
+
+We will also lay the foundation for composite types, making them easy to define
+through recursion. They will simply reference those of the simple types to
+compose new composite types.
+
+% reference
+
+The machine will have a set of reference types, with the most fundamental being
+the {\tt Reference <t>} type. This allows heap objects to be referenced from the
+stack. As the name infers, it will take a type of the object it referenced as
+argument. In the opposite scenario, there is a {\tt StackReference <t>} type,
+allowing passing references directly to stack references. This type may not be
+boxed, nor passed to threaded tasks. This will save programs from major pitfalls
+in concurrent programs (?).
+
+To support variable argument calling conventions, letting a subroutine take an
+arbitrary number of arguments, a special reference type is needed. This is done
+through an {\tt ArgumentReference}, allowing a subroutine to iterate over its
+given arguments. Also, to referencing a subroutine will be done through a {\tt
+  CodeReference <signature>}, taking the signature which it implements. This is
+a meta type, described below.
+
+% arrays
+
+The machine will support two types of arrays; a static and a dynamic
+type. Both will be generic, taking the type of its values. This could be to
+other arrays, allowing an array to be multi-dimensional. The static variant will
+also take a lower and higher limit of values, aptly named {\tt StaticArray
+  <t><lowerLimit><higherLimit>}. The dynamic variant will not take the limits,
+as therefore named {\tt DynamicArray <t>}. To allow it to grow dynamically, it
+will be instanced and put on the heap. It will therefore be referenced through a
+{\tt Reference} type.
+
+% composite
+
+To support custom types, similar to a struct in the C programming language,
+there will be a {\tt Composite <t+>} type. This will take an arbitrary number of
+type arguments, describing its member. Though not visible from the type
+signature, each member will have a name, allowing for convenient referencing (TODO).
+
+Lastly, the machine will have a set of meta types, describing types by them
+selves. These include {\tt Type}, {\tt Signature} and {\tt TypeSignature}. (TODO)
 
 
 % Examples of how to map things to our model ()

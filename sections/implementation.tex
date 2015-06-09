@@ -146,6 +146,100 @@ create the necessary structures and track the data. This will likely consist of
 some internal thread identifier and possible mutex variables.
 
 
+\subsection{Types}
+The binary file, containing the program to be run, declares a type table for the
+custom types created by the program. Through out the binary file, these types
+are referenced through the type's index in this table. This table is static, so
+the machine can analyze how many types it contains. The machine has it's own
+type table, which is a statically sized array. The size is the sum of built-in
+types and types from the binary file.This is called the machines \term{type
+  table}. It holds references to {\it all} types used in the program.
+
+The machines built-in types are described by a type tag, implemented as an enum:
+\begin{ccode}
+enum type_tag_e {
+    ACTIVATION_ELEMENT = 0,
+    ANY                = 1,
+    BOOL               = 2,
+    INT8               = 3,
+    UINT8              = 4,
+    ...
+};
+typedef enum type_tag_e type_tag;
+\end{ccode}
+The enums integer value is used to describe its index in the type table. There
+will always only be {\it one} instance of each type, so two equal types can
+never be referenced by two different pointer. This invariant lets the machine
+check type equality through comparing the type pointers.
+
+More specifically, all types in the machine is stored internally through
+structs. Simple types implement the {\tt type\_base} struct, which is extended
+in composite types. For instance, a reference type would be represented as:
+\begin{ccode}
+struct type_base {
+    type_tag tag;
+    int size;
+};
+
+struct type_ref {
+    struct type_base base;
+    struct type_base *ptr_type;
+};
+
+typedef type_base type;
+\end{ccode}
+
+All types are always passed around in the machine through the {\tt type}
+name. If the type is for instance a reference, i.e. implementing the {\tt
+  type\_ref}, is is cast so its reference specific attributes can be
+referenced. The type of type is checked through the tag, defined in {\tt
+  type\_base}. Another important entry in the type structure is the size
+attribute. This is essential, as it tells the machine how much memory is needed
+to store its value on either the stack or heap.
+
+Types from the binary file are mapped from its index in the binary type table to
+the machines type table. The types from the binary file is parsed lazily,
+i.e. the first time the program tries to look-up a type through its index in the
+binary type table, it is parsed and stored in the machine's type table. This is
+done in the virtual machine implementation's {\tt vm\_lookup\_elf\_type}
+function, which takes a reference to the type table and a type index in the
+binary file.
+
+To get a reference to a built-in type, one can look-it up through a look-up
+function, which takes the name of the built-in type and the type table:
+\begin{ccode} % TODO: update
+type *lookup_type(type **ttable, type_tag tag)
+{
+    int i;
+    for (i = 0; i < ttable_size; i++) {
+        if (ttable[i] == NULL)
+            continue;
+
+        if (ttable[i]->tag == tag)
+            return ttable[i];
+    }
+
+    log_errf(TYPE_ERROR, "could not find type with tag %d", tag);
+
+    return NULL;
+}
+\end{ccode}
+The function iterates the types in the type table, matching on its tag. The null
+check is used to avoid types from the binary file not yet parsed, to be skipped.
+
+Currently, if a type is not found, an error is thrown, halting the machine (TODO
+exceptions).
+
+Composite types are made through (TODO).
+
+Most types can be converted, with some exceptions (TODO signature type). If a
+value is converted to a type with smaller size, for instance an {\tt Int32} to
+{\tt Int8}, the value is truncated (TODO exception)?
+
+All types are garbage collected. This means, when a type is no longer used by
+the program, it's memory is freed. (TODO)
+
+
 \subsection{Binary file}
 
 % Assembler
