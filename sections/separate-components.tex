@@ -48,7 +48,9 @@ We have made a phony implementation of that interface using \code{malloc} for
 allocation and left the rest of the functions unimplemented, which basically
 means that all allocations are leaked. This is not a big issue when developing
 the machine, because we do not need to run memory heavy programs, but for any
-actual use it is critical that the garbage collector works.
+actual use it is critical that the garbage collector works. As with the
+threading, the implementation is wrapped in auxiliary function to simplify the
+process of changing the actual implementation without changing the interface.
 
 The biggest advantage of using a garbage collector is that it prevents most
 memory leaks and can significantly simplify development. It does however come
