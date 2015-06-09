@@ -59,7 +59,9 @@ The abstract machine state, implemented as the \code{am\_state} struct, contains
 data that is generally available in a machine-wide context. We say ``generally''
 because some parts of the system are by design ignorant of their context. A
 symbol table, for instance, is not aware of which thread is using it, and
-instructions do not know of the abstract machine state. The \code{am\_state}
+instructions do not know of the abstract machine state. The most important
+members of \code{am\_state} are a reference to the code bytes and a reference to
+the main thread. These are both values that will not change during the entire
 
 
 thread
@@ -97,7 +99,7 @@ executable.
 
 \subsubsection{Debugging}
 Logging macros
-Debug functions (print_stack)
+Debug functions (print\_stack)
 
 % vm initialization
 % instruction cycle
@@ -173,7 +175,7 @@ create the necessary structures and track the data. This will likely consist of
 some internal thread identifier and possible mutex variables.
 
 \subsection{Types}
-\input{implementation-types}
+\input{sections/implementation-types}
 \subsection{Scopes}
 
 \subsection{Binary file}
@@ -183,7 +185,7 @@ some internal thread identifier and possible mutex variables.
 % gprof?
 
 \subsection{Testing}
-\input{implementation-testing}
+\input{sections/implementation-testing}
 
 % Assembler
 %% Simple parsing/emitting
