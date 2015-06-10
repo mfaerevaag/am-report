@@ -6,10 +6,9 @@
   };
 
   \drawstruct{(5,0)}
-  \structcell[freecell,fill=blue!10]{Virtual table} \coordinate (vtbl_e) at (currentcell.east); \coordinate (vtbl_w) at (currentcell.west);
-  \structcell[freecell]{RTTI}
-  \structcell[freecell]{Function 1}
-  \structcell[freecell]{Function 1}
+  \structcell[freecell]{Virtual table} \coordinate (vtbl_e) at (currentcell.east); \coordinate (vtbl_w) at (currentcell.west);
+  \structcell[freecell]{Type information}
+  \structcell[freecell]{Lookup table}
   \structname{Virtual table}
 
   \drawstruct{(5,-5)}
@@ -18,12 +17,9 @@
   \structname{Hash map}
 
   \drawstruct{(0,0)}
-  \structcell[freecell,fill=blue!10]{Virtual table} \coordinate (ho_vtbl) at (currentcell.east);
-  \structcell[freecell,fill=blue!10]{Hash map} \coordinate (ho_hm) at (currentcell.east);
-  \structcell[freecell]{Field 1}
-  \structcell[freecell]{Field 2}
-  \structcell[freecell]{Simple function 1}
-  \structcell[freecell]{Simple function 2}
+  \structcell[freecell]{Virtual table} \coordinate (ho_vtbl) at (currentcell.east);
+  \structcell[freecell]{Hash map} \coordinate (ho_hm) at (currentcell.east);
+  \structcell[padding]{Object data}
   \structname{Heap object}
 
   \draw[->, thick] (ho_vtbl) -- (vtbl_w);

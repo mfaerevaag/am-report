@@ -1,10 +1,5 @@
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: "../report"
-%%% End:
-
 In the following we will outline out design of \thename{} and give a detailed
-description of each area of concern. The design is heavily tied to the
+description of each area of functionality. The design is heavily tied to the
 \thename{} specification, but further includes some considerations for
 implementation, i.e.~the design of the implementation.
 
@@ -19,26 +14,73 @@ thread management (see Section~\ref{NEEDED}). Further the type system is aimed
 at being strict enough to guarantee type safety but flexible enough for dynamic
 languages. Compilers are free to select which features to utilize, meaning for
 instance that for a strictly statically typed language, the dynamic typing
-mechanisms can be disregarded and method dispatches can be wired statically thus
-avoiding dynamic run-time lookups.
+mechanisms can be disregarded and all method dispatches can be wired statically.
 % TODO more?
 
 \textbf{Note:} Because the specification is such a central document to the
-design we will not cite the specification directly. Instead we refer to
-Appendix~\ref{appendix:spec} where the full specification is included.
+design we will not cite the specification directly throughout the
+thesis. Instead we refer to Appendix~\ref{appendix:spec} where the full
+specification is included.
 
-\subsection{Memory}
-
-\thename{} uses the common stack and heap memory model. Stacks are local to the
-thread that it belongs to, and cross-thread references between stack elements
-are illegal. The heap is a globally shared memory region in which values reside
-until they are deallocated or cleaned by the garbage collector. Threads store
-and retrieve value on the heap using the same addresses, thus facilitating
-shared data. Machine type values such as \code{Int8} and \code{Boolean}
+\subsection{Memory Model}
+% TODO garbage collector
+\thename{} uses the common stack and heap memory model. Stacks are local to
+threads, and cross-thread references between stack elements are illegal. The
+heap is a globally shared memory region in which values reside until they are
+deallocated or cleaned by the garbage collector. Threads store and retrieve
+values on the heap using the same addresses, thus facilitating shared
+data. Machine type values such as \code{Int8} and \code{Boolean}
 (Section~\ref{NEEDED} details the available types and type system) typically
 reside on the stack but can be boxed (see Section~\ref{NEEDED}) and placed on
 the heap.
-% TODO more!
+
+\subsection{Execution Model}
+%TODO: tasks and transactions
+The model of execution defines how, where and by whom code is executed during
+run-time. All code in \thename{} is executed in the context of a thread (see
+Section\ref{sec:design:threading}), and all threads are spawned from an original
+``main'' thread in which execution begins. This allows language implementations
+to use multi-threading features of \thename{}, but also to ignore them and run
+everyting in a single thread without having to worry about creating and
+destroying threads.
+
+\subsection{Object Model}
+%TODO: more
+The object model defines how heap objects are layed out in memory and how their
+content is described by the type system. The object model used \thename{} is
+heavily based on the C++ Itanium ABI\cite{itanium}. That means that all heap
+objects include a pointer to a virtual table which is essentially a statically
+created lookup table that maps integer indices to pieces of code
+(i.e.~sub-routine addresses). Further, and different from the Itanium ABI, the
+virtual tables contain type information about the heap
+object. Figure~\ref{fig:design:heap-object-layout} shows how a heap object is
+stored in memory. The bootstrapped virtual table is created by the machine and
+can be thought of as the fundamental ``Object'' type that all other objects
+inherit from.
+
+\begin{figure}[H]
+  \centering
+  \input{figures/heap-object-layout}
+  \caption{Heap object memory layout}
+  \label{fig:design:heap-object-layout}
+\end{figure}
+
+\subsection{Executable File Format}
+%TODO: more
+\thename{} reads executable files written in the Executable Linkable Format
+(ELF). ELF is a very popular format for executable binary files that is used in
+most Unix based systems (OpenBSD, Linux, Solaris, etc\cite{NEEDED}). That alone
+enables much easier porting of existing libraries and frameworks to
+\thename{}.
+
+
+\subsection{Types}
+%TODO: more
+Types are represented differently in the ELF files and internally in the
+machine. DWARF\cite{dwarf} is used in the executables.
+
+The internal type system is described in Section~\ref{sec:implementation:types}.
+
 
 \subsection{Stack Management}
 %% Basic
@@ -181,6 +223,7 @@ Here we can see some simple operations using the {\tt pushElement} and {\tt
 
 
 \subsection{Threading}
+\label{sec:design:threading}
 Big chip manufacturers like Intel, have always been under big pressure to
 deliver ever faster processors, year after year. For around the last decade, the
 technological development of processors has been focused adding cores rather
@@ -374,3 +417,8 @@ selves. These include {\tt Type}, {\tt Signature} and {\tt TypeSignature}. (TODO
 % Mem model
 %% Standard heap and stack, stack per thread, global heap
 %%
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../report"
+%%% End:

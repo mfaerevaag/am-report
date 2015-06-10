@@ -44,6 +44,34 @@ implementation. They carry the gist of what we want to communicate but generally
 avoids unnecessary and redundant information not relevant to the individual
 cases.
 
+\subsection{Code Style}
+
+The C languages frees the programmer to structure code and data in about as many
+ways as one can imagine. This can be both a blessing and a curse, and warrants
+some agreed upon conventions to maximize consistency.
+
+For a module of functionality we use a general pattern that consists of a struct
+containing the state or data of a piece of machinery, and corresponding prefixed
+functions that take such a structure as argument and operate on its
+data. Stacks, for instance, are implemented with a \code{stack} struct, and the
+functions \code{stack\_init}, \code{stack\_pop}, \code{stack\_free}, etc. This
+essentially mimics object orientation from other languages (C++, Java), but has
+the benefit of most functions being \term{pure}, i.e.~a function that only
+depends on its input, making testing and reasoning about the code easier.
+
+We use a few naming conventions that will be present in the code as well as code
+snippets found in this thesis: %TODO might be useless
+
+\begin{itemize}
+\item We use underscore to separate multi-word variable and function names.
+\item Structs are defined with \code{\_s} suffix and typedef'd to a name
+  without.\\Eg: \code{struct stack\_s \{...\}} and \code{typedef struct stack\_s
+    stack}.
+\item Enums are defined with \code{\_e} suffix and typedef'd to a name
+  without.\\Eg: \code{struct opcode\_e \{...\}} and \code{typedef enum opcode\_e
+    opcode}.
+\end{itemize}
+
 \subsection{Core Infrastructure}
 
 The infrastructure of \thename{} is the code that lays the basis for interaction
@@ -53,24 +81,40 @@ cycle, thread management and exception handling. Besides the machine's exposed
 exception handling system there is an internal error handling mechanism which
 allows errors within the machine to be handled as gracefully possible.
 
-The machine is separated into modules, %TODO-S1
-
-The abstract machine state, implemented as the \code{am\_state} struct, contains
+The machine is divided into several modules of which \code{am}, for abstract
+machine and implemented in \code{am.h} and \code{am.c}, is the most
+overarching. It defines a structure, the \code{am\_state} struct, which contains
 data that is generally available in a machine-wide context. We say ``generally''
 because some parts of the system are by design ignorant of their context. A
 symbol table, for instance, is not aware of which thread is using it, and
 instructions do not know of the abstract machine state. The most important
-members of \code{am\_state} are a reference to the code bytes and a reference to
-the main thread. These are both values that will not change during the entire
+members of \code{am\_state} are a pointer to the code bytes and a pointer to the
+main thread. The state is initialized by loading in  the code %TODO
 
+During the initialization phase of the machine approximately the following steps
+are carried out, in order: %TODO
 
-thread
-instructions
-stack
-types
-gc interface
-symtab, strtab, ttable
+\begin{enumerate}
+\item Set up internal error handling mechanisms
+\item Initialize global abstract machine state
+  \begin{enumerate}
+  \item Read code bytes from executable
+  \item Read string table
+  \end{enumerate}
+\item Initialize root scope
+\item Initialize main thread
+  \begin{enumerate}
+  \item Allocate stack
+  \end{enumerate}
+\item Begin the instruction cycle in the main thread
+\end{enumerate}
 
+% thread
+% instructions
+% stack
+% types
+% gc interface
+% symtab, strtab, ttable
 
 \subsubsection{File Reading}
 The first thing the machine does upon start up is to load various parts of the
@@ -116,18 +160,13 @@ Debug functions (print\_stack)
 % Command line arguments
 
 \subsection{Stacks}
+\label{sec:implementation:stacks}
 \input{sections/implementation-stack}
 
 \subsection{Execution Model}
 \thename{} uses a simple calling convention that
 
 \subsection{Heap Objects}
-
-\begin{figure}[H]
-  \centering
-  \input{figures/heap-object-layout}
-  \caption{Heap object memory layout}
-\end{figure}
 
 
 \subsection{Threading}
