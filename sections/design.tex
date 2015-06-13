@@ -1,4 +1,4 @@
-In the following we will outline out design of \thename{} and give a detailed
+In the following we will outline  design of \thename{} and give a detailed
 description of each area of functionality. The design is heavily tied to the
 \thename{} specification, but further includes some considerations for
 implementation, i.e.~the design of the implementation.
@@ -9,61 +9,61 @@ in an efficient manner. The overarching idea is that by exposing much of the
 underlying low-level constructs we provide very flexible means for compilers to
 do things the way that is most suitable for their particular requirements,
 without having to conform to a tight object-model or strict type system. This
-involves exposing constructs like virtual tables (see Section~\ref{NEEDED}) and
-thread management (see Section~\ref{NEEDED}). Further the type system is aimed
-at being strict enough to guarantee type safety but flexible enough for dynamic
-languages. Compilers are free to select which features to utilize, meaning for
-instance that for a strictly statically typed language, the dynamic typing
-mechanisms can be disregarded and all method dispatches can be wired statically.
+involves exposing constructs like scopes, object model internals (field and
+member management and modification), thread management and type system. Further
+the type system is aimed at being strict enough to guarantee type safety as far
+as possible, but flexible enough for dynamic languages. Compilers are free to
+select which features to utilize, meaning for instance that for a strictly
+statically typed language, the dynamic typing mechanisms can be disregarded and
+all method dispatches can be wired statically.
 % TODO more?
 
 \textbf{Note:} Because the specification is such a central document to the
-design we will not cite the specification directly throughout the
-thesis. Instead we refer to Appendix~\ref{appendix:spec} where the full
-specification is included.
+design we will not cite it directly throughout the thesis. Instead we refer to
+Appendix~\ref{appendix:spec} where it is included in its entirety.
 
-\subsection{Memory Model}
-% TODO garbage collector
-\thename{} uses the common stack and heap memory model. Stacks are local to
-threads, and cross-thread references between stack elements are illegal. The
-heap is a globally shared memory region in which values reside until they are
-deallocated or cleaned by the garbage collector. Threads store and retrieve
-values on the heap using the same addresses, thus facilitating shared
-data. Machine type values such as \code{Int8} and \code{Boolean}
-(Section~\ref{NEEDED} details the available types and type system) typically
-reside on the stack but can be boxed (see Section~\ref{NEEDED}) and placed on
-the heap.
+\subsection{Memory and Object Model}
 
-\subsection{Execution Model}
-%TODO: tasks and transactions
-The model of execution defines how, where and by whom code is executed during
-run-time. All code in \thename{} is executed in the context of a thread (see
-Section\ref{sec:design:threading}), and all threads are spawned from an original
-``main'' thread in which execution begins. This allows language implementations
-to use multi-threading features of \thename{}, but also to ignore them and run
-everyting in a single thread without having to worry about creating and
-destroying threads.
+\thename{} uses the common stack and heap memory model. Each running thread has
+their own evaluation stack that is local to itself. Other threads, whether
+parent or child can not access elements on another thread's stack, neither by
+direct memory addressing (TODO: maybe with unsafe code?) or by use of the
+\code{StackReference} type. The only means by which a thread can make data from
+its stack available to others is by boxing it, i.e.~moving it to the heap and
+track it by reference. The heap is a single, usually large, globally shared
+memory region where data is stored and modified by use of references. It is
+managed fully by the garbage collector, which means that all allocations and
+deallocations are made through an interface. Internally the garbage collector is
+regarded as a ``black box'', meaning that no assumptions to its inner workings
+are made, and it is assumed to efficiently free unused memory when possible.
 
-\subsection{Object Model}
-%TODO: more
-The object model defines how heap objects are layed out in memory and how their
-content is described by the type system. The object model used \thename{} is
-heavily based on the C++ Itanium ABI\cite{itanium}. That means that all heap
-objects include a pointer to a virtual table which is essentially a statically
-created lookup table that maps integer indices to pieces of code
-(i.e.~sub-routine addresses). Further, and different from the Itanium ABI, the
-virtual tables contain type information about the heap
-object. Figure~\ref{fig:design:heap-object-layout} shows how a heap object is
-stored in memory. The bootstrapped virtual table is created by the machine and
-can be thought of as the fundamental ``Object'' type that all other objects
-inherit from.
+The object model defines how objects are layed out in heap and how their content
+is described by the type system. \thename{} uses a simple but very flexible
+object model. The general idea is that a heap object is described by the
+\code{Composite} type which is capable of expressing arbitrarily complex data
+structures. In addition to what is described by the type a heap object includes
+a reference to an object of the \code{AnyType} type. The purpose of this is to
+provide language implementations the means to associate some arbitrary
+information to objects. It could used for any kind of meta data storage,
+implementation of class methods, polymorphism, etc.
 
+%TODO the figure is outdated. again.
 \begin{figure}[H]
   \centering
   \input{figures/heap-object-layout}
   \caption{Heap object memory layout}
   \label{fig:design:heap-object-layout}
 \end{figure}
+
+\subsection{Execution Model}
+%TODO: tasks and transactions
+The model of execution defines how, where and by whom code is executed during
+run-time. All code in \thename{} is executed in the context of a thread (details
+in Section\ref{sec:design:threading}), and all threads are spawned from the
+initial ``main'' thread in which execution begins. This allows language
+implementations to use the multi-threading features of \thename{}, but also to
+ignore them and run everyting in a single thread without having to worry about
+creating and destroying threads.
 
 \subsection{Executable File Format}
 %TODO: more
@@ -72,15 +72,6 @@ inherit from.
 most Unix based systems (OpenBSD, Linux, Solaris, etc\cite{NEEDED}). That alone
 enables much easier porting of existing libraries and frameworks to
 \thename{}.
-
-
-\subsection{Types}
-%TODO: more
-Types are represented differently in the ELF files and internally in the
-machine. DWARF\cite{dwarf} is used in the executables.
-
-The internal type system is described in Section~\ref{sec:implementation:types}.
-
 
 \subsection{Stack Management}
 %% Basic
@@ -311,34 +302,136 @@ TODO: Exception handling
 
 
 \subsection{Types}
-The machine will have a built-in set of types. These are broken into simple
-types, arrays, reference types, composite types and meta types. These will
-effectively lay the foundation for arbitrary new types new to be mapped upon.
 
-The simple types are will consist of:
+The type system of \thename{} aims to enable efficient implementation of both
+dynamically and statically typed languages. That gives rise to a need for an
+adaptable system that is capable of describing arbitrarily complex types along
+with potential storage layout information for languages that require explicit
+memory layout of objects. Moreover the system must be flexible and modifiable
+during run-time, e.g.~to allow dynamic languages to add and remove members of an
+object while still being able to properly type check the code.
+
+\subsubsection{DWARF}
+
+Types are expressed in the DWARF format\cite{dwarf}. DWARF is a format mainly
+used to describe debug information for executable files, essentially by
+describing the source code of a program and mappings into to the compiled
+binary. It is used in many modern compilers\footnote{Usages include GCC, Clang
+  and Go} and is commonly used in combination with ELF binaries. It provides a
+method to describe everything from source code locations, scopes, exception
+handling, compilation units, linking information, etc. The primary building
+block of DWARF information is the Debug Information Entry (DIE). It consists of
+a DWARF tag that describes the kind of entry, and a set of attributes that
+further defines the characteristics of an entry. Tags and attributes can be
+nested which enables types to be as intricate as necessary. It is worth to
+mention that DWARF is simply a \emph{format}, and while there are libraries to
+help read and write the format, they are not part of the DWARF specification.
+
+We do not use the full set of features provided by DWARF, rather we only use
+DIEs for type information in ELF files. We would most likely also use DWARF to
+facilitate proper debugging, but that is beyond the scope of this thesis.
+
+DWARF DIEs are tree structures and we will use indention based notation to
+present them. Listing~\ref{lst:design:dwarf:basic} shows how we can use DWARF to
+express a 32-bit signed integer. Note that the name ``int'' has no special
+meaning in DWARF, but consumers of DWARF may put special meaning into names.
+
+\begin{lstlisting}[
+  caption={A simple DWARF DIE describing a 32-bit signed integer},
+  label={lst:design:dwarf:basic}]
+<1> DW_TAG_base_type
+        DW_AT_name = int
+        DW_AT_byte_size = 4
+        DW_AT_encoding = signed
+\end{lstlisting}
+
+In the above, there is a single tag with three attributes that describe the
+type's name, size and encoding. The \code{DW\_TAG\_base\_type} essentially
+designates a primitive type, one that is not a compound of one or more types,
+and will usually be a leaf in the DWARF tree. For types that \emph{are}
+compound, the approach is to store DIEs in an indexed table and reference types
+by their index location in the table. In the above, the type's index is
+designated by the \code{<1>}. By doing this no type ever has to be duplicated,
+because any other types simply reference the same index. Tags start with the
+\code{DW\_TAG\_} prefix while attributes use \code{DW\_AT\_}, all of which are
+simply names for integer constants defined by the DWARF specification.
+
+Listing~\ref{lst:design:dwarf:complex} shows a more complex example with a
+subprogram (i.e.~a subroutine) that returns a pointer to the integer type
+defined above.
+
+\begin{lstlisting}[
+  caption={A more complex example of DWARF types referencing each other},
+  label={lst:design:dwarf:complex}]
+<2> DW_TAG_pointer_type
+        DW_AT_byte_size = 4
+        DW_AT_type = <1>
+
+<3> DW_TAG_subprogram
+        DW_AT_name = foo
+        DW_AT_type = <2>
+        DW_AT_low_pc = 0x1
+        DW_AT_high_pc = 0x10
+\end{lstlisting}
+
+It is shown how type \code{<2>} is defined as a pointer to the type \code{<1>},
+which in C lingo is \code{int*}. Type \code{<3>} defines a subroutine whose name
+is ``foo'' and returns a \code{<2>}, again in C lingo that would be \code{int
+  *foo()}. This is the fundamental way that the DWARF format expresses types; it
+is simple but very flexible and powerful.
+
+There are scores of attributes and tags defined in the specification, but we do
+not nearly use all of them. Because the format is so simple it is easy to add
+new tags and attributes, simply by defining a new tag or attribute and a
+corresponding numeric constant and documenting it. \thename{} defines some tags
+TODO.
+
+DWARF DIEs are, as mentioned, tree structures which is effective for expressing
+types but is not very compact for storage,and can result in potentially unwieldy
+data. There are more than one way to store the tree structure in a compact
+manner, one of which we will describe here. TODO (which one does bfd use?).
+
+\subsubsection{\thename{}'s Types System}
+
+\thename{} provides a set of built-in types, encompassing both primitive types
+as well as references, arrays and composite types. Further there is the concept
+of a meta kinds which essentially wraps type definitions, type references,
+subroutines, etc.~into a unified meta-data kind which are all stored in a single
+table in the executable.
+
+Compilers can map their primitive types to the ones provided by \thename{}, and
+we expect that combinations of the available compound types to be sufficient for
+expressing any other conceivable type however complex.
+
+Below is a description of the various kinds of simple types provided.
+
 \begin{description}
-\item[Integer] Will include all combinations of 8-bit, 16-bit and 32-bit, signed
-  or unsigned, integer numbers. E.g. {\tt Int32} and {\tt UInt16}.
-\item[Boolean] A {\tt Boolean} type with the values `true` or `false`.
-\item[Float] 32-bit or 64-bit floating point numbers, in the IEEE 753-1985 or
-  IEEE 755-1985 standard representation, respectively named {\tt Ieee32} and
-  {\tt Ieee64}.
-\item[Address] Unsigned integer value representing a memory address, named {\tt
+\item[Integer values] \hfill\\
+  Includes all combinations of 8-bit, 16-bit and 32-bit, signed or unsigned
+  integer numbers. E.g. {\tt Int32} and {\tt UInt16}.
+
+\item[Boolean] \hfill\\
+  A {\tt Boolean} type with the values `true` or `false`.
+
+\item[Floating point values] \hfill\\
+  32-bit or 64-bit floating point numbers, in the IEEE 753-1985 or IEEE 755-1985
+  standard representation, respectively named {\tt Ieee32} and {\tt Ieee64}.
+
+\item[Address] \hfill\\
+  Unsigned integer value representing a memory address, named {\tt
     Address}. This is considered unsafe, and will therefore only be possible in
   code declared as `unsafe`.
-\item[Abstract] Type which can take any value at run-time, named {\tt
-    AnyType}. Large values will be boxed on the heap to make space for it.
-\end{description}
 
-We will also lay the foundation for composite types, making them easy to define
-through recursion. They will simply reference those of the simple types to
-compose new composite types.
+\item[Abstract] \hfill\\
+  Type which can take any value at run-time, named {\tt AnyType}. Large values
+  will be boxed on the heap to make space for it.
+\end{description}
 
 % reference
 
-The machine will have a set of reference types, with the most fundamental being
-the {\tt Reference <t>} type. This allows heap objects to be referenced from the
-stack. As the name infers, it will take a type of the object it referenced as
+The machine has a set of reference types, with the most fundamental being the
+{\tt Reference <t>} type. This allows heap objects to be referenced from the
+stack. As the name suggests, it will take a type of the object it referenced as
 argument. In the opposite scenario, there is a {\tt StackReference <t>} type,
 allowing passing references directly to stack references. This type may not be
 boxed, nor passed to threaded tasks. This will save programs from major pitfalls
@@ -353,10 +446,10 @@ a meta type, described below.
 
 % arrays
 
-The machine will support two types of arrays; a static and a dynamic
-type. Both will be generic, taking the type of its values. This could be to
-other arrays, allowing an array to be multi-dimensional. The static variant will
-also take a lower and higher limit of values, aptly named {\tt StaticArray
+The machine supports two types of arrays; a static and a dynamic type. Both will
+be generic, taking the type of its values. This could be to other arrays,
+allowing an array to be multi-dimensional. The static variant will also take a
+lower and higher limit of values, aptly named {\tt StaticArray
   <t><lowerLimit><higherLimit>}. The dynamic variant will not take the limits,
 as therefore named {\tt DynamicArray <t>}. To allow it to grow dynamically, it
 will be instanced and put on the heap. It will therefore be referenced through a
@@ -394,7 +487,6 @@ selves. These include {\tt Type}, {\tt Signature} and {\tt TypeSignature}. (TODO
 % Object model
 %% Virtual tables
 %% Hash maps
-%%% How is it different from using vtables
 %%% The efficiency of them
 %% Dynamic dispatches
 
