@@ -65,6 +65,16 @@ implementations to use the multi-threading features of \thename{}, but also to
 ignore them and run everyting in a single thread without having to worry about
 creating and destroying threads.
 
+Most CPU architectures define a calling convention which defines how parameters
+are passed to sub-routines and how values are returned from them. \thename{} has
+no notion of return values as commonly used by other architectures. Rather
+pass-by-reference parameters are used to pass values back to the caller. The
+callee allocates space on the stack or the heap and sub-routines must accept
+corresponding reference type parameters which it can then ``fill'' with the
+values that are to be returned. This is a flexible method that allows any number
+of values to be passed back to the caller, and further does not require any
+dedicated instructions for returning values.
+
 \subsection{Executable File Format}
 %TODO: more
 \thename{} reads executable files written in the Executable Linkable Format

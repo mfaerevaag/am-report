@@ -98,10 +98,13 @@ are carried out, in order: %TODO
 \item Set up internal error handling mechanisms
 \item Initialize global abstract machine state
   \begin{enumerate}
-  \item Read code bytes from executable
-  \item Read string table
+  \item Load byte code from the executable
+  \item Load and parse information tables
   \end{enumerate}
 \item Initialize root scope
+  \begin{enumerate}
+  \item Load the the run-time library functions
+  \end{enumerate}
 \item Initialize main thread
   \begin{enumerate}
   \item Allocate stack
@@ -164,7 +167,8 @@ Debug functions (print\_stack)
 \input{sections/implementation-stack}
 
 \subsection{Execution Model}
-\thename{} uses a simple calling convention that
+
+
 
 \subsection{Heap Objects}
 
