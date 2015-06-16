@@ -598,6 +598,28 @@ occurs which will set the program counter back to the instruction following the
 used without a defined sub-routine by use of \code{call}, which takes a byte
 address offset from where execution will continue.
 
+For performance critical scenarios we provide a switch/case instruction that
+does constant time case branching by using a jump table. The concept is
+relatively simple and is an example of a variable-length instruction. The
+\code{switch} instruction has the following format:
+
+\code{switch <UInt8>target\_count, <Int8>target\_0, \ldots, <Int8> target\_N}
+
+The \code{target\_count} defines the number of entries in the jump table and is
+followed by exactly that amount of target byte addresses. When executed, the top
+of the stack is popped and its value is used as index for a lookup into the list
+of targets, which is an O(1) operation. The last target, i.e. \code{target\_n},
+is treated as default case, meaning that if the value on the stack lies without
+the range $[0;n]$ it will be chosen instead of looking up a value. This makes a
+jump to a case branch of a switch statement very efficient, but has certain
+limitations. If case values are not adjacent, ``fake'' branch targets must be
+inserted, usually pointing to the default target. The instruction's length is
+equal to the maximum case value, meaning that if there are just two cases, 1 and
+1000, then there will be 998 redundant bytes in the instruction, which is
+obviously unacceptable. In that case it will be a better choice to use a series
+of conditional branches. %TODO: ordered lookupswitch?
+
+
 
 
 % Examples of how to map things to our model ()
