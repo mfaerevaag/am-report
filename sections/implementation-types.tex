@@ -142,3 +142,29 @@ value is converted to a type with smaller size, for instance an {\tt Int32} to
 
 All types are garbage collected. This means, when a type is no longer used by
 the program, it's memory is freed. (TODO)
+
+% floats
+When handling floating point precision numbers we will, as aforementioned, use
+the IEEE 754 standard~\cite{ieee754}.
+TODO:
+\begin{itemize}
+  \item General
+  \item Special values (NaN, infinity, +/- 0)
+  \item Binary representation
+  \item binary32 vs binary64
+  \item To and from C float/double
+\end{itemize}
+
+% type lattice
+When performing arithmetic instruction on numbers, the type of the number has to
+be taken into careful consideration. There is always the common pitfall of not
+handling overflow of numbers, but also when doing arithmetic operations of two
+different types of numbers. If a program, for instance, divides a floating point
+precision number by an integer number, will the result be an floating point or
+integer? Instead of having a long list of each case, the choice will be defined
+by a type lattice. This type lattice will control what type the result is of a
+given operation between two numbers of different types. TODO:
+\begin{itemize}
+  \item The type lattice
+  \item Handling errors (div by zero, overflow, etc.)
+\end{itemize}
