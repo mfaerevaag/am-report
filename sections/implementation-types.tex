@@ -1,10 +1,55 @@
-The binary file, containing the program to be run, declares a type table for the
-custom types created by the program. Through out the binary file, these types
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../report"
+%%% End:
+
+It is not only for stack or heap elements which we need to store information
+about their type. Sub-routines and object fields also has type information which
+we need to keep track of, but the information is not the same. For instance, a
+stack or heap element has types describing the type of its value. A sub-routing
+will need have a type signature, describing the types of it's parameters, a name
+and possible properties. Similarly an object field will have (TODO).
+
+Therefore, we need to abstract our type information a level higher, letting us
+better describe different types of types. Instead of storing the different data
+different places, we will have a centralized table, containing all meta
+information. This will be named the \term{meta table} and will need to be
+dynamically sized to support reflection and generating new types at run-time.
+
+All meta objects in the machine will have a tag defining which of type of
+information it contains.
+\begin{ccode}
+enum meta_tag_e {
+    TYPE,
+    METADATA,
+    FIELD,
+};
+typedef enum meta_tag_e meta_tag;
+
+struct meta_base_s {
+    meta_tag tag;
+};
+typedef struct meta_base_s meta;
+
+struct meta_type_s {
+    meta base;
+
+    type *type;
+};
+typedef struct meta_type_s meta_type;
+\end{ccode}
+In the case of {\tt TYPE} it will be cast to the {\tt meta\_type} which allows
+access to the {\tt type} referenced described below.
+
+We will describe each type of meta information in turn.
+
+\subsubsection{Types}
+The executable file, containing the program to be run, declares a type table for
+the custom types created by the program. Through out the executable, these types
 are referenced through the type's index in this table. This table is static, so
-the machine can analyze how many types it contains. The machine has it's own
-type table, which is a statically sized array. The size is the sum of built-in
-types and types from the binary file.This is called the machines \term{type
-  table}. It holds references to {\it all} types used in the program.
+the machine can analyze how many types it contains. The types will be parsed
+from the executable and added to the global meta table lazily. This reduces
+the initial overhead of parsing the executable.
 
 The machines built-in types are described by a type tag, implemented as an enum:
 \begin{ccode}
@@ -18,44 +63,45 @@ enum type_tag_e {
 };
 typedef enum type_tag_e type_tag;
 \end{ccode}
-The enums integer value is used to describe its index in the type table. There
+The enums integer value is used to describe its index in the meta table. There
 will always only be {\it one} instance of each type, so two equal types can
-never be referenced by two different pointer. This invariant lets the machine
+never be referenced by two different pointers. This invariant lets the machine
 check type equality through comparing the type pointers.
 
 More specifically, all types in the machine is stored internally through
 structs. Simple types implement the {\tt type\_base} struct, which is extended
-in composite types. For instance, a reference type would be represented as:
+in composite types. For instance, a reference is represented as:
 \begin{ccode}
-struct type_base {
+struct type_base_s {
     type_tag tag;
     int size;
 };
+typedef struct type_base_s type;
 
-struct type_ref {
-    struct type_base base;
-    struct type_base *ptr_type;
+struct type_ref_s {
+    type base;
+    type *ref_type;
 };
-
-typedef type_base type;
+typedef struct type_ref_s type_ref;
 \end{ccode}
 
 All types are always passed around in the machine through the {\tt type}
 name. If the type is for instance a reference, i.e. implementing the {\tt
-  type\_ref}, is is cast so its reference specific attributes can be
+  type\_ref}, it is cast so its reference specific attributes can be
 referenced. The type of type is checked through the tag, defined in {\tt
   type\_base}. Another important entry in the type structure is the size
 attribute. This is essential, as it tells the machine how much memory is needed
 to store its value on either the stack or heap.
 
-Types from the binary file are mapped from its index in the binary type table to
-the machines type table. The types from the binary file is parsed lazily,
+Types from the executable are mapped from its index in the binary type table to
+the machines meta table. The types from the binary file is parsed lazily,
 i.e. the first time the program tries to look-up a type through its index in the
 binary type table, it is parsed and stored in the machine's type table. This is
 done in the virtual machine implementation's {\tt vm\_lookup\_elf\_type}
 function, which takes a reference to the type table and a type index in the
 binary file.
 
+TODO: update look-up shit
 To get a reference to a built-in type, one can look-it up through a look-up
 function, which takes the name of the built-in type and the type table:
 \begin{ccode} % TODO: update
@@ -80,6 +126,13 @@ check is used to avoid types from the binary file not yet parsed, to be skipped.
 
 Currently, if a type is not found, an error is thrown, halting the machine (TODO
 exceptions).
+
+When trying to box a stack element trough the {\tt box} instruction, the top
+element is popped off the stack and stored on the heap. An element with a
+reference to the heap object is in turn pushed to the stack. The type of the new
+element will be a {\tt Reference<t>} type, where {\tt t} is the type of the
+stack element which was boxed. If this type is not found in the type table
+already it will have to be generated. This is done by TODO.
 
 Composite types are made through (TODO).
 
