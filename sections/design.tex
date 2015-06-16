@@ -65,15 +65,18 @@ implementations to use the multi-threading features of \thename{}, but also to
 ignore them and run everyting in a single thread without having to worry about
 creating and destroying threads.
 
-Most CPU architectures define a calling convention which defines how parameters
-are passed to sub-routines and how values are returned from them. \thename{} has
-no notion of return values as commonly used by other architectures. Rather
-pass-by-reference parameters are used to pass values back to the caller. The
-callee allocates space on the stack or the heap and sub-routines must accept
-corresponding reference type parameters which it can then ``fill'' with the
-values that are to be returned. This is a flexible method that allows any number
-of values to be passed back to the caller, and further does not require any
-dedicated instructions for returning values.
+Most CPU architectures define a \emph{calling convention} which defines how
+parameters are passed to sub-routines and how values are returned from
+them. Parameters to a subroutine must be passed into the stack prior to an
+\code{invoke} instruction. The sub-routine code can then peek upward into the
+stack to retrieve or replace them. \thename{} has no notion of return values as
+commonly used by other architectures. Rather, pass-by-reference parameters are
+used to pass values back to the caller. The callee allocates space on the stack
+or the heap and sub-routines must accept corresponding reference type parameters
+which it can then ``fill'' with the values that are to be returned. This is a
+flexible method that allows any number of values to be passed back to the
+caller, and further does not require any dedicated instructions for returning
+values.
 
 Another aspect of the execution model is the use of scopes. At its core, a scope
 is simply a mapping from names to values that define the bindings available at
@@ -109,6 +112,10 @@ which are seamlessly supported. There is little to no performance overhead by
 manual scope management, because the internal procedures are exactly the same as
 if the machine would introduce scopes automatically.
 
+\subsubsection{Sub-routines}
+
+%TODO
+
 \subsection{Executable File Format}
 %TODO: more
 \thename{} reads executable files written in the Executable Linkable Format
@@ -118,6 +125,7 @@ enables much easier porting of existing libraries and frameworks to
 \thename{}.
 
 \subsection{Stack Management}
+\label{sec:design:stack-mgmt}
 %% Basic
 %% Stack vs. Register
 %%% (see background)
@@ -126,13 +134,13 @@ enables much easier porting of existing libraries and frameworks to
 %%% Type
 %% Manipulation (instr)
 
-Stack is an abstract data type, fundamental in the fields of algorithms and
-computer science. It is a very simple model only requiring two essential
-functions, {\it push} and {\it pop}, as visualized in
-figure~\ref{fig:stack}. Push adds an element to a stack of elements, while pop
-removes the top most element. As an analogy, imagine a pile of dishes. When
-adding a new dish it becomes the new top-most dish in the stack. This sequence
-of adding and taking from a collection of element is called Last In, First Out
+A stack is an abstract data type, fundamental in the fields of algorithms and
+computer science. At its core, it is a very simple model consisting of two
+essential functions, {\it push} and {\it pop}, as visualized in
+figure~\ref{fig:stack}. Push adds an element to the top of a stack, while pop
+removes the top most element. As an analogy, imagine a pile of dishes: when
+adding a new dish it becomes the new top-most dish in the pile. This sequence of
+adding and taking from a collection of element is called Last In, First Out
 (LIFO).
 \begin{figure}[h]
   \centering
@@ -168,7 +176,7 @@ removing the top most element, the model can easily be modified to support such
 operations. For instance, a common stack operation is {\it peek}, which reads
 the value of the top element without actually removing it. This can easily be
 done by popping, storing the value and pushing it back to the stack. Other
-operations can be implemented in a similar fashion.
+operations can be implemented in a similar fashion. %TODO: thats not how we actually do it
 
 \subsubsection{Stack vs. Register Machine}
 Machines can implement the stack model virtually and execute it directly in
@@ -192,25 +200,26 @@ operations, where $1\ 2\ +$ becomes:
 Here the {\tt add} operation pops two elements, adds them together and pushes
 the result back onto the stack.
 
-As briefly discussed in the~\ref{sec:background} section, a register machine
-TODO
+As briefly discussed in Section~\ref{sec:background:stack-vs-register}, a
+register machine TODO
 
 \subsubsection{Stack Organization}
 % All stacks will initially have a single activation frame
 
-The stacks will not be limited in size, as the stacks can be implemented as heap
-object which can grow dynamically. Through out this report, we will say that the
-stacks \term{grows downwards}. This is because physically, the top most element
-of the stack is located at a low address in the host computers
-memory. Therefore, as more elements are pushed to the stack, they will get
-higher addresses, making the stack grow downwards in memory.
+Stacks in \thename{} are unbounded, meaning that they can be arbitrarily large
+and that stack overflows never can occur (if the machine runs out of memory
+entirely it is treated as a memory error, not a stack overflow). Throughout the
+report, we will say that the stacks \term{grows downwards}. This is because
+physically, the top most element of the stack is located at a low address in the
+host computers memory. Therefore, as more elements are pushed to the stack, they
+will get higher addresses, making the stack grow downwards in memory.
 
-A stack element will consist of some type information and a reference to its
-content, or data. The type information will include its declared type, but also
-an actual type. For statically typed languages, these will most likely (TODO: ?)
-be the same. For dynamic languages this is required to hold track of an
-element's type, as its allowed to assign a value type an element, which was
-originally declared with an other type.
+A stack element will consist of some type information along with the actual data
+bytes. The type information consist of a declared type, but also an actual
+type. For statically typed languages, these will most likely (TODO: ?) be the
+same. For dynamic languages this is required to keep track of an element's type,
+as it is allowed to assign a value type an element, which was originally
+declared with an other type.
 
 \subsubsection{Stack Manipulation}
 As mentioned above, there will we instructions for doing simple stack
@@ -510,6 +519,87 @@ Lastly, the machine will have a set of meta types, describing types by them
 selves. These include {\tt Type}, {\tt Signature} and {\tt TypeSignature}. (TODO)
 
 
+\subsection{Instruction Set Architecture}
+
+The interface by which compilers and programmers interact with \thename{} is
+defined by the Instruction Set Architecture (ISA). It is the language that the
+machine understands and provides the means to utilize all of the above described
+functionality. It is exactly the same as the x86 instruction set is to the x86
+CPU architecture.
+
+The \thename{} ISA is a set of instructions which are relatively low-level, as
+compared to ordinary hardware implemented instruction sets. The abstraction
+level of the \thename{} is high enough for uncomplicated implementation of
+high-level constructs but low enough for efficient code generation. It can be
+divided into four overarching categories of functionality, namely stack
+manipulation, numeric operations, control flow and object model
+instructions.
+
+Instruction prefixes modifies how an instruction is interpreted in terms of
+arguments, safety and exception handling. For instance, integer arguments are by
+default read as 8-bit values, but may be extended to 32-bits by providing the
+\code{large} prefix. Another prefix, \code{noOverflow}, will make overflowing
+arithmetic throw an exception. Prefixes generally only take effect for a single
+instruction and are reset at the end of an execution cycle.
+
+The following describes each of the four categories of instructions in detail
+and highlights some of the most interesting examples.
+
+\subsection{Stack Manipulation}
+
+The stack manipulating instructions facilitate the functionality described in
+Section~\ref{sec:design:stack-mgmt}. It includes a group of push-instructions
+that will push a value onto the stack, either from somewhere in the stack itself
+(effectively copying an element), the constant table or a literal value inlined
+in the instruction. We further provide an instruction for storing a value in an
+element upward into the stack, i.e.~replacing the value of a stack element. The
+type of the source (which is always the top element) and the target element must
+be the same, or unifiable.
+
+\subsection{Arithmetic and Logical Operations}
+
+\thename{} supports the usual range of logic operations including \emph{and},
+\emph{or} and \emph{xor} along with arithmetic operations such as addition,
+subtraction, multiplication, division and modulo, etc. In addition all
+arithmetic instruction have supports so-called saturated variants which will
+compute values that are saturated within the bounds of a given type in case of
+overflowing results. For example:
+
+\begin{stackops}
+  \op{push 254}{254}
+  \op{push 2}{254,\ 2}
+  \op{add}{1}
+\end{stackops}
+
+And the corresponding saturated variant:
+
+\begin{stackops}
+  \op{push 254}{254}
+  \op{push 2}{254,\ 2}
+  \op{addSaturated}{255}
+\end{stackops}
+
+\subsection{Object Model Instructions}
+
+% new, pushMember, popMember, boxing
+% indirect variants
+
+\subsection{Control Flow}
+
+\thename{} supports different forms of control flow mechanisms. First there is
+the case of sub-routines which are invoked via the \code{invoke} instruction. It
+takes an index into the meta table which is expected to be a sub-routine
+definition containing information about the sub-routines byte address bounds and
+parameter types. When executed the current thread's program counter will be
+modified to be the lowest address of the sub-routines byte address
+bounds. Execution will continue from there until a \code{return} instruction
+occurs which will set the program counter back to the instruction following the
+\code{invoke} that initiated the call. The same call/return mechanism can be
+used without a defined sub-routine by use of \code{call}, which takes a byte
+address offset from where execution will continue.
+
+
+
 % Examples of how to map things to our model ()
 %% Classes
 %% Inheritance
@@ -529,7 +619,6 @@ selves. These include {\tt Type}, {\tt Signature} and {\tt TypeSignature}. (TODO
 %%% Everybody else uses it so we can port stuff easier
 
 % Object model
-%% Virtual tables
 %% Hash maps
 %%% The efficiency of them
 %% Dynamic dispatches
@@ -548,7 +637,6 @@ selves. These include {\tt Type}, {\tt Signature} and {\tt TypeSignature}. (TODO
 
 % ISA
 %% Highlight the most important instructions, explain how they facilitate the above
-
 
 % Mem model
 %% Standard heap and stack, stack per thread, global heap
