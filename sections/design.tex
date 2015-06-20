@@ -565,10 +565,10 @@ add or remove an element on the stack without causing \textit{side effects}. A
 side effect is essentially anything that results in changes in the heap. Control
 flow and numeric instructions are not considered stack manipulations either.
 
-The stack manipulating instructions includes a set of push-instructions that
-push values onto the stack. What that values represents and how it is obtained
-differs between the individual instructions, the most fundamental of which are
-described below.
+The stack manipulating instructions mostly consist of set of push-instructions
+that push values onto the stack. What that values represents and how it is
+obtained differs between the individual instructions, the most fundamental of
+which are described below.
 
 \begin{description}
 
@@ -614,6 +614,11 @@ described below.
   before properly initialized. A use case is for allocating local variables and
   out parameters (for return values) for use in sub-routines.
 
+\item[\code{pop}:]
+
+  The operation that removes one or more values from the stack. It takes an
+  argument which defines the number of elements to remove.
+
 \end{description}
 
 %pop
@@ -657,7 +662,7 @@ compute values that are saturated within the bounds of a given type in case of
 overflowing or underflowing results. Consider adding the values $255$ and $2$
 both as unsigned 8-bit integral values (UInt8). The maximum value of a UInt8 is
 $255$ meaning that $255+2=257$ will result in an overflow. Using the normal
-\code{add} instruction the result will be truncated to $1$ because the exess
+\code{add} instruction the result will be truncated to $1$ because the excess
 bytes are ignored, but with the saturated variant the result will remain $255$
 because the overflow is detected and the value is capped at the maximum
 possible. The same is true for underflowing values with both signed and unsigned
@@ -665,22 +670,67 @@ values.
 
 \subsubsection{Heap Related Instructions}
 
-% new, pushMember, popMember, boxing
-% indirect variants
+The heap related instructions form the interface to the object model of
+\thename{}. Several of the instructions are closely related to the composite
+type (see Section~\ref{NEEDED}) due to the fact that a composite type is used to
+describe and inspect a heap object's layout in memory.
+
+To create a new heap object, space must be allocated on the heap. This is done
+with the \instr{new} instruction which takes a type representation and delegates
+the task of actual memory allocation to the garbage collector. A reference to
+the newly created memory region is then pushed to the stack. Constructor code
+can be run to initialize the object and finally the \instr{release} instruction
+must be executed so as to mark the object ready for garbage collection. Note
+that releasing an object does \emph{not} free its memory region, but rather
+``releases'' the object into the hands of the garbage collector. This pattern is
+similar to how Objective-C manages object creation, namely by use of the
+\code{alloc} and \code{init} methods, which allocates and initializes an object
+it, respectively.
+
+There is a whole family of instructions for getting and setting fields of
+objects, which correlates to the members of a composite type. The general
+structure of field instructions is the same, the difference lies in \emph{where}
+the field is retrieved from. Fields can be retrieved from any location that
+defines a composite type, which means either a stack element, heap object or the
+global scope. Following is the description of the simplest forms, namely the
+global scope, but the information applies to the whole set of field
+instructions:
+
+\begin{description}
+
+\item[\code{pushField}:]
+
+  Takes a field reference as argument and looks up the corresponding memory
+  location in the global scope. The value of the field is pushed to the stack as
+  a stack element with the same type as the field's type.
+
+\item[\code{popField}:]
+
+  Takes a field reference and a value of the \emph{same type}. The field
+  reference is used to look up a memory address into which the value is copied.
+
+\end{description}
+
+Finally there is the \instr{box} and \instr{unbox} instructions that are used to
+move values between the stack and the heap. \instr{box} takes value and moves it
+to the heap by wrapping it in a heap object. The type of the heap object will be
+the same as the value's type but wrapped in a reference type. Correspondingly,
+\instr{unbox} takes a reference to a heap object, unpacks it's value and pushes
+it onto the stack with the type that the consumed reference was referencing.
 
 \subsubsection{Control Flow}
 
-\thename{} supports different forms of control flow mechanisms. First there is
-the case of sub-routines which are invoked via the \code{invoke} instruction. It
-takes an index into the meta table which is expected to be a sub-routine
-definition containing information about the sub-routines byte address bounds and
-parameter types. When executed the current thread's program counter will be
-modified to be the lowest address of the sub-routines byte address
-bounds. Execution will continue from there until a \code{return} instruction
-occurs which will set the program counter back to the instruction following the
-\code{invoke} that initiated the call. The same call/return mechanism can be
-used without a defined sub-routine by use of \code{call}, which takes a byte
-address offset from where execution will continue.
+\thename{} supports different forms of control flow mechanisms. First there are
+sub-routines which are invoked via the \code{invoke} instruction. It takes an
+index into the meta table which is expected to be a sub-routine definition
+containing information about the sub-routine's byte address bounds and parameter
+types. When executed, the current thread's program counter will be set to the
+lowest address of the sub-routines byte address bounds. Execution will then
+continue from there until a \code{return} instruction occurs which will set the
+program counter back to the instruction following the \code{invoke} that
+initiated the call (i.e. the address of the callee). The same call/return
+mechanism can be used without a defined sub-routine by use of \code{call}, which
+takes a byte address offset from where execution will continue.
 
 For performance critical scenarios we provide a switch/case instruction that
 does constant time case branching by using a jump table. The concept is
