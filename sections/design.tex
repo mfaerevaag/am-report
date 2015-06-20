@@ -62,7 +62,7 @@ run-time. All code in \thename{} is executed in the context of a thread (details
 in Section\ref{sec:design:threading}), and all threads are spawned from the
 initial ``main'' thread in which execution begins. This allows language
 implementations to use the multi-threading features of \thename{}, but also to
-ignore them and run everyting in a single thread without having to worry about
+ignore them and run everything in a single thread without having to worry about
 creating and destroying threads.
 
 Most CPU architectures define a \emph{calling convention} which defines how
@@ -720,22 +720,61 @@ it onto the stack with the type that the consumed reference was referencing.
 
 \subsubsection{Control Flow}
 
-\thename{} supports different forms of control flow mechanisms. First there are
-sub-routines which are invoked via the \code{invoke} instruction. It takes an
-index into the meta table which is expected to be a sub-routine definition
-containing information about the sub-routine's byte address bounds and parameter
-types. When executed, the current thread's program counter will be set to the
-lowest address of the sub-routines byte address bounds. Execution will then
-continue from there until a \code{return} instruction occurs which will set the
-program counter back to the instruction following the \code{invoke} that
-initiated the call (i.e. the address of the callee). The same call/return
-mechanism can be used without a defined sub-routine by use of \code{call}, which
-takes a byte address offset from where execution will continue.
+\thename{} supports different forms of control flow mechanisms. The most basic
+form of control flow are simple branching instruction. We provide three distinct
+ones all of which take a target address from where execution should
+continue. The target address must lie within the currently executing
+sub-routines address bounds, otherwise the operation is considered
+illegal. The simple branching instructions are:
+
+\begin{description}
+
+\item[\instr{br}:]
+
+  Simple unconditional branch.
+
+\item[\instr{brtrue}:]
+
+  Branches to the provided target address if the top of the stack is a truthy boolean value.
+
+\item[\instr{brfalse}:]
+
+  The opposite; branches to the provided target address if the top of the stack
+  is a falsy boolean value.
+
+\end{description}
+
+% TODO: example scenario of `call' use (switch-like statement?)
+Sometimes it is useful to be able to return to the call site, but without the
+overhead and added complexity of proper sub-routines. This is supported via the
+\instr{call} instruction which works like the unconditional branch, \instr{br},
+with the addition that control will be handed back upon execution of
+\instr{return}.
+
+Finally there are proper sub-routines which are defined in the executable file
+and can be looked up during run-time by their id. The fundamental instruction
+for executing a sub-routine is \instr{invoke}, but in the same manner as the
+field operations, there is a family of invocation instructions that determines
+the scope in which the sub-routine will be looked up.
+
+\instr{invoke} takes a sub-routine definition argument which contains
+information about the byte address bounds and parameter types. When executed,
+the current thread's program counter will be set to the lowest address of the
+sub-routine's byte address bounds. Execution will then continue from there until
+a \code{return} instruction occurs which will set the program counter back to
+the instruction following the \code{invoke} that initiated the call (i.e.~the
+address of the call site).
+
+Both \instr{call} and the \instr{invoke} family of instructions allow
+arbitrarily deep recursion. Activation elements are stored on the stack and the
+\instr{return} instruction determines the call site information by finding the
+\emph{top-most} activation element. That means calls/invocations and returns
+happen in a First-In-First-Out manner.
 
 For performance critical scenarios we provide a switch/case instruction that
 does constant time case branching by using a jump table. The concept is
 relatively simple and is an example of a variable-length instruction. The
-\code{switch} instruction has the following format:
+\instr{switch} instruction has the following format:
 
 \code{switch <UInt8>target\_count, <Int8>target\_0, \ldots, <Int8> target\_N}
 
