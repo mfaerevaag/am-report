@@ -529,18 +529,28 @@ CPU architecture.
 
 The \thename{} ISA is a set of instructions which are relatively low-level, as
 compared to ordinary hardware implemented instruction sets. The abstraction
-level of the \thename{} is high enough for uncomplicated implementation of
-high-level constructs but low enough for efficient code generation. It can be
-divided into four overarching categories of functionality, namely stack
-manipulation, numeric operations, control flow and object model
+level of the \thename{} is aimed at being high enough for uncomplicated
+implementation of high-level constructs but low enough for efficient code
+generation. It can be divided into four overarching categories of functionality,
+namely stack manipulation, numeric operations, control flow and heap related
 instructions.
 
-Instruction prefixes modifies how an instruction is interpreted in terms of
-arguments, safety and exception handling. For instance, integer arguments are by
-default read as 8-bit values, but may be extended to 32-bits by providing the
-\code{large} prefix. Another prefix, \code{noOverflow}, will make overflowing
-arithmetic throw an exception. Prefixes generally only take effect for a single
-instruction and are reset at the end of an execution cycle.
+Most instructions require one or more parameters that define the exact behavior
+of execution. By default, the arguments are read from the byte code stream, but
+several instructions have \emph{indirect} variants that read one or more of
+their arguments from elements on the stack instead of from the byte code
+stream. This enables much more flexible and dynamic programs because arguments
+to an instructions can be computed at run-time rather than having to statically
+determine arguments.
+
+There is a set of instruction \emph{prefixes} that modify how an instruction is
+interpreted in terms of arguments, safety and exception handling. Technically
+they are simply predefined byte values that are parsed before an instruction is
+executed. For instance, integer arguments are by default read as 8-bit values,
+but may be extended to 32-bits by providing the \code{large} prefix. Another
+prefix, \code{noOverflow}, will make overflowing arithmetic throw an
+exception. Prefixes generally only take effect for a single instruction and are
+reset at the end of an execution cycle.
 
 The following describes each of the four categories of instructions in detail
 and highlights some of the most interesting examples.
@@ -548,43 +558,117 @@ and highlights some of the most interesting examples.
 \subsection{Stack Manipulation}
 
 The stack manipulating instructions facilitate the functionality described in
-Section~\ref{sec:design:stack-mgmt}. It includes a group of push-instructions
-that will push a value onto the stack, either from somewhere in the stack itself
-(effectively copying an element), the constant table or a literal value inlined
-in the instruction. We further provide an instruction for storing a value in an
-element upward into the stack, i.e.~replacing the value of a stack element. The
-type of the source (which is always the top element) and the target element must
-be the same, or unifiable.
+Section~\ref{sec:design:stack-mgmt}. It can be argued that all instructions are
+stack manipulations since almost every instruction will leave the stack
+changed. However we define stack manipulations as the instructions that either
+add or remove an element on the stack without causing \textit{side effects}. A
+side effect is essentially anything that results in changes in the heap. Control
+flow and numeric instructions are not considered stack manipulations either.
 
-\subsection{Arithmetic and Logical Operations}
+The stack manipulating instructions includes a set of push-instructions that
+push values onto the stack. What that values represents and how it is obtained
+differs between the individual instructions, the most fundamental of which are
+described below.
+
+\begin{description}
+
+\item[\code{pushElement}:]
+
+  Fetches an element from upward into the stack and pushes a copy back onto the
+  stack. This is useful, and indeed required, for loading arguments in
+  sub-routines and can be used by a compiler to implement local variables. We
+  further provide the opposite mechanism; an instruction for storing a value
+  back into an element upward into the stack, i.e.~replacing the value of a
+  stack element. The source element and the target element must have either the
+  same or unifiable types.
+
+\item[\code{pushLiteral}:]
+
+  Takes a type argument in the form of an index into the type table defined in
+  the executable. The next byte (or bytes depending on the presence of the
+  \code{large} prefix), in the byte code stream is parsed as a literal value
+  which is pushed onto the stack along with the type.
+
+\item[\code{pushConstant}:]
+
+  Works just as \code{pushLiteral} except that the value is read via an index
+  into the constant table rather than read from the byte code stream. This
+  allows arbitrarily large literal values to be pushed to the stack, required
+  for any value bigger than 32-bits. This is both useful for 64-bit numeric
+  values but can also be used for static arrays and object literals.
+
+\item[\code{pushMeta}:]
+
+  Meta data is, as mentioned in Section~\ref{NEEDED}, a wrapping kind
+  encompassing type information, field information and sub-routine
+  information. The \code{pushMeta} takes an index into the meta data table and
+  places the corresponding value on the stack. This is required for many of the
+  indirect instruction variants, eg.~where a type reference is read from the
+  stack.
+
+\item[\code{pushUninitialized}:]
+
+  Creates a new stack element with a provided type and reserves space on the
+  stack according to the type. The value of the element is initialized to 0
+  regardless of the type, meaning that it is not guaranteed to be a valid value
+  before properly initialized. A use case is for allocating local variables and
+  out parameters (for return values) for use in sub-routines.
+
+\end{description}
+
+%pop
+
+\subsubsection{Numeric and Logical Operations}
 
 \thename{} supports the usual range of logic operations including \emph{and},
-\emph{or} and \emph{xor} along with arithmetic operations such as addition,
-subtraction, multiplication, division and modulo, etc. In addition all
-arithmetic instruction have supports so-called saturated variants which will
+\emph{or}, \emph{xor} and bit-wise shifts along with the arithmetic operations
+of addition, subtraction, multiplication, division and remainder. Unlike JVM we
+only provide a single instruction per operator which takes care of proper type
+detection and potential conversion. That makes it much simpler to write generic
+arithmetic code without having to create specialized versions for each
+combination of types.
+
+The \code{shl} and \code{shr}, for shift left and shift right, performs logical
+shifts. That is, they displace shift bits in the given direction and simply pads
+with 0-bits in the opposite direction. The \code{ashr} instruction performs an
+\textit{arithmetic shift} to the right which means that the sign-bit of an
+integer value is extended. The sign-bit is simply the left-most bit (we are
+using big endian representation) and is extended regardless of the sign of the
+type. In effect that gives the following results (number are in binary
+representation):
+\[
+0b1001 shl 2  = 0b0100 \\
+0b1001 shr 2  = 0b0010 \\
+0b1001 ashr 2 = 0b1110 \\
+\]
+
+It is worth noting that we do not provide an arithmetic left shift instruction
+because it is mostly redundant since there is right-most bit is insignificant
+and does not usually make sense to extend.
+
+Numeric values can be converted other numeric types using the \code{convert}
+instruction. It takes a type as a parameter and will convert a value on the
+stack to the provided one. The \code{convert} instruction is only defined for
+numeric values and is thus not meant or able to be used for converting and
+casting any other type.
+
+In addition all arithmetic instruction have so-called saturated variants which
 compute values that are saturated within the bounds of a given type in case of
-overflowing results. For example:
+overflowing or underflowing results. Consider adding the values $255$ and $2$
+both as unsigned 8-bit integral values (UInt8). The maximum value of a UInt8 is
+$255$ meaning that $255+2=257$ will result in an overflow. Using the normal
+\code{add} instruction the result will be truncated to $1$ because the exess
+bytes are ignored, but with the saturated variant the result will remain $255$
+because the overflow is detected and the value is capped at the maximum
+possible. The same is true for underflowing values with both signed and unsigned
+values.
 
-\begin{stackops}
-  \op{push 254}{254}
-  \op{push 2}{254,\ 2}
-  \op{add}{1}
-\end{stackops}
-
-And the corresponding saturated variant:
-
-\begin{stackops}
-  \op{push 254}{254}
-  \op{push 2}{254,\ 2}
-  \op{addSaturated}{255}
-\end{stackops}
-
-\subsection{Object Model Instructions}
+\subsubsection{Heap Related Instructions}
 
 % new, pushMember, popMember, boxing
 % indirect variants
 
-\subsection{Control Flow}
+\subsubsection{Control Flow}
 
 \thename{} supports different forms of control flow mechanisms. First there is
 the case of sub-routines which are invoked via the \code{invoke} instruction. It
@@ -617,10 +701,14 @@ inserted, usually pointing to the default target. The instruction's length is
 equal to the maximum case value, meaning that if there are just two cases, 1 and
 1000, then there will be 998 redundant bytes in the instruction, which is
 obviously unacceptable. In that case it will be a better choice to use a series
-of conditional branches. %TODO: ordered lookupswitch?
+of conditional branches.
 
 
 
+\subsection{Usage Examples}
+
+% local vars
+% sub-routines
 
 % Examples of how to map things to our model ()
 %% Classes
