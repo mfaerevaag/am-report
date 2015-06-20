@@ -621,8 +621,6 @@ which are described below.
 
 \end{description}
 
-%pop
-
 \subsubsection{Numeric and Logical Operations}
 
 \thename{} supports the usual range of logic operations including \emph{and},
@@ -667,6 +665,16 @@ bytes are ignored, but with the saturated variant the result will remain $255$
 because the overflow is detected and the value is capped at the maximum
 possible. The same is true for underflowing values with both signed and unsigned
 values.
+
+% TODO: the names of the ops might change with new specs
+The last form of numeric operation is comparison of values. We provide the usual
+equality (\instr{ceq}), less-than (\instr{clt}) and greater-than (\instr{cgt})
+checks, each of which pushes a boolean value describing the result back onto the
+stack. Comparing to zero is a fairly common operation so to avoid the need for
+pushing the value $0$ on the stack we provide variants of each comparison
+instruction that only takes a single argument and compares it to zero. Another
+common comparison is that of a null-reference, i.e.~a reference that points to
+nothing for which we provide the instruction \instr{cmpnull}.
 
 \subsubsection{Heap Related Instructions}
 
