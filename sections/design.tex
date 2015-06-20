@@ -68,7 +68,7 @@ creating and destroying threads.
 Most CPU architectures define a \emph{calling convention} which defines how
 parameters are passed to sub-routines and how values are returned from
 them. Parameters to a subroutine must be passed into the stack prior to an
-\code{invoke} instruction. The sub-routine code can then peek upward into the
+\instr{invoke} instruction. The sub-routine code can then peek upward into the
 stack to retrieve or replace them. \thename{} has no notion of return values as
 commonly used by other architectures. Rather, pass-by-reference parameters are
 used to pass values back to the caller. The callee allocates space on the stack
@@ -572,7 +572,7 @@ which are described below.
 
 \begin{description}
 
-\item[\code{pushElement}:]
+\item[\instr{pushElement}:]
 
   Fetches an element from upward into the stack and pushes a copy back onto the
   stack. This is useful, and indeed required, for loading arguments in
@@ -582,31 +582,31 @@ which are described below.
   stack element. The source element and the target element must have either the
   same or unifiable types.
 
-\item[\code{pushLiteral}:]
+\item[\instr{pushLiteral}:]
 
   Takes a type argument in the form of an index into the type table defined in
   the executable. The next byte (or bytes depending on the presence of the
   \code{large} prefix), in the byte code stream is parsed as a literal value
   which is pushed onto the stack along with the type.
 
-\item[\code{pushConstant}:]
+\item[\instr{pushConstant}:]
 
-  Works just as \code{pushLiteral} except that the value is read via an index
+  Works just as \instr{pushLiteral} except that the value is read via an index
   into the constant table rather than read from the byte code stream. This
   allows arbitrarily large literal values to be pushed to the stack, required
   for any value bigger than 32-bits. This is both useful for 64-bit numeric
   values but can also be used for static arrays and object literals.
 
-\item[\code{pushMeta}:]
+\item[\instr{pushMeta}:]
 
   Meta data is, as mentioned in Section~\ref{NEEDED}, a wrapping kind
   encompassing type information, field information and sub-routine
-  information. The \code{pushMeta} takes an index into the meta data table and
+  information. The \instr{pushMeta} takes an index into the meta data table and
   places the corresponding value on the stack. This is required for many of the
   indirect instruction variants, eg.~where a type reference is read from the
   stack.
 
-\item[\code{pushUninitialized}:]
+\item[\instr{pushUninitialized}:]
 
   Creates a new stack element with a provided type and reserves space on the
   stack according to the type. The value of the element is initialized to 0
@@ -614,7 +614,7 @@ which are described below.
   before properly initialized. A use case is for allocating local variables and
   out parameters (for return values) for use in sub-routines.
 
-\item[\code{pop}:]
+\item[\instr{pop}:]
 
   The operation that removes one or more values from the stack. It takes an
   argument which defines the number of elements to remove.
@@ -631,9 +631,9 @@ detection and potential conversion. That makes it much simpler to write generic
 arithmetic code without having to create specialized versions for each
 combination of types.
 
-The \code{shl} and \code{shr}, for shift left and shift right, performs logical
+The \instr{shl} and \instr{shr}, for shift left and shift right, performs logical
 shifts. That is, they displace shift bits in the given direction and simply pads
-with 0-bits in the opposite direction. The \code{ashr} instruction performs an
+with 0-bits in the opposite direction. The \instr{ashr} instruction performs an
 \textit{arithmetic shift} to the right which means that the sign-bit of an
 integer value is extended. The sign-bit is simply the left-most bit (we are
 using big endian representation) and is extended regardless of the sign of the
@@ -649,9 +649,9 @@ It is worth noting that we do not provide an arithmetic left shift instruction
 because it is mostly redundant since there is right-most bit is insignificant
 and does not usually make sense to extend.
 
-Numeric values can be converted other numeric types using the \code{convert}
+Numeric values can be converted other numeric types using the \instr{convert}
 instruction. It takes a type as a parameter and will convert a value on the
-stack to the provided one. The \code{convert} instruction is only defined for
+stack to the provided one. The \instr{convert} instruction is only defined for
 numeric values and is thus not meant or able to be used for converting and
 casting any other type.
 
@@ -660,7 +660,7 @@ compute values that are saturated within the bounds of a given type in case of
 overflowing or underflowing results. Consider adding the values $255$ and $2$
 both as unsigned 8-bit integral values (UInt8). The maximum value of a UInt8 is
 $255$ meaning that $255+2=257$ will result in an overflow. Using the normal
-\code{add} instruction the result will be truncated to $1$ because the excess
+\instr{add} instruction the result will be truncated to $1$ because the excess
 bytes are ignored, but with the saturated variant the result will remain $255$
 because the overflow is detected and the value is capped at the maximum
 possible. The same is true for underflowing values with both signed and unsigned
@@ -706,13 +706,13 @@ instructions:
 
 \begin{description}
 
-\item[\code{pushField}:]
+\item[\instr{pushField}:]
 
   Takes a field reference as argument and looks up the corresponding memory
   location in the global scope. The value of the field is pushed to the stack as
   a stack element with the same type as the field's type.
 
-\item[\code{popField}:]
+\item[\instr{popField}:]
 
   Takes a field reference and a value of the \emph{same type}. The field
   reference is used to look up a memory address into which the value is copied.
@@ -769,8 +769,8 @@ the scope in which the sub-routine will be looked up.
 information about the byte address bounds and parameter types. When executed,
 the current thread's program counter will be set to the lowest address of the
 sub-routine's byte address bounds. Execution will then continue from there until
-a \code{return} instruction occurs which will set the program counter back to
-the instruction following the \code{invoke} that initiated the call (i.e.~the
+a \instr{return} instruction occurs which will set the program counter back to
+the instruction following the \instr{invoke} that initiated the call (i.e.~the
 address of the call site).
 
 Both \instr{call} and the \instr{invoke} family of instructions allow
