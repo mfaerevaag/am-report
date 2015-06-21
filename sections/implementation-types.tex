@@ -144,6 +144,7 @@ All types are garbage collected. This means, when a type is no longer used by
 the program, it's memory is freed. (TODO)
 
 % floats
+
 When handling floating point precision numbers we will, as aforementioned, use
 the IEEE 754 standard~\cite{ieee754}.
 TODO:
@@ -156,6 +157,7 @@ TODO:
 \end{itemize}
 
 % type lattice
+
 When performing arithmetic instruction on numbers, the type of the number has to
 be taken into careful consideration. There is always the common pitfall of not
 handling overflow of numbers, but also when doing arithmetic operations of two
@@ -163,8 +165,32 @@ different types of numbers. If a program, for instance, divides a floating point
 precision number by an integer number, will the result be an floating point or
 integer? Instead of having a long list of each case, the choice will be defined
 by a type lattice. This type lattice will control what type the result is of a
-given operation between two numbers of different types. TODO:
+given operation between two numbers of different types.
+
+All binary arithmetic operations follow the same type lattice (TODO:
+correct?). The type lattice has the following set of rules matching which
+operand that is to be converted, where the resulting conversion is also the type
+of the result.
 \begin{itemize}
-  \item The type lattice
-  \item Handling errors (div by zero, overflow, etc.)
+  \item If both operands is of the same type, nothing needs to be done.
+  \item Otherwise, if either operand is a double floating-point precision number, the other
+    operand is converted to a double also.
+  \item Otherwise, if either operand is a single floating-point precision number, the other
+    operand is converted to a float also.
+  \item Otherwise, if either operand is of different signs, i.e. one is unsigned
+    and the other is signed, the signed operand is converted to the an signed
+    integer of the largest size of the two operands.
+  \item Otherwise, the operands is of integer types of the same sign, where we
+    return the largest of the two are returned.
 \end{itemize}
+
+If none of the rules apply it will mean that at least one of the given operands
+is of a type not supporting arithmetic operations. In this case, an exception
+will be thrown.
+
+If a type is converted to a type of smaller size, the value it truncated and
+will have the chance of overflowing, changing the value of the number. This is
+considered legal, and no exception will be thrown (TODO: correct?). There are
+though, separate instruction for saturated arithmetic operations, where overflow
+is handled by saturating the number of the given type. For instance, converting
+{\tt 0xFFFF} of type {\tt Int16} to {\tt Int8} will become {\tt 0xFF}.
