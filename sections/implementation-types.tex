@@ -146,15 +146,36 @@ the program, it's memory is freed. (TODO)
 % floats
 
 When handling floating point precision numbers we will, as aforementioned, use
-the IEEE 754 standard~\cite{ieee754}.
-TODO:
-\begin{itemize}
-  \item General
-  \item Special values (NaN, infinity, +/- 0)
-  \item Binary representation
-  \item binary32 vs binary64
-  \item To and from C float/double
-\end{itemize}
+the IEEE 754 standard~\cite{ieee754}. This is a technical standard defining the
+arithmetic format, i.e. the finite range and special values, rounding rules,
+operations, exception handling and interchange formats. Its values include
+finite numbers (within a certain maximum or minimum, depending on the size), two
+infinities (plus and minus) and a NaN (not a number).
+
+A floating point number is always represented by a sign, a fraction (also called
+significant or mantissa), and an exponent. A can have multiple alternative
+representations, for instance $1.10 \cdot 10^2$ can also be written as
+$11.00 \cdot 10^1$. This though, should not have any effect on the result of
+arithmetic operations. When storing the number in memory, one bit is used for
+sign and the rest for exponent and fraction, depending on the size. The most
+common the is single and double precision, which is respectively 4 and 8 bytes
+in size. Their binary representation is called {\tt binary32} and {\tt
+  binary64}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.7]{images/ieee32.png}
+  \caption[Caption for LOF]{IEEE-754 binary32 encoding~\footnotemark}
+\end{figure}
+\footnotetext{\url{https://en.wikipedia.org/wiki/Single-precision_floating-point_format}}
+
+When parsing a {\tt binary32} we start by taking all the correct bits out into
+separate numbers. We can then apply the following formula to get its decimal
+value.
+
+\begin{equation}
+  value = (-1)^{sign} \cdot (1 + \sum^{23}_{i=1} b_{23-i}2^{-i}) \cdot 2^{e - 127}
+\end{equation}
 
 % type lattice
 
@@ -181,7 +202,7 @@ of the result.
     and the other is signed, the signed operand is converted to the an signed
     integer of the largest size of the two operands.
   \item Otherwise, the operands is of integer types of the same sign, where we
-    return the largest of the two are returned.
+    return the largest of the two.
 \end{itemize}
 
 If none of the rules apply it will mean that at least one of the given operands
@@ -189,8 +210,9 @@ is of a type not supporting arithmetic operations. In this case, an exception
 will be thrown.
 
 If a type is converted to a type of smaller size, the value it truncated and
-will have the chance of overflowing, changing the value of the number. This is
-considered legal, and no exception will be thrown (TODO: correct?). There are
-though, separate instruction for saturated arithmetic operations, where overflow
-is handled by saturating the number of the given type. For instance, converting
-{\tt 0xFFFF} of type {\tt Int16} to {\tt Int8} will become {\tt 0xFF}.
+will have the chance of overflowing, changing the value of the number. The {\tt
+  noOverflow} prefix defines if an exception should be thrown if overflow
+occurs. There are though, separate instruction for saturated arithmetic
+operations, where overflow is handled by saturating the number of the given
+type. For instance, converting {\tt 0xFFFF} of type {\tt Int16} to {\tt Int8}
+will become {\tt 0xFF}.
