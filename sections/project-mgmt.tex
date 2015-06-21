@@ -1,25 +1,23 @@
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: "../report"
-%%% End:
+With every software engineering project comes the challenge of management with
+respect to both time, development and personal resources. There are several
+aspects to managing each and there are a many ways to go about it. We have
+obviously not had the luxury of a dedicated project manager who can take care of
+planning tasks, handle communication, keep track of loose ends and continuously
+assess the status of the project. Thus we have done this ourselves in parallel
+with development which encourages a rigorous system that ``gets out of the
+way'', while still providing a flexible work flow that supports the inevitable
+change that is part of all software development; designs change as flaws are
+discovered, inefficiencies must be optimized, refactoring of sloppy code is
+required and so on.
 
-With every software engineering project comes the challenge of management, with
-respect to both time, development (coding) and personal resources. There are
-several aspects to managing each and there are a many ways to go about it. We
-have obviously not had the luxury of a dedicated project manager who can take
-care of planning tasks, handle communication, keep track of loose ends and
-continuously assess the status of the project. Thus we need to do this ourselves
-in parallel with development which encourages a rigorous system that ``gets out
-of the way'', while still providing a flexible work flow that supports the
-inevitable change that is part of all software development; designs change as
-flaws are discovered, inefficiencies must be optimized, refactoring of sloppy
-code is required and so.
+We will first give a detailed presentation of the methods and tools we have used
+and then evaluate how it went.
 
-A system that has become very popular among software developer in recent years
-is the so-called agile method. It is based on the Agile
+A management methodology that has become very popular among software developer
+in recent years is the so-called agile method. It is based on the Agile
 Manifesto\cite{agile-manifesto} which is a collection of twelve principles that
-guides the method of work. The central focus is on response to change over
-following a plan and working software over extensive documentation.
+guides the method of work. The central focus is on response to change rather
+than following a plan and working software rather than extensive documentation.
 
 ``Agile'' became so popular and widespread that it has now degraded to something
 of a clich\'e that everyone seems to have their own definition of and is a
@@ -28,6 +26,7 @@ a strong basis for project management and have chosen to use it for the
 development of \thename{}.
 
 \subsection{Phases and Iterations}
+\label{sec:project-mgmt:phases}
 
 The agile process works in a set of four phases from the inception of the
 project to the transition into production. The following is a description of
@@ -99,27 +98,19 @@ Appendix~\ref{appendices:risk-assessment}.
     \label{tbl:risk-assessment}
 \end{table}
 
-
 \subsection{The Backlog}
 \label{sec:project-mgmt:backlog}
 
 The tool that lays the foundation for the agile work flow is the backlog. It is
 a collection of work that needs to be done ordered by priority. The work is
-described in the form of user stories which are small and optimally completely
-independent chunks of work that can be processed separately. The term user story
-comes from the fact that projects are usually done with an end-user in mind and
-the description is of the form. While there is certainly meant to be users of
-\thename{} it is not in the same strict sense that it is for say a website or
-game. User stories are meant to be defined in the form ``As an X I want to Y''
-where X could be a user and Y would be an action, such as ``log in to the
-website'' or ``send an email''. We have not followed this principle because we
-do not think it provides any value for our purposes, and have therefore been
-more loose in the formulation of tasks.
+described in the form of stories which are small and optimally completely
+independent chunks of work that can be processed separately.
 
-Before any work is done on a user story it is estimated in terms of the
-approximate amount of work in involves. Points are awarded to each story
-resulting in an overview of how much is done and how much is to be done at any
-given time.
+Before any work is done on a story it is estimated in terms of the approximate
+amount of work in involves. Points are awarded to each story resulting in an
+overview of how much is done and how much is to be done at any given
+time. Points can be given by any measure but for simplicity we have estimated
+stories in terms of hours needed to complete the task.
 
 Instead of having a single collection of all tasks we split the work into
 categories such as ``Testing'', ``Documentation'', ``Design'' and ``Core
@@ -130,13 +121,32 @@ focus on.
 \subsection{Tools}
 \label{sec:project-mgmt:tools}
 
+There are scores of tools available to aid in the agile management process. Some
+are as simple as a to-do list manager, and some a full-blown management
+suites. Given that we are only two people working on the project we decided to
+``roll our own'' and use a Google Spreadsheet of which
+Figure~\ref{fig:project-mgm:backlog} shows an excerpt.
+
+\begin{figure}[h]
+  \centering
+
+  \includegraphics[width=.9\textwidth]{./images/backlog}
+
+  \caption{Excerpt from the initial backlog}
+  \label{fig:project-mgm:backlog}
+\end{figure}
+
+%TODO more?
+
 \subsection{Technical Management}
 
 When working in a team with multiple developers it is of paramount importance to
 efficiently manage the codebase. When multiple people are writing code in the
 same source tree it is virtually impossible to manually maintain and apply
 changes from each other. Further it is an invaluable tool to be able to revert
-changes and work on different branches of the system in a unified manner.
+changes and work on different branches of the system in a unified manner, which
+is true for both a single person project and for dozens of developers of the
+same codebase.
 
 Specifically designed for this purpose are Source Code Management (SCM)
 tools. Without going into excessive details, there two general forms of SCMs
@@ -145,7 +155,7 @@ which differ fundamentally in the way files can be edited concurrently. The
 repository from which everyone edits files and is the single source of
 truth. With \textit{decentralized} SCMs every developer has her own repository
 and can merge changes from servers or other developers directly. There is no
-single source of truth in this model, but the a mainline tree is almost always
+single source of truth in this model, but a mainline tree is almost always
 maintained.
 
 The SCMs handle merging of files which have been edited by multiple people, and
@@ -159,3 +169,49 @@ GitHub\footnote{\url{https://github.com}}. git is fully decentralized which we
 find to be the most convenient model.
 
 %TODO derp? more?
+
+\subsection{Evalutation of the Management Process}
+
+We followed the phase structure described in
+Section~\ref{sec:project-mgmt:phases} starting with the inception phase and got
+the vision and overarching plan of the project laid out. During the elaboration
+we began to keep a backlog as concrete work started, both in terms design and
+programming tasks. Programming tasks were fairly easy to describe and can be
+well isolated, though many of them were inevitably interdependent and had to be
+carried out in a specific order. However we quickly found that design tasks are
+very difficult to describe in detail and even more so to estimate. This is both
+due to the fact that describing a design task is essentially part of solving it,
+and that the time it takes to figure out a design decision is highly
+unpredictable. It becomes even more complicated when design flaws are discovered
+and development plans must change. For several purposes it did not prove
+beneficial to use the backlog strictly, but instead generated unnecessary
+overhead, why we began to use it more ad-hoc.
+
+As for planning of sprints we used the weekly meetings with our advisor as
+milestones where we summarized the work that had been done and the plan for the
+next week. That way we could get continuous feedback on the plan which was a
+great help in taking the project in the right direction.
+
+In the final weeks of the project we shifted from the spreadsheet backlog to
+somewhat extensive to-do lists using a tool for the Emacs editor known as
+org-mode\footnote{Org-mode for Emacs: \url{http://orgmode.org}} (for
+organization mode). It enables nested lists of items with descriptions and
+current status as well as tagging mechanisms. The main down-side of org-mode is
+that it cannot be shared between the both of us, but because we were always
+working at the same location it was not a significant issue.
+
+We have certainly learned that good planning is vital for a successful project
+process, and that it pays off to thoroughly think about design choices before
+starting an implementation. It is a fine balance between management and
+production and there will never be a single method that works for all types of
+projects. We consider the essence of the agile methodology great, but the
+process must be tailored to each individual project. The concrete methods used
+must depend of the type of software that is being developed, what the relation
+to the end-user is, how it is going to be deployed (continuous delivery, large
+milestones or a single monolithic delivery), the size of the team and so on.
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../report"
+%%% End:
