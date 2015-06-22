@@ -179,14 +179,17 @@ value.
 
 % type lattice
 
-When performing arithmetic instruction on numbers, the type of the number has to
-be taken into careful consideration. There is always the common pitfall of not
-handling overflow of numbers, but also when doing arithmetic operations of two
-different types of numbers. If a program, for instance, divides a floating point
-precision number by an integer number, will the result be an floating point or
-integer? Instead of having a long list of each case, the choice will be defined
-by a type lattice. This type lattice will control what type the result is of a
-given operation between two numbers of different types.
+When performing arithmetic instruction on numbers, the machine enforces strong
+typing and will therefore throw an exception if the operands is not of the same
+type. This is to avoid common pitfalls, such as not handling overflow of
+numbers, but also when doing arithmetic operations of two different types of
+numbers. If a program, for instance, divides a floating point precision number
+by an integer number, will the result be an floating point or integer? The only
+case the machine it self needs to make a choice is with stack elements of type
+{\tt AnyType}. Instead of having a long list of what do do in every case of all
+types, the choice will be defined by a type lattice. This type lattice will
+control what type the result is of a given operation between two numbers of
+different types.
 
 All binary arithmetic operations follow the same type lattice (TODO:
 correct?). The type lattice has the following set of rules matching which
@@ -194,10 +197,10 @@ operand that is to be converted, where the resulting conversion is also the type
 of the result.
 \begin{itemize}
   \item If both operands is of the same type, nothing needs to be done.
-  \item Otherwise, if either operand is a double floating-point precision number, the other
-    operand is converted to a double also.
-  \item Otherwise, if either operand is a single floating-point precision number, the other
-    operand is converted to a float also.
+  \item Otherwise, if either operand is a double floating-point precision
+    number, the other operand is converted to a double also.
+  \item Otherwise, if either operand is a single floating-point precision
+    number, the other operand is converted to a float also.
   \item Otherwise, if either operand is of different signs, i.e. one is unsigned
     and the other is signed, the signed operand is converted to the an signed
     integer of the largest size of the two operands.
