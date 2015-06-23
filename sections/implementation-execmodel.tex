@@ -1,0 +1,101 @@
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../report"
+%%% End:
+
+\subsubsection{Instruction Prefixes and Suffixes}
+
+TODO: move elsewhere?
+
+Instructions can be prefixed or suffixed to invoke special behavior. TODO.
+
+The {\tt noOverflow} prefix will enabled the machine to throw exceptions if
+overflow occurs when executing the following instruction. This might for
+instance be desired when executing arithmetic instruction, to ensure that the
+arithmetic operation does not induce overflow which could induce unwanted
+behavior.
+
+Overflow is detected differently for different arithmetic operations and operand
+types. This is required as different as types have different maximum and minimum
+values. We will briefly explain the challenge of handling overflow in different
+scenarios and how \thename{} currently, and imperfectly, tackles them.
+
+Looking at how to detect overflow when doing arithmetic operations on {\em
+  signed integer} operands, we have to take the size of the the operands' type
+into account. For instance, an {\tt Int8} can only represent integer numbers in
+the rage of -128 to 127. Knowing the type's maximum and minimum value, we can
+deduce whether the operation will induce over- or underflow on operand $a$ and
+$b$. In the case where the operation is addition, we check if operand $b$ is
+larger than zero {\em and} operand $a$ is lesser than the sum of the type's
+maximum value and $b$'s inverse. This can be denoted in the following
+mathematical formula:
+\label{eq:overflow}
+\begin{equation}
+  overflow = (b > 0) \wedge (a > max - b)
+\end{equation}
+
+In a similar fashion we can detect underflow by:
+\begin{equation}
+  underflow = (b < 0) \wedge (a < min - b)
+\end{equation}
+
+If the operation is subtraction, we just change the plus operator to minus, in
+the two equations. In the case of multiplication we use division, etc.
+
+For unsigned integers the case is a little simpler, as the operand cannot be
+negative. Therefore, when doing addition, underflow can per definition not
+occur:
+\begin{equation}
+  a + b > 0, \qquad when\ a > 0, b > 0
+\end{equation}
+
+For substitution, we only needs to check if the $b$ operand is greater
+than $a$, which will result in a negative number, thus inducing underflow.
+\begin{equation}
+  a - b < 0, \qquad when\ a > 0, b > a
+\end{equation}
+
+These fairly simple solutions has shown through tests, to work well where the
+operand precision is not {\tt Int64} or {\tt UInt64}. The reason for this is
+that all overflow check function promote each operand to an {\tt int64\_t} or
+{\tt uint64\_t}, which prevents overflow of all operands with lower
+precision. In the case of 64-bit integers, there is a risk of the check it self
+to overflow. More precisely, $a < min - b$ will overflow if $b$ is
+positive. There is not good solution for this, other than to use a higher
+precision number for the tests. As C does not have any built-in data types of
+larger precision, one would have to use multi-precision numbers which would
+require some time to implement. We have chosen to note the short comings of the
+current solution and focus our attention else where (TODO).
+
+Both
+GCC~\footnote{\url{https://gcc.gnu.org/onlinedocs/gcc/Integer-Overflow-Builtins.html}}
+and
+Clang~\footnote{http://clang.llvm.org/docs/LanguageExtensions.html#checked-arithmetic-builtins}
+has built-in functions for doing integer arithmetic while also detecting
+overflow. GCC's implementation (TODO: maybe also Clang) does this by converting
+the two operands into infinite precision numbers, where after doing the the
+operation on the promoted operands. The result is then cast to the original
+precision. If the casted result does not equal the infinite precision result,
+overflow has occurred, which is indicated by the functions return value. We have
+chosen to not use these to hold the implementation as library independent as
+possible TODO.
+
+Detecting overflow for floating-point precision numbers is somewhat more
+challenging, due to the more complex nature of its implementation. The C
+Standard Library has built-in constants for finding the a float's maximum value;
+{\tt FLT\_MIN} and {\tt FLT\_MAX} for single precision, {\tt DBL\_MIN} and {\tt
+  DBL\_MAX} for double precision. These could in theory be used in the same
+fashion as above, creating an efficient solution, given that we could do
+built-in arithmetic operations on them. This is unfortunately, as {\tt FLT\_MAX
+  - 1}, for instance, is regarded as undefined behavior and will on most
+platforms equal to {\tt FLT\_MAX}. Inducing undefined behavior when trying to
+deduce whether an instruction is safe, renders it's point moot.
+
+We have therefor chosen to use a simple, but also sub optimal, solution. When,
+for instance, adding two floats together that should produce overflow, the
+resulting value will become equal to {\tt FLT\_MAX} (in the case of single
+precision). We therefor check whether the result of each operation either equals
+the maximum or minimum value for the given precision. In cases where an
+operation equals exactly the maximum or minimum value, an overflow exception
+will be thrown, even though under- or overflow will not have occurred. TODO:
+need more comment?
