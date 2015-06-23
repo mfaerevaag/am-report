@@ -36,7 +36,7 @@ managed fully by the garbage collector, which means that all allocations and
 deallocations are made through an interface. Internally the garbage collector is
 regarded as a ``black box'', meaning that no assumptions to its inner workings
 are made, and it is assumed to efficiently free unused memory when possible.
-
+%TODO garbage collector details (the interface)
 The object model defines how objects are layed out in heap and how their content
 is described by the type system. \thename{} uses a simple but very flexible
 object model. The general idea is that a heap object is described by the
@@ -123,6 +123,51 @@ if the machine would introduce scopes automatically.
 most Unix based systems (OpenBSD, Linux, Solaris, etc\cite{NEEDED}). That alone
 enables much easier porting of existing libraries and frameworks to
 \thename{}.
+
+
+\subsection{Information Tables}
+
+\thename{} executable files define three distinct kinds of information tables
+which are used to store most information that is referenced by the byte
+code. The exceptions are inlined literal values and jump tables for the
+\instr{switch} instruction (explained in
+Section~\ref{sec:design:isa:control-flow}). Byte code makes references to
+entries in the tables by use of indices produced by compilers, and which are
+given by integral values. Indices overlap so a concrete index will point to
+different entries depending on which table a given instruction assumes that the
+index is into.
+
+The most simple table is the string table which is a list of immutable UTF-8
+character strings. It is to store and retrieve any string that a program might
+use, both for identifying scope symbols, run-time functions, fields etc. It is
+also the place where compilers must store strings that are used in ordinary
+program logic. Strings in the string table must be unique, both because it is
+redundant to store duplicates and because it enables the machine to compare
+strings for equality simply by comparing their indices. That saves a lot of look
+up operations which would otherwise sum up to a significant performance cost.
+
+% TODO does it contain types?
+Next is the constant table that contains any type of value for use in
+programs. Values are retrieved by a program by use of the \instr{pushConstant}
+instruction which takes an index into the table and pushes the value onto the
+stack. It is useful for handling large data types that can be expressed neither
+in the default \code{Int8} argument type nor the large \code{Int32} enabled by
+the \code{large} prefix. Constant entries can be arbitrarily large and can thus
+also be used to store array literals. In some cases a compiler will be able to
+optimize the total code size by storing recurring constant values in the
+constant table rather than inlining them in instruction.
+
+The last and most complex table is the meta-data table. It contains information
+about all types, sub-routines and fields. All entries are represented in the
+DWARF debugging format (explained in Section~\ref{sec:design:types:dwarf}) which
+is parsed by the machine into internal data structures. Meta-data is retrieved
+like constants, by use of the \instr{pushMeta} instruction.
+%TODO more
+
+The three tables together are similar to JVMs concept of a constant pool that
+``... contains several kinds of constants, ranging from numeric literals known
+at compile-time to method and field references that must be resolved at
+run-time.''\cite[Section 2.5.5]{jvm-spec}.
 
 \subsection{Stack Management}
 \label{sec:design:stack-mgmt}
@@ -355,6 +400,7 @@ TODO: Exception handling
 
 
 \subsection{Types}
+\label{sec:design:types}
 
 The type system of \thename{} aims to enable efficient implementation of both
 dynamically and statically typed languages. That gives rise to a need for an
@@ -365,6 +411,7 @@ during run-time, e.g.~to allow dynamic languages to add and remove members of an
 object while still being able to properly type check the code.
 
 \subsubsection{DWARF}
+\label{sec:design:types:dwarf}
 
 Types are expressed in the DWARF format\cite{dwarf}. DWARF is a format mainly
 used to describe debug information for executable files, essentially by
@@ -518,8 +565,8 @@ signature, each member will have a name, allowing for convenient referencing (TO
 Lastly, the machine will have a set of meta types, describing types by them
 selves. These include {\tt Type}, {\tt Signature} and {\tt TypeSignature}. (TODO)
 
-
 \subsection{Instruction Set Architecture}
+\label{sec:design:isa}
 
 The interface by which compilers and programmers interact with \thename{} is
 defined by the Instruction Set Architecture (ISA). It is the language that the
@@ -727,6 +774,7 @@ the same as the value's type but wrapped in a reference type. Correspondingly,
 it onto the stack with the type that the consumed reference was referencing.
 
 \subsubsection{Control Flow}
+\label{sec:design:isa:control-flow}
 
 \thename{} supports different forms of control flow mechanisms. The most basic
 form of control flow are simple branching instruction. We provide three distinct
