@@ -94,45 +94,35 @@ attribute. This is essential, as it tells the machine how much memory is needed
 to store its value on either the stack or heap.
 
 Types from the executable are mapped from its index in the binary type table to
-the machines meta table. The types from the binary file is parsed lazily,
-i.e. the first time the program tries to look-up a type through its index in the
-binary type table, it is parsed and stored in the machine's type table. This is
-done in the virtual machine implementation's {\tt vm\_lookup\_elf\_type}
-function, which takes a reference to the type table and a type index in the
-binary file.
+the machines meta table. As the executable meta table is of static size, this
+will be a simple integer array, mapping binary meta index to the machines actual
+meta entry pointer. The meta entries will be parsed lazily, i.e. the first time
+the program tries to look-up a meta entry through its index in the binary meta
+table, it is parsed and stored in the machine's meta table.
 
-TODO: update look-up shit
-To get a reference to a built-in type, one can look-it up through a look-up
-function, which takes the name of the built-in type and the type table:
-\begin{ccode} % TODO: update
-type *lookup_type(type **ttable, type_tag tag)
-{
-    int i;
-    for (i = 0; i < ttable_size; i++) {
-        if (ttable[i] == NULL)
-            continue;
-
-        if (ttable[i]->tag == tag)
-            return ttable[i];
-    }
-
-    log_errf(TYPE_ERROR, "could not find type with tag %d", tag);
-
-    return NULL;
-}
-\end{ccode}
-The function iterates the types in the type table, matching on its tag. The null
-check is used to avoid types from the binary file not yet parsed, to be skipped.
-
-Currently, if a type is not found, an error is thrown, halting the machine (TODO
-exceptions).
+The machines internal meta table is implemented through a hash map, where each
+meta entry can be looked up through it's hashed value. Having implemented the
+meta table implemented as a hash table let's us lookup entries in constant time,
+removing overhead from iterating. The only requirement of the hashing function
+is that it makes unique hashed for meta entry that are equal. This is currently
+done with a simple implementation of Bob Jenkins' On-at-a-time
+hash~\footnote{\url{https://en.wikipedia.org/wiki/Jenkins_hash_function\#one-at-a-time}}. We
+have chosen this hash function due to relatively good speed and uniqueness,
+compared to more complex hashing functions. Bob Jenkins himself has written
+article comparing several similar functions and their running speed, which we
+used as reference~\cite{jenkins}. To get a reference to a built-in type, one can
+look-it up through a look-up function, which takes a meta hash. This can be done
+through a strict function which thrown an exception if the hash is not found, or
+a lazy function which will generate the new meta entry if not found. This is
+especially useful for looking up types, not guaranteed to already be found in
+the meta table.
 
 When trying to box a stack element trough the {\tt box} instruction, the top
 element is popped off the stack and stored on the heap. An element with a
 reference to the heap object is in turn pushed to the stack. The type of the new
 element will be a {\tt Reference<t>} type, where {\tt t} is the type of the
-stack element which was boxed. If this type is not found in the type table
-already it will have to be generated. This is done by TODO.
+stack element which was boxed. If this type is not found in the meta table
+already it is generated at run-time.
 
 Composite types are made through (TODO).
 
