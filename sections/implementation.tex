@@ -82,14 +82,14 @@ exception handling system there is an internal error handling mechanism which
 allows errors within the machine to be handled as gracefully possible.
 
 The machine is divided into several modules of which \code{am}, for abstract
-machine and implemented in \code{am.h} and \code{am.c}, is the most
-overarching. It defines a structure, the \code{am\_state} struct, which contains
-data that is generally available in a machine-wide context. We say ``generally''
-because some parts of the system are by design ignorant of their context. A
-symbol table, for instance, is not aware of which thread is using it, and
-instructions do not know of the abstract machine state. The most important
-members of \code{am\_state} are a pointer to the code bytes and a pointer to the
-main thread. The state is initialized by loading in  the code %TODO
+machine and implemented in \code{am.h/c}, is the most overarching. It defines a
+structure, the \code{am\_state} struct, which contains data that is generally
+available in a machine-wide context. We say ``generally'' because some parts of
+the system are by design ignorant of their context. A string table, for
+instance, is not aware of which thread is using it, and instructions do not know
+of the abstract machine state. The most important members of \code{am\_state}
+are a pointer to the code bytes and a pointer to the main thread. The state is
+initialized by loading in the code %TODO
 
 During the initialization phase of the machine approximately the following steps
 are carried out, in order: %TODO
@@ -125,6 +125,11 @@ executable file into memory. %TODO
 
 \subsubsection{Instruction Cycle}
 
+% general loop (check with whats in design)
+% instruction functions signature
+% role of instructions vs vm (who fetches what)
+% byte code address is into elf, ie offset from first byte when loaded
+
 The fundamental means of operation in the machine is the execution of
 instructions that are parsed and interpreted from byte code. Each thread runs
 their own cycle, the essence of which is shown in
@@ -141,8 +146,65 @@ while (thread is running) {
 }
 \end{lstlisting}
 
-Opcodes and any potential arguments are read from the code section of the
-executable.
+Each task is performed by different modules of the machine. The abstract
+machine, \code{am}, module is responsible for reading byte code including
+reading the opcodes, parsing arguments and in turn executing the function that
+implements the individual functions. The instruction module,
+\code{instruction.h/c} is where instruction routines are defined, one function
+per instruction. All instruction functions take a \code{thread\_state*} argument
+that they use to manipulate the stack, change the program counter, access scopes
+and so on. Generally the abstact machine does not do look ups into information
+tables and other logic, rather its responsibility is to read and parse the byte
+code and delegate the rest of the work to other modules.
+
+As an example consider the following byte code stream:
+
+%TODO needs correct opcode value
+\code{0: 0xFC, 1: 0x10, 2: 0x00, 3: 0x00, 4: 0x05, 5: 0x39, ...}
+
+And let the program counter be $pc = 0$. The machine will carry out the following:
+
+\begin{enumerate}
+\item Read instruction prefixes
+  \label{item:read-prefix}
+  \begin{enumerate}
+  \item Look for bytes that are valid prefix values which is any value greater
+    than or equal to \code{0xFC} (decimal 252).
+  \item The byte at $pc=0$, \code{0xFC}, is a valid prefix, namely the
+    \code{large} prefix.
+  \item Set the \code{pre\_large} flag in the executing thread's state and
+    increment program count, $pc \leftarrow pc + 1 \Rightarrow pc= 1$
+  \item The byte at $pc=1$, \code{0x10}, is not a valid prefix, thus stop
+    reading prefixes.
+  \end{enumerate}
+
+\item Read the opcode which is always a single byte. The byte at $pc=1$ is
+  \code{0x10} which corresponds to the \instr{pushConstant} instruction.
+
+\item Increment program counter, $pc \leftarrow pc + 1 \Rightarrow pc = 2$
+
+\item Fetch arguments
+  \begin{enumerate}
+  \item \instr{pushConstant} takes an argument, an integer value representing a
+    constant table index.
+  \item The \code{pre\_large} flag is true, so we must read the argument as a
+    32-bit (four bytes) integer.
+  \item Interpret the next four bytes as a big endian integral value. The four
+    bytes are \code{0x00, 0x00, 0x05, 0x39} which is interpreted as the value
+    \code{0x539} (decimal 1337).
+  \item Increment program counter by four bytes,
+    $pc \leftarrow pc + 4 \Rightarrow pc = 6$
+  \end{enumerate}
+
+\item Call the instruction function for \instr{pushConstant} with the argument
+  $1337$.
+
+\item Go to~\ref{item:read-prefix}.
+
+\end{enumerate}
+
+The implementation of concrete instructions is detailed in
+Section~\ref{sec:implementation:instr}.
 
 \subsubsection{Debugging}
 Logging macros
