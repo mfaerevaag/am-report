@@ -1,7 +1,48 @@
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: "../report"
-%%% End:
+\subsubsection{Instruction Cycle}
+\label{sec:impl:instr}
+
+% general loop (check with whats in design)
+% instruction functions signature
+% role of instructions vs vm (who fetches what)
+% byte code address is into elf, ie offset from first byte when loaded
+
+\subsubsection{Control Flow}
+\label{sec:implementation:instr:control-flow}
+
+At its core control flow is about changing the program counter of an executing
+thread. The program counter, also known as the instruction pointer, is an
+unsigned integral value representing an address in the byte code where the
+machine will start parsing the next instruction. Instructions can change the
+value of the program counter during execution which is the basis of all control
+flow instructions, including branching and sub-routine calls.
+
+The program counter is implemented as a field on the thread state and since the
+thread state is the fundamental argument to all instruction functions, it is
+trivial to change the program counter at any time. Because the byte code
+programs are byte \textit{addressed} and most instructions span several bytes,
+it is possible to set the program counter to a byte that is in the middle of an
+instruction, which would lead to unpredictable unwanted behavior. Assemblers
+usually use named labels that mark specific locations in assembly code and are
+converted to actual addresses when assembled into binary format. It could also
+be a task of the byte code verifier to assert that addresses always point to the
+beginning of an instruction (as described in
+Section~\ref{sec:separate-components:verifier:branch}).
+
+Branching is the most fundamental control flow operation and is implemented
+simply by setting the executing thread's program counter directly. Certain
+checks are made to verify that a given address is a legal branch target,
+detailed in Section~\ref{sec:impl:instr}.
+
+Sub-routines are essentially implemented in the exact same way as branching
+operations but with the addition of an activation element being pushed to the
+stack. The activation element contains the address of the call site which is
+used to set the program counter back when a return instruction is executed. In
+addition to being on the stack, pointers to activation elements are saved as a
+linked list in the thread state making it possible to retrieve its information
+without having to search through the stack. Among others, it is used to check
+whether the program counter is exceeding the address bounds of the current
+sub-routine, which will result in an implicit return. %TODO: er det rigtigt?
+
 
 \subsubsection{Prefixes and Suffixes}
 
@@ -97,3 +138,8 @@ the maximum or minimum value for the given precision. In cases where an
 operation equals exactly the maximum or minimum value, an overflow exception
 will be thrown, even though under- or overflow will not have occurred. TODO:
 need more comment?
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../report"
+%%% End:

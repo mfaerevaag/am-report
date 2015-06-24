@@ -72,7 +72,7 @@ code must pass the verifier before it is allowed to be executed.
 The byte code verifier is different from the system that generates the byte
 code. A compiler is responsible for verifying the semantics and syntax of a
 particular language, which is something the machine and byte code verifier is
-obviously ignorant of.
+obviously unaware of.
 
 In theory the interpreter could assume that any code fed to it is valid, but in
 practice this is not viable. There are issues that the verifier cannot or might
@@ -118,6 +118,7 @@ underflows can occur if an instruction attempts to pop more elements than are
 currently on the stack.
 
 \subsubsection{Branching and Sub-routines}
+\label{sec:separate-components:verifier:branch}
 
 Branching instructions take an arbitrary offset argument, which must be verified
 to not lie outside the bounds of the current sub-routine. Further, each
