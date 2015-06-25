@@ -77,6 +77,23 @@ snippets found in this thesis: %TODO might be useless
 \end{itemize}
 
 \subsection{Core Infrastructure}
+\label{sec:implementation:core}
+
+% Very general architecture (theres a vm, a file reader, instruction codes, etc)
+% What's in the VM state and Thread state?
+% How code bytes are handled
+% Instruction cycles
+% Internal error handling
+% Logging/debugging facilities
+% Graceful exits / clean up
+% Command line arguments
+
+% thread
+% instructions
+% stack
+% types
+% gc interface
+% symtab, strtab, ttable
 
 The infrastructure of \thename{} is the code that lays the basis for interaction
 between the individual parts of the system. It is a collection of machinery
@@ -99,6 +116,7 @@ During the initialization phase of the machine approximately the following steps
 are carried out, in order: %TODO
 
 \begin{enumerate}
+\item Parse command-line arguments
 \item Set up internal error handling mechanisms
 \item Initialize global abstract machine state
   \begin{enumerate}
@@ -116,19 +134,31 @@ are carried out, in order: %TODO
 \item Begin the instruction cycle in the main thread
 \end{enumerate}
 
-% thread
-% instructions
-% stack
-% types
-% gc interface
-% symtab, strtab, ttable
+We will briefly explain each step in the following sections.
+
+\subsubsection{Command-line Arguments}
+\thename{} will eventually be run through an executable binary, most likely in a
+command-line environment. The most common, and arguably the most efficient, way
+of customizing parameters and execution options is through command-line
+arguments, given directly to the executable when run. These arguments can be
+extended to do a number of things, but essentially we only require the name of
+the binary file to be executed and optionally customizing the level of
+verbosity, i.e. the amount of logging information to display.
+
+We follow common conventions by having two special arguments for displaying
+useful meta information about the \thename{} binary. These include the {\tt
+  --help} argument for printing information on the different arguments, and {\tt
+  --version}, for simply printing the version of the binary.
+
+For ease of implementation we use the Getopt library~\footnote{Getopt (libc):
+  \url{http://www.gnu.org/software/libc/manual/html_node/Getopt.html}}, included
+in C's Standard Library.
 
 \subsubsection{File Reading}
 The first thing the machine does upon start up is to load various parts of the
 executable file into memory. %TODO
 
 \subsubsection{Instruction Cycle}
-
 % general loop (check with whats in design)
 % instruction functions signature
 % role of instructions vs vm (who fetches what)
@@ -214,19 +244,6 @@ Section~\ref{sec:implementation:instr}.
 Logging macros
 Debug functions (print\_stack)
 
-% vm initialization
-% instruction cycle
-% memory layout (stack per thread, heap area, code area)
-% thread
-
-% Very general architecture (theres a vm, a file reader, instruction codes, etc)
-% What's in the VM state and Thread state?
-% How code bytes are handled
-% Instruction cycles
-% Internal error handling
-% Logging/debugging facilities
-% Graceful exits / clean up
-% Command line arguments
 
 \subsection{Stacks}
 \label{sec:implementation:stacks}
