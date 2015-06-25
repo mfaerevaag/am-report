@@ -270,18 +270,66 @@ And let the program counter be $pc = 0$. The machine will carry out the followin
 The implementation of concrete instructions is detailed in
 Section~\ref{sec:implementation:instr}.
 
-\subsubsection{Debugging}
-Logging macros
-Debug functions (print\_stack)
+\subsubsection{Logging and Debugging}
+\label{sec:implementation:core:debug}
+% Logging macros
+% Debug functions (print\_stack)
+% Debug instructions
+
+\thename{} has a logging system, found in the {\tt logger.h} module. It handles
+all messages sent by all components of the machine and decides whether to print
+them to {\tt stdout}. This decision is based on a logging level, which is part
+of the global state of the machine. The logging level sets the `barrier` for
+which a message should be printed. The levels includes {\tt brief}, {\tt normal}
+and {\tt verbose} which can be customized through command-line arguments, but
+defaults to {\tt normal}. As each log message is also categorized with a level,
+the logging module decides, given the current logging level, if it should be
+printed. The message level are {\tt error}, {\tt warning} and {\tt info}.
+
+If the logging level is set to brief, only warnings will be printed, if set to
+normal, warnings will also be printed, and lastly, is set to verbose, everything
+will be printed.
+
+A log message is sent through an interface of macros, exposed by the {\tt
+  logger.h} header-file. Each message level has two logging macros, logging a
+message of the given level. The two macros include on which takes a string, and
+one, suffixed with `f`, which takes a formatted string and a variable number of
+arguments.
+\begin{ccode}
+#define log_warn(msg)                             \
+  do {                                            \
+      if (should_log(WARNING)) {                  \
+          fprintf(stderr, "warning: " msg "\n");  \
+      }                                           \
+  } while (0)
+\end{ccode}
+
+The {\tt log\_err} macro, will in addition to log an error, clean up and stop the
+machine, as it cannot safely continue.
+
+For debugging during development there are an extra macro for printing a message
+prefixed with file name, function name and line number. In addition the is one
+suffixes with `f`, which takes a formatted string in the same manner as the
+logging macros.
+
+The logging messages are only displayed if the {\tt DEBUG} macro value is
+defined. This value is automatically set through the build system, if not making
+a release build through the {\tt release} target.
 
 
 \subsection{Stacks}
 \label{sec:implementation:stacks}
 \input{sections/implementation-stack}
+% vm initialization
+% instruction cycle
+% memory layout (stack per thread, heap area, code area)
+% thread
+
 
 \subsection{Execution Model}
 % \label{sec:implementation:execmodel}
 % \input{sections/implementation-execmodel}
+
 
 \subsection{Heap Objects}
 
