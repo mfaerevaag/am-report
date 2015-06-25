@@ -154,6 +154,36 @@ For ease of implementation we use the Getopt library~\footnote{Getopt (libc):
   \url{http://www.gnu.org/software/libc/manual/html_node/Getopt.html}}, included
 in C's Standard Library.
 
+\subsubsection{Internal Error Handling}
+% Why
+% Error handler
+% Signals
+% Cleanup
+% Error macro
+
+When writing software, history has shown that bugs will most likely find its way
+into the code. The do not expect \thename{} to be an exception, so rather than
+denying this fact, we try to remedy the situation by gracefully exiting the
+program, while also trying to some useful information on what went wrong. This
+way makes it easier for users to understand what is going on and reporting the
+problem so it can fixed.
+
+Internal errors can occur two ways. Either by the machine checking the value of
+different parameters, ensuring they are of the expected format, in which the
+they are not we can cowardly stop the machine without crashing. Or an error can
+occur by the operating system signaling the machine that it is trying to do
+something illegal. In this we can catch the signal, which follows the
+POSIX-standard, and again gracefully exit the program.
+
+When we say gracefully exit, we mean that we can stop running threads, free any
+allocated memory, print some information and set the return code of the
+process. The two last things are very important to let the user know what has
+happened, but also to debug the problem.
+
+With checks, errors can be invoked through a special logging macro {\tt
+  log\_err}, described in the \nameref{sec:implementation:core:debug} section
+below.
+
 \subsubsection{File Reading}
 The first thing the machine does upon start up is to load various parts of the
 executable file into memory. %TODO
