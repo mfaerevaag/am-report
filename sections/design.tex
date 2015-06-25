@@ -146,6 +146,12 @@ redundant to store duplicates and because it enables the machine to compare
 strings for equality simply by comparing their indices. That saves a lot of look
 up operations which would otherwise sum up to a significant performance cost.
 
+Rather than using the regular UTF-8 encoding standard, we have chosen a
+derivative version named Modified UTF-8. This encoding has the UTF-8 character
+{\tt U+0000} encoded as the bytes {\tt 0xC0}, {\tt 0x80}, rather than a null
+byte ({\tt 0x00}). This enables functions to interpret UTF-8 strings as regular
+null-terminating strings, like the C programming language.
+
 % TODO does it contain types?
 Next is the constant table that contains any type of value for use in
 programs. Values are retrieved by a program by use of the \instr{pushConstant}
