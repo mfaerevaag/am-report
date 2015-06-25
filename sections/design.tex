@@ -117,13 +117,58 @@ if the machine would introduce scopes automatically.
 %TODO
 
 \subsection{Executable File Format}
-%TODO: more
-\thename{} reads executable files written in the Executable Linkable Format
-(ELF). ELF is a very popular format for executable binary files that is used in
-most Unix based systems (OpenBSD, Linux, Solaris, etc\cite{NEEDED}). That alone
-enables much easier porting of existing libraries and frameworks to
-\thename{}.
 
+\thename{} reads executable files written in the Executable Linkable Format
+(ELF). ELF is a widely used format for executable binary files format that is
+standard for Unix based systems (OpenBSD, Linux, Solaris, etc\cite{NEEDED}). It
+is a simple and very flexible format that is not specific to any platform or
+architecture but is a container format for such. That means that it provides
+structures for organizing bits and bytes into sections and defines headers that
+describe the file in terms of purpose and functionality.
+
+ELF files are not necessarily executable files, they can be only linkable (hence
+the name) meaning for instance that there is no execution entry point
+defined. \thename{} does not currently support linking why we will not go into
+details about linkable files; this section is about executables only but most of
+the information applies to both.
+
+The contents of an ELF file is stored in segments which in turn contain
+sections. Generally speaking, segments contain information that is useful for
+the execution of programs while sections are useful for linking. The data
+contained in both is the same, but the distinction provides different views of
+that same data, useful for said purposes\cite{elf-spec}. However, since the
+format by design is flexible and can be used in whatever manner and for whatever
+purpose desired. There are no restrictions by the format per s\'e.
+
+An ELF file is described by headers defined in the file itself. The overarching
+file header that describes the remaining file organization is the ELF header. It
+details the attributes of the file such as the machine architecture on which the
+file can be executed, endianess, ELF format version and so on. Further it
+defines where in the file that section and segment headers are located, their
+size and how many there are. In turn the section and segment headers describe
+their entries in the same manner. The general idea is that the starting
+location, size of entry and amount of entries are defined and from that the data
+can be extracted correctly.
+
+All sections have, among other information, a name. Executable ELF files usually
+contain a section named \code{.text} which is where the instructions of a
+program are stored. This is also the case for \thename{}. %TODO more, or remove?
+%TODO info tables.
+
+The fact that ELF is such a widely used format, and a standard for Unix systems
+enables much easier porting of existing tools and libraries to run on
+\thename{}. GCC and GNU Binutils\footnote{GNU Binutils:
+  \url{http://www.gnu.org/software/binutils}} are examples of software that is
+portable, and indeed is designed to be relatively easy to port to new
+architectures. That effectively means that an extensive compiler collection and
+tools are available at a fraction of the effort that it would take to implement
+them from scratch.
+
+% headers
+% segs(progs)/secs
+% .text section
+% string tab
+% easy porting (gcc, binutils)
 
 \subsection{Information Tables}
 
