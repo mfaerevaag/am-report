@@ -30,12 +30,16 @@ that it is a great exercise for becoming proficient with programming in general
 because it provides us with knowledge of the mechanisms that lie behind concepts
 that are generally taken for granted.
 
-For debugging we use gdb via GNU Emacs\footnote{GNU Emacs:
+For finding such memory leaks we use Valgrind~\footnote{Valgrind:
+  \url{http://valgrind.org/}}, and for profiling and benchmarking we use GNU
+gprof~\footnote{GNU gprof: \url{https://sourceware.org/binutils/docs/gprof/}}.
+
+For debugging we use gdb via GNU Emacs~\footnote{GNU Emacs:
   \url{http://www.gnu.org/software/emacs}} and for analyzing memory usage and
 fixing memory leaks we use the Valgrind instrumentation tool\footnote{Valgrind:
   \url{http://valgrind.org}}.
 
-The code is extensively documented using Doxygen\footnote{Doxygen:
+The code is extensively documented using Doxygen~\footnote{Doxygen:
   \url{http://www.stack.nl/~dimitri/doxygen}} style comments.
 
 \textbf{Note:} The code snippets presented in the following sections does not
