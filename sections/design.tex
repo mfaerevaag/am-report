@@ -56,7 +56,7 @@ implementation of class methods, polymorphism, etc.
 \end{figure}
 
 \subsection{Execution Model}
-%TODO: tasks and transactions
+
 The model of execution defines how, where and by whom code is executed during
 run-time. All code in \thename{} is executed in the context of a thread (details
 in Section\ref{sec:design:threading}), and all threads are spawned from the
@@ -64,6 +64,20 @@ initial ``main'' thread in which execution begins. This allows language
 implementations to use the multi-threading features of \thename{}, but also to
 ignore them and run everything in a single thread without having to worry about
 creating and destroying threads.
+
+\subsubsection{Sub-routines and Calling Convention}
+
+A sub-routine is a set of instructions that can be executed, or invoked, as a
+group from another instruction, in our case the \code{invoke} family of
+instructions. \thename{} does not currently support either static or dynamic
+linking and hence all byte code is stored in a single stream of bytes. A
+sub-routine is simply defined by a designated subset of those bytes that,
+usually, performs an specific task and subsequently passes control back to the
+caller. In \thename{} each sub-routine has a name, a low-address that is the
+entry point and a high-address which is the last instruction byte belonging to
+it. The machine does not restrict the address bounds, so the same code bytes can
+potentially be shared by multiple sub-routines, however rare that case might
+be. In addition they define the type or arguments that are expected.
 
 Most CPU architectures define a \emph{calling convention} which defines how
 parameters are passed to sub-routines and how values are returned from
@@ -78,26 +92,22 @@ flexible method that allows any number of values to be passed back to the
 caller, and further does not require any dedicated instructions for returning
 values.
 
-\subsubsection{Sub-routines}
-%TODO
-
 \subsection{Scopes}
 
-Another aspect of the execution model is the use of scopes. At its core, a scope
-is simply a mapping from names to values that define the bindings available at
-any given point during execution. The available bindings depend on the scoping
-rules used, and can generally be divided into dynamic and lexical
-mechanism. With dynamic scoping a name is resolved when it is \emph{evaluated},
-that is, it depends on the execution context or state of the program. With
-lexical scoping a name is resolved when it is \emph{defined}, meaning that
-resolution depends on the name's lexical location in the source code (hence the
-name). Dynamic scoping can be confusing and make it difficult to reason about a
-program's behavior. It can lead to unwanted or unexpected results because the
-programmer has to be very careful not to use identical names in different
-locations that might be evaluated in the same execution context. Lexical scoping
-makes it easier to figure out what a program will do and harder to shoot
-yourself in the foot. Dynamic scoping has more or less disappeared from language
-implementation\cite{cse341}.
+At its core, a scope is simply a mapping from names to values that define the
+bindings available at any given point during execution. The available bindings
+depend on the scoping rules used, and can generally be divided into dynamic and
+lexical mechanism. With dynamic scoping a name is resolved when it is
+\emph{evaluated}, that is, it depends on the execution context or state of the
+program. With lexical scoping a name is resolved when it is \emph{defined},
+meaning that resolution depends on the name's lexical location in the source
+code (hence the name). Dynamic scoping can be confusing and make it difficult to
+reason about a program's behavior. It can lead to unwanted or unexpected results
+because the programmer has to be very careful not to use identical names in
+different locations that might be evaluated in the same execution
+context. Lexical scoping makes it easier to figure out what a program will do
+and harder to shoot yourself in the foot. Dynamic scoping has more or less
+disappeared from language implementation\cite{cse341}.
 
 Scopes are usually organized in tree structures, where each scope has exactly
 one parent and zero or more children. Name resolution starts in the current
