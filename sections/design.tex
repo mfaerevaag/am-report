@@ -44,7 +44,7 @@ object model. The general idea is that a heap object is described by the
 structures. In addition to what is described by the type a heap object includes
 a reference to an object of the \code{AnyType} type. The purpose of this is to
 provide language implementations the means to associate some arbitrary
-information to objects. It could used for any kind of meta data storage,
+information to objects. It could used for any kind of metadata storage,
 implementation of class methods, polymorphism, etc.
 
 %TODO the figure is outdated. again.
@@ -720,9 +720,9 @@ which are described below.
 
 \item[\instr{pushMeta}:]
 
-  Meta data is, as mentioned in Section~\ref{NEEDED}, a wrapping kind
+  Metadata is, as mentioned in Section~\ref{NEEDED}, a wrapping kind
   encompassing type information, field information and sub-routine
-  information. The \instr{pushMeta} takes an index into the meta data table and
+  information. The \instr{pushMeta} takes an index into the metadata table and
   places the corresponding value on the stack. This is required for many of the
   indirect instruction variants, eg.~where a type reference is read from the
   stack.
