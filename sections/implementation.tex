@@ -404,6 +404,27 @@ some internal thread identifier and possible mutex variables.
 
 \subsection{Scopes}
 
+Scopes are implemented as an array of key-value pairs that we call symbols, in
+which the key is a string and the value is a function pointer. Obviously, the
+value of a symbol should be an arbitrary type, as almost anything should be
+storable in a symbol, but so far we have only used scopes to implement the
+run-time library and thus have not made a generic symbol implementation. Name
+resolution in a scope is carried out by iterating the array of symbols and
+comparing names with the name that is being searched for. This is simple and
+inefficient but sufficient for small test programs.
+
+The obviously superior implementation would be a hash map, where a symbol's
+names is hashed into an integer and stored in an array indexed by the hashed
+value of the name. This requires an array that is as large as the output of the
+hash function which is likely to be unacceptable since most hash functions
+compute at least 32-bit meaning resulting in a 4.4 billion long array. Instead
+the desired size of array is chosen, $n$, and the hash keys are computed
+$\mod n$ to find the index. It is possible for two different names to have the
+same $\mod$'d value, called a collision. To mitigate this each entry in the
+array is a linked list of symbols that also stores the full hash value. As a
+result, if a collision occurs it is possible to iterate the linked list and find
+the symbol that matches the full hash.
+
 \subsection{Instructions}
 \label{sec:implementation:instr}
 \input{sections/implementation-instr}

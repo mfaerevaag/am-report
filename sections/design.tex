@@ -106,26 +106,37 @@ reason about a program's behavior. It can lead to unwanted or unexpected results
 because the programmer has to be very careful not to use identical names in
 different locations that might be evaluated in the same execution
 context. Lexical scoping makes it easier to figure out what a program will do
-and harder to shoot yourself in the foot. Dynamic scoping has more or less
-disappeared from language implementation\cite{cse341}.
+and harder to shoot yourself in the foot. While dynamic scoping has more or less
+disappeared from modern language implementation\cite{cse341} it is still used in
+some places. An interesting example are C macros (and indeed macros in general)
+which do no form of resolution by themselves, it is essentially simple text
+replacement. Macros are a prime example of how dynamic scoping can be very
+useful, but also of the severe issues and frustration that it can cause.
 
 Scopes are usually organized in tree structures, where each scope has exactly
-one parent and zero or more children. Name resolution starts in the current
+one parent and zero or more children. Name resolution starts in one specific
 scope, and if a matching name is found then the value of the name is determined
 immediately. If the name was not found in the current scope then resolution
-continues in the scope's parent, repeatedly. This means that a name can be
-override, known as \textit{shadowing}, by a child scope by binding a value to a
-name that is also used by the parent scope.
+continues in the scope's parent, repeatedly. As a result a name can be override,
+known as \textit{shadowing}, by a child scope by binding a value to a name that
+is also used by the parent scope.
 
 \thename{} exposes run-time functions for managing scopes, more specifically
 pushing and popping them on demand. That means that by default a new scope is
 \textit{not} introduced when a sub-routine is invoked, compilers must handle
-this manually. This way a compiler is completely free to introduce scopes when
-it is required by the language specification. For instance, some languages
-introduce scopes in if-blocks (e.g. C) and some do not (e.g JavaScript), both of
-which are seamlessly supported. There is little to no performance overhead by
-manual scope management, because the internal procedures are exactly the same as
-if the machine would introduce scopes automatically.
+this manually. This way a compiler is completely free to introduce scopes
+according to the semantics of a language specification, and there is very little
+performance overhead by manual scope management; the internal procedures are the
+same as if the machine would introduce scopes automatically.
+
+Scopes can be used to as the means to implement various different language
+features. A global scope like C's or JavaScript's can be achieved simply by
+having all other scopes be children (or grand-children) of it. Module systems
+(think Java's \code{package} and \code{import}) can be constructed by combining
+multiple scopes into a larger context specific for each module. On a more
+detailed level C-like languages introduce new scopes in every block, usually
+marked with braces, such as if-statements, switch cases, function bodies, and so
+on.
 
 \subsection{Information Tables}
 
@@ -913,10 +924,6 @@ equal to the maximum case value, meaning that if there are just two cases, 1 and
 1000, then there will be 998 redundant bytes in the instruction, which is
 obviously unacceptable. In that case it will be a better choice to use a series
 of conditional branches.
-
-
-
-\subsection{Usage Examples}
 
 % local vars
 % sub-routines
