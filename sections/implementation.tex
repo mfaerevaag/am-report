@@ -351,6 +351,51 @@ a release build through the {\tt release} target.
 % \input{sections/implementation-execmodel}
 
 
+\subsection{Information Tables}
+\label{sec:implementation:infotables}
+The three information tables handled by \thename{} are all implemented in the
+most simplistic way possible, with the intention being; less is more. With that
+being said, this might not be as apparent with the meta table, than with the
+string- and constants table. As for the reasons explained in TODO.
+
+The constants- and string table are almost identical in implementation. They are
+both parsed from the executable file, where they are stored as static lists of
+elements. This means we can parse the size of each list and allocate internal
+arrays of the same size and type. The type for the internal string table will
+simply be a list strings, or rather {\tt char *}'s, as they are encoded as
+Modified UTF-8, which are null-byte terminated. As for the constants table, they
+are stored as simple arrays of bytes. It is the compilers job of keeping track
+of the bytes' encoding. Therefore, the same constant can be interpreted as
+different numbers, depending on the type it is expected to have.
+
+For parsing bytes to numbers, as signed and unsigned integers, and
+floating-point numbers, there are special utility functions located in the {\tt
+  byte.h} module. These are extensively tested for overflow, sign errors,
+endianness errors and other common pitfalls when decoding numbers to C's
+built-in types. In total there are 26 unit tests, all located in the module's
+respective test suite, found in {\tt test/byte\_test.c}. The test suite are kept
+dry by using macros to generate tests for a multiple of edge cases. For more
+information on how we decode more complex encoding, as floating-point precision
+numbers, see section~\ref{sec:implementation:meta:types}.
+
+Each element in the constants- and string table are parsed lazily. If we were to
+parse both tables on initialization, it would create an undesirable overhead,
+depending on their size. To encapsulate this, each table has lookup function
+which checks if the element on the given index is {\tt NULL}, in which case it
+is first parsed from the executable and stored in the internal table. Due to the
+fact that we did not have time to finish the assembler, the data not currently
+being parsed from the executable, but rather taken from hardcoded test data. The
+interface is on the other hand is set, encapsulating the code which needs to be
+changed.
+
+The metadata table is a little more complex and therefor requires a more complex
+implementation. This is due to the design of the meta information system,
+explained in section~\ref{sec:implementation:meta}. Unfortunately, due to the
+same reasons as with the constant and string tables, this has not been
+implemented. Also, as with above, the interface is, it just returns hardcoded
+test data instead of parsing anything from an executable.
+
+
 \subsection{Heap Objects}
 
 
