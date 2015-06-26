@@ -1,8 +1,3 @@
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: "../report"
-%%% End:
-
 It is not only for stack or heap elements which we need to store information
 about their type. Sub-routines and object fields also has type information which
 we need to keep track of, but the information is not the same. For instance, a
@@ -209,3 +204,43 @@ occurs. There are though, separate instruction for saturated arithmetic
 operations, where overflow is handled by saturating the number of the given
 type. For instance, converting {\tt 0xFFFF} of type {\tt Int16} to {\tt Int8}
 will become {\tt 0xFF}.
+
+
+\subsubsection{Fields}
+% meta data
+% described by composite member
+% has name, type, offset
+
+Field is also a type of meta data, describing a member of a {\tt Composite}
+type, in the form of field definition. It is important to note that fields are
+not types them selves, like {\tt Composite} is, but a meta element describing a
+field definition. Consequently, a field definition has a type element describing
+the type the fields' content.
+
+The internal data representation of a field definition, is as all other meta
+types, an extension of the {\tt meta\_base} struct, giving it a type of meta, in
+the form of a tag, and a unique hash. The field definition struct, {\tt
+  meat\_field} extends this by adding a name, which is a index into the string
+table, an integer offset, which is the distance where its value is stores from
+the beginner of the heap object, and lastly a type. I addition to these it a has
+an arbitrary number of properties and versions, which is not yet
+implemented. The version element is to support dynamic languages (TODO) which
+can be extended or monkey patched, as Rubyists like to call it. Therefore, a
+number of similar fields can exist in memory, which are distinguished by
+version. % TODO
+\begin{ccode}
+struct meta_field_s {
+    meta base;
+
+    str_index name;
+    int offset;
+    type *type;
+
+    /* missing: props, versions */
+};
+\end{ccode}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../report"
+%%% End:
