@@ -121,7 +121,7 @@ are carried out, in order: %TODO
 \item Initialize global abstract machine state
   \begin{enumerate}
   \item Load byte code from the executable
-  \item Load and parse information tables %TODO not really
+  \item Load information tables %TODO not really
   \end{enumerate}
 \item Initialize root scope
   \begin{enumerate}
@@ -154,6 +154,8 @@ For ease of implementation we use the Getopt library~\footnote{Getopt (libc):
   \url{http://www.gnu.org/software/libc/manual/html_node/Getopt.html}}, included
 in C's Standard Library.
 
+%TODO args for the executable
+
 \subsubsection{Internal Error Handling}
 % Why
 % Error handler
@@ -184,12 +186,23 @@ With checks, errors can be invoked through a special logging macro {\tt
   log\_err}, described in the \nameref{sec:implementation:core:debug} section
 below.
 
-\subsubsection{File Reading}
-The first thing the machine does upon start up is to load the executable
-file. This involves reading the file from disk and extracting the various parts defined
+\subsubsection{ELF File Loading}
+The first thing the machine does upon start up is to load the input file that is
+going to be executed. The current implementation does not read information
+tables which means that only the byte code is loaded. Information table entries
+can be hardcoded into the system easily, which is what we have done for testing
+purposes.
 
- various parts of the executable
-file into memory.
+In the \code{loader} module, we use the library Libelf\footnote{libelf:
+  \url{https://directory.fsf.org/wiki/Libelf}} to parse and extract data from
+the input file. It provides the means to very easily parse ELF files and search
+through segments and sections, making the process of byte code loading quite
+simple indeed. The file is verified to be a valid, parsable ELF file before
+beginning any data extraction. Libelf exposes a function a to get the section
+following another by use of which the sections are iterated. We need to extract
+the data of the \code{.text} section which is where the byte code is stored in
+its entirety. Thus for each section we simply check its name and if it matches
+we copy the bytes from the section into the abstract machine state's code field.
 
 \subsubsection{Instruction Cycle}
 % general loop (check with whats in design)
@@ -389,8 +402,6 @@ some internal thread identifier and possible mutex variables.
 \subsection{Instructions}
 \label{sec:implementation:instr}
 \input{sections/implementation-instr}
-
-\subsection{Binary file}
 
 \subsection{Analysis}
 % Valgrind
