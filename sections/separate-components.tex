@@ -147,8 +147,33 @@ at run-time. The verifier must thus do ``what it can'', and remaining mismatched
 types will result in run-time errors.
 
 
-\subsection{Assembler}
-% TODO
+\subsection{Assembler and Linker}
+
+The assembler and linker will be implemented through porting (TODO: define?)
+parts of the GNU Toolchain. The necessary components are the GNU
+Assembler~\cite{gnu:as}, {\bf as}, commonly known as GAS, and the GNU Linker,
+{\bf ld}~\cite{gnu:ld}. These ports are not yet finished, and are therefore not
+yet used in the machine.
+
+A linker combines several compiled object files into a single binary file,
+executable by \thename{}. This often occurs as the last step of the compilation
+process, where each file are compiled separately and finally linked together
+with a linker. {\bf ld} is the standard linker for GCC, TODO.
+
+The GNU Assembler is actually a family of assemblers, supporting many
+front-ends, or languages. Many other assemblers needs to pass over the source
+code multiple times to be able to produce a valid output, while {\bf as} was
+designed to do assemble in a single pass. This makes for a more complex assembly
+process, but in turn removes the overhead of passing over the source code
+multiple times.
+
+The reason for choosing to port new implementation of both of these components
+is to make use of their arguably, good performance and
+configurability~\cite{NEEDED}. Creating something new from scratch would have
+taken a significant amount of time to be able to create something that could
+even compare in performance.
+
+% TODO: more
 
 
 \subsection{Byte Code Optimizer}
