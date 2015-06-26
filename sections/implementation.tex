@@ -121,7 +121,7 @@ are carried out, in order: %TODO
 \item Initialize global abstract machine state
   \begin{enumerate}
   \item Load byte code from the executable
-  \item Load and parse information tables
+  \item Load and parse information tables %TODO not really
   \end{enumerate}
 \item Initialize root scope
   \begin{enumerate}
@@ -185,8 +185,11 @@ With checks, errors can be invoked through a special logging macro {\tt
 below.
 
 \subsubsection{File Reading}
-The first thing the machine does upon start up is to load various parts of the
-executable file into memory. %TODO
+The first thing the machine does upon start up is to load the executable
+file. This involves reading the file from disk and extracting the various parts defined
+
+ various parts of the executable
+file into memory.
 
 \subsubsection{Instruction Cycle}
 % general loop (check with whats in design)
