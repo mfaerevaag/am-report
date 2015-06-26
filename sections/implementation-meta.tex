@@ -211,7 +211,7 @@ will become {\tt 0xFF}.
 % described by composite member
 % has name, type, offset
 
-Field is also a type of meta data, describing a member of a {\tt Composite}
+Fields are also a type of meta data, describing a member of a {\tt Composite}
 type, in the form of field definition. It is important to note that fields are
 not types them selves, like {\tt Composite} is, but a meta element describing a
 field definition. Consequently, a field definition has a type element describing
@@ -222,13 +222,13 @@ types, an extension of the {\tt meta\_base} struct, giving it a type of meta, in
 the form of a tag, and a unique hash. The field definition struct, {\tt
   meat\_field} extends this by adding a name, which is a index into the string
 table, an integer offset, which is the distance where its value is stores from
-the beginner of the heap object, and lastly a type. I addition to these it a has
-an arbitrary number of properties and versions, which is not yet
-implemented. The version element is to support dynamic languages (TODO) which
-can be extended or monkey patched, as Rubyists like to call it. Therefore, a
-number of similar fields can exist in memory, which are distinguished by
-version. % TODO
-\begin{ccode}
+the beginner of the heap object, and lastly a type describing its content. I
+addition to these it a has an arbitrary number of properties and versions, which
+is not yet implemented. The version element is to support dynamic languages
+(TODO) which can be extended or monkey patched, as Rubyists like to call
+it. Therefore, a number of similar fields can exist in memory, which are
+distinguished by version. % TODO
+\begin{ccode} % TODO: update
 struct meta_field_s {
     meta base;
 
@@ -239,6 +239,24 @@ struct meta_field_s {
     /* missing: props, versions */
 };
 \end{ccode}
+
+A field can be defined with set of properties, modifying its
+functionality. Such properties are {\em abstract}, where the field is not
+actually initialized, only declared. This is useful for languages with
+interfaces or abstract methods, akin to Java's abstract classes and methods
+where another class can extends the abstract class, implementing its already
+defined fields and methods.
+
+Another property is {\em final}, where the the specific content of the field
+cannot be changes. If the content is a reference, for instance, the reference
+will always be the same, but the value of reference may still be mutated (TODO:
+correct?).
+
+The last property is {\em strict layout}, where the value of the field is
+guaranteed to be placed directly preceding to the field definition on the
+heap. This enabled the compiler to the {\tt offset} element to reference the
+content of the field. This is though considered unsafe, and thus the instruction
+must be prefixed with the {\tt unsafe} flag.
 
 %%% Local Variables:
 %%% mode: latex
