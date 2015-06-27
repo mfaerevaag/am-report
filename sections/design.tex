@@ -35,9 +35,14 @@ memory region where data is stored and modified by use of references. It is
 managed fully by the garbage collector, which means that all allocations and
 deallocations are made through an interface. Internally the garbage collector is
 regarded as a ``black box'', meaning that no assumptions to its inner workings
-are made, and it is assumed to efficiently free unused memory when possible.
-%TODO garbage collector details (the interface)
-The object model defines how objects are layed out in heap and how their content
+are made, and it is assumed to efficiently free unused memory when possible. The
+only exception to this is that the object model defines a sub-routine on heap
+object called \code{finalize} which is called before the garbage collector frees
+the objects memory. It is used for an object to be able to properly free any
+resources it might be using, such as open files or network connections, and is
+directly analogous to C++'s destructor method on classes.
+
+The object model defines how objects are laid out in heap and how their content
 is described by the type system. \thename{} uses a simple but very flexible
 object model. The general idea is that a heap object is described by the
 \code{Composite} type which is capable of expressing arbitrarily complex data
@@ -47,13 +52,8 @@ provide language implementations the means to associate some arbitrary
 information to objects. It could used for any kind of metadata storage,
 implementation of class methods, polymorphism, etc.
 
-%TODO the figure is outdated. again.
-\begin{figure}[H]
-  \centering
-  \input{figures/heap-object-layout}
-  \caption{Heap object memory layout}
-  \label{fig:design:heap-object-layout}
-\end{figure}
+
+
 
 \subsection{Execution Model}
 \label{sec:design:exec}
