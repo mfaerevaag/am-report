@@ -39,14 +39,16 @@ access to the {\tt type} referenced described below.
 We will describe each type of meta information in turn.
 
 \subsubsection{Types}
-The executable file, containing the program to be run, declares a type table for
-the custom types created by the program. Through out the executable, these types
+The executable file, containing the program to be run, defines a type table for
+the custom types created by the program. Throughout the executable, these types
 are referenced through the type's index in this table. This table is static, so
 the machine can analyze how many types it contains. The types will be parsed
-from the executable and added to the global meta table lazily. This reduces
-the initial overhead of parsing the executable.
+from the executable and added to the global meta table lazily. This reduces the
+initial overhead of parsing the executable and avoids loading types that will
+not be used during run-time.
 
-The machines built-in types are described by a type tag, implemented as an enum:
+The machine's built-in types are described by a type tag, implemented as an enum:
+
 \begin{ccode}
 enum type_tag_e {
     ACTIVATION_ELEMENT = 0,
@@ -58,14 +60,17 @@ enum type_tag_e {
 };
 typedef enum type_tag_e type_tag;
 \end{ccode}
-The enums integer value is used to describe its index in the meta table. There
-will always only be {\it one} instance of each type, so two equal types can
-never be referenced by two different pointers. This invariant lets the machine
-check type equality through comparing the type pointers.
 
-More specifically, all types in the machine is stored internally through
+The enum's integer value is used to describe its index in the meta table. There
+will always only be a single instance of each type, so two equal types can never
+be referenced by two different pointers, similar to how DWARF types are stored
+(as described in Section~\ref{sec:design:types:dwarf}). This invariant lets the
+machine check type equality simply by comparing the type pointers.
+
+More specifically, all types in the machine are stored internally through
 structs. Simple types implement the {\tt type\_base} struct, which is extended
 in composite types. For instance, a reference is represented as:
+
 \begin{ccode}
 struct type_base_s {
     type_tag tag;
@@ -81,12 +86,12 @@ typedef struct type_ref_s type_ref;
 \end{ccode}
 
 All types are always passed around in the machine through the {\tt type}
-name. If the type is for instance a reference, i.e. implementing the {\tt
+name. If the type is for instance a reference, i.e.~implementing the {\tt
   type\_ref}, it is cast so its reference specific attributes can be
 referenced. The type of type is checked through the tag, defined in {\tt
   type\_base}. Another important entry in the type structure is the size
 attribute. This is essential, as it tells the machine how much memory is needed
-to store its value on either the stack or heap.
+to store a value of that type on either the stack or heap.
 
 Types from the executable are mapped from its index in the binary type table to
 the machines meta table. As the executable meta table is of static size, this
@@ -97,10 +102,10 @@ table, it is parsed and stored in the machine's meta table.
 
 The machines internal meta table is implemented through a hash map, where each
 meta entry can be looked up through it's hashed value. Having implemented the
-meta table implemented as a hash table let's us lookup entries in constant time,
-removing overhead from iterating. The only requirement of the hashing function
-is that it makes unique hashed for meta entry that are equal. This is currently
-done with a simple implementation of Bob Jenkins' On-at-a-time
+meta table as a hash table lets us lookup entries in constant time, removing
+overhead from iterating. The only requirement of the hashing function is that it
+makes unique hashed for meta entry that are equal. This is currently done with a
+simple implementation of Bob Jenkins' One-at-a-time
 hash~\footnote{\url{https://en.wikipedia.org/wiki/Jenkins_hash_function\#one-at-a-time}}. We
 have chosen this hash function due to relatively good speed and uniqueness,
 compared to more complex hashing functions. Bob Jenkins himself has written
@@ -112,6 +117,7 @@ a lazy function which will generate the new meta entry if not found. This is
 especially useful for looking up types, not guaranteed to already be found in
 the meta table.
 
+%TODO: this should be under instructions?
 When trying to box a stack element trough the {\tt box} instruction, the top
 element is popped off the stack and stored on the heap. An element with a
 reference to the heap object is in turn pushed to the stack. The type of the new
@@ -119,20 +125,42 @@ element will be a {\tt Reference<t>} type, where {\tt t} is the type of the
 stack element which was boxed. If this type is not found in the meta table
 already it is generated at run-time.
 
-Composite types are made through (TODO).
+% TODO: removed since it's discussed under type lattice. vale?
+% Most types can be converted, with some exceptions (TODO signature type). If a
+% value is converted to a type with smaller size, for instance an {\tt Int32} to
+% {\tt Int8}, the value is truncated (TODO exception)?
 
-Most types can be converted, with some exceptions (TODO signature type). If a
-value is converted to a type with smaller size, for instance an {\tt Int32} to
-{\tt Int8}, the value is truncated (TODO exception)?
+% TODO: move along?
+% All types are garbage collected. This means, when a type is no longer used by
+% the program, it's memory is freed. (TODO)
 
-All types are garbage collected. This means, when a type is no longer used by
-the program, it's memory is freed. (TODO)
+% TODO how to structure this?
 
-% floats
+\subsubsection{Composite Types}
+
+Composite types are used to describe heap objects, stack objects and
+scopes. They consist of a name and a set of members which are implemented as an
+array of pointers to meta data entries which must be either fields or
+sub-routines. Members are looked up during run-time by use of a meta data entry
+that describes the field or sub-routine. The idea is that a heap object's (or
+stack object's or scope's) associated type includes the members, so modification
+of the heap objects actual data is possible by providing the definition of the
+desired member that maps to a field or sub-routine. See
+Section~\ref{implementation:meta:fields}
+and~\ref{implementation:meta:sub-routines} for details of how fields and
+sub-routines are used to modify a heap object.
+
+The list of members is dynamic meaning that members can be added
+or removed during run-time. This is a very useful feature for dynamic languages
+in which it is a common feature to be able to modify the list of properties on
+an object during run-time. The current implementation however does not support
+this, but would likely be implemented via run-time library functions.
+
+\subsubsection{Floating Point Value Types}
 
 When handling floating point precision numbers we will, as aforementioned, use
 the IEEE 754 standard~\cite{ieee754}. This is a technical standard defining the
-arithmetic format, i.e. the finite range and special values, rounding rules,
+arithmetic format, i.e.~the finite range and special values, rounding rules,
 operations, exception handling and interchange formats. Its values include
 finite numbers (within a certain maximum or minimum, depending on the size), two
 infinities (plus and minus) and a NaN (not a number).
@@ -207,6 +235,7 @@ will become {\tt 0xFF}.
 
 
 \subsubsection{Fields}
+\label{implementation:meta:fields}
 % meta data
 % described by composite member
 % has name, type, offset
