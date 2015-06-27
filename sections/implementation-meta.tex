@@ -312,9 +312,9 @@ execution continues as before, meaning that the semantics from the running
 program's point of view are identical to that of usual sub-routines. The machine
 distinguishes between run-time sub-routines and normal ones by their name;
 language implementations are required to mangle the names of all symbols
-(i.e.~field, subroutines and type names) and prepend them with the ``_''
+(i.e.~field, subroutines and type names) and prepend them with the ``\_''
 characters. Upon invocation, if the name of the sub-routine does not start with
-``_'' then it is dispacted as a run-time function and if not it is
+``\_'' then it is dispacted as a run-time function and if not it is
 
 The arguments that are accepted by a sub-routine are defined in its metadata
 entry, but are currently not implemented. They would be used to verify that the
