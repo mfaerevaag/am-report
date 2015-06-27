@@ -398,6 +398,25 @@ test data instead of parsing anything from an executable.
 
 \subsection{Heap Objects}
 
+\thename{} treats heap object as simple chunks of bytes, allocated and tracked
+by the garbage collector. The only meta information a heap objects has a simple
+type pointer, describing the type of its content, and in therefore the size. To
+make the internal data representation able to hold objects of different sizes,
+the content of the object is implemented with a flexible array (TODO: new
+term?). Here the last element in the internal struct is an empty array, just
+used a reference, or handle, to the location of the data.
+
+The garbage collector is responsible for making sure the following memory is
+already allocated and is large enough to hold the value of its given type. As
+explained later in section~\cite{sec:separate-components:gc}, the garbage
+collector has a set interface, separated from the actual implementation. With
+this encapsulation, only a type is needed to get a reference to an allocated
+piece of memory with the appropriate size.
+
+Heap objects are referenced through the {\tt Ref<t>}, where {\tt t} is the type
+of the object's content. There are special instruction for creating heap
+objects, where {\tt box} is one of them. TODO: explained elsewhere?
+
 
 \subsection{Threading}
 % Abstraction
