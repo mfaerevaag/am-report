@@ -95,6 +95,7 @@ caller, and further does not require any dedicated instructions for returning
 values.
 
 \subsection{Scopes}
+\label{sec:design:scopes}
 
 At its core, a scope is simply a mapping from names to values that define the
 bindings available at any given point during execution. The available bindings
@@ -923,6 +924,17 @@ equal to the maximum case value, meaning that if there are just two cases, 1 and
 1000, then there will be 998 redundant bytes in the instruction, which is
 obviously unacceptable. In that case it will be a better choice to use a series
 of conditional branches.
+
+\subsection{Run-Time Library}
+
+The \thename{} run-time provides a set of functions for various purposes,
+together known as a run-time library. It can be difficult to decide whether
+functionality should be exposed via run-time functions or dedicated
+instructions, but the general criteria is that functionality that is
+``higher-level'' or more rarely used should be available through the run-time
+library rather than instructions. Run-time functions are invoked in the same way
+as user-defined sub-routines so compilers do not have to take special measures
+and distinguish between them.
 
 % local vars
 % sub-routines

@@ -474,6 +474,14 @@ the symbol that matches the full hash.
 \label{sec:implementation:instr}
 \input{sections/implementation-instr}
 
+\subsection{Run-Time Library}
+
+The run-time library is implemented in the \code{runtime\_lib} module as a
+collection of functions, one for each available run-time function. There are
+currently two functions available namely \code{push\_scope} and \code{iprint}
+which pushes a scope onto the current one and prints an integer value from the
+stack, respectively.
+
 \subsection{Testing}
 \input{sections/implementation-testing}
 
