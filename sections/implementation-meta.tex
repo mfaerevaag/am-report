@@ -258,15 +258,15 @@ is not yet implemented. The version element is to support dynamic languages
 (TODO) which can be extended or monkey patched, as Rubyists like to call
 it. Therefore, a number of similar fields can exist in memory, which are
 distinguished by version. % TODO
+
 \begin{ccode} % TODO: update
 struct meta_field_s {
     meta base;
 
     str_index name;
     int offset;
-    type *type;
 
-    /* missing: props, versions */
+    type *type;
 };
 \end{ccode}
 
@@ -287,6 +287,34 @@ guaranteed to be placed directly preceding to the field definition on the
 heap. This enabled the compiler to the {\tt offset} element to reference the
 content of the field. This is though considered unsafe, and thus the instruction
 must be prefixed with the {\tt unsafe} flag.
+
+\subsubsection{Sub-routines}
+
+The last kind of metadata is a sub-routine which defines an executable set of
+instructions. It is similar to a function (as in C), with the exception that a
+sub-routine does not return a value. Rather, as described in
+Section~\ref{sec:design:exec:sub-routine}, a sub-routine can modify values by
+reference or by modifying stack elements upward into the stack, outside its own
+stack frame.
+
+A sub-routine defines a low-address which is the entry point of execution upon
+invocation, and a high-address which is the the last instruction belonging to
+it, together defining the address bounds of the sub-routine. Branching
+instructions are not allowed to target addresses outside the bounds of the
+currently executing sub-routine because it can be a security risk to execute
+arbitrary code. This becomes an issue when linking multiple executables which
+are ignorant of each others program data.
+
+A special type of sub-routine are those defined by the run-time. Instead of
+using a byte code address, they are current hardcoded into the machine and are
+invoked via a C function pointer. The run-time function is executed and then
+execution continues as before, meaning that the semantics from the running
+program's point of view are identical to that of usual sub-routines.
+
+The arguments that are accepted by a sub-routine are defined in its metadata
+entry, but are currently not implemented. They would be used to verify that the
+type of the elements currently on the stack align with the types of arguments,
+and if not throw an exception.
 
 %%% Local Variables:
 %%% mode: latex

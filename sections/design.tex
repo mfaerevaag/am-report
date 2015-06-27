@@ -56,6 +56,7 @@ implementation of class methods, polymorphism, etc.
 \end{figure}
 
 \subsection{Execution Model}
+\label{sec:design:exec}
 
 The model of execution defines how, where and by whom code is executed during
 run-time. All code in \thename{} is executed in the context of a thread (details
@@ -66,6 +67,7 @@ ignore them and run everything in a single thread without having to worry about
 creating and destroying threads.
 
 \subsubsection{Sub-routines and Calling Convention}
+\label{sec:design:exec:sub-routine}
 
 A sub-routine is a set of instructions that can be executed, or invoked, as a
 group from another instruction, in our case the \code{invoke} family of
