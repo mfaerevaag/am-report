@@ -250,25 +250,56 @@ performance is difficult to say. We have not encountered major issues with how
 the modules interoperate.
 
 \subsection{Code Analysis}
-\subsubsection{Code size (SLOC)}
-\subsubsection{Architectural analysis}
-\subsubsection{Readability, maintainability}
+
+Another side of code evaluation is to view the source code from a macro
+perspective, including trivial things such as counting source lines of code
+(SLOC) and looking at the number of comments per line of
+code. Figure~\ref{fig:eval:sloc} shows the division of code in the source
+directory and in the tests. The amount of source code is well correlated with
+the amount of work performed by each module. The test SLOC are not proportional
+to the amount of code in the corresponding module because some algorithms
+require much more extensive unit tests than others. For instance the type
+conversion algorithms must cover almost all different combinations of types
+which results in extensive tests.
+
+\begin{figure}
+  \centering
+  \scalebox{0.8}[0.7]{\input{figures/sloc}}
+  \caption{SLOC in \thename{}}
+  \label{fig:eval:sloc}
+\end{figure}
+
+The overall architecture has proved itself to be a well suited design that
+allowed us to modify functionality, even larger non-trivial changes, without
+causing significant trouble or breaking other parts of the system. The division
+of modules and their responsibilities was largely based on intuitive decisions
+about what categories of functionality were needed. That said, there is room for
+improvement in several areas of the system. The instruction execution module has
+become large and to some extent unwieldy, and should optimally be split into
+smaller sub-modules each implementing a specific family or type of
+instructions. There are some repeating patterns of code that we have so far kept
+DRY\footnote{``Don't Repeat Yourself''} by use of macros making it difficult to
+maintain, reason about and debug and would be better off implemented by
+combining smaller and more concise functions.
+
+We have strived to keep the code readable and easy to digest and believe we have
+succeeded in this. However, as we have optimized the code, some algorithms have
+become more complex and difficult to grasp at first sight, but that is something
+we find unavoidable to some extent.
+
 \subsubsection{Tests, coverage}
-\subsubsection{Configurability (macros)}
+
+
 
 \subsection{Documentation}
 
-Very brief doxy description
+The code is fairly well documented using Doxygen, which has been a help when
+reviewing and when continuing work on code written by the other. There are
+approximately 14 lines of comments for each 100 SLOC which should provide a
+decent amount of explanation.
 
-% Usage evaluation
-%% Have the problems been solved
-
-% Assembly generation
-%% Something about generating code for the machine
-
-% Performance
-%% Function calls
-%% Analysis
+Appendix~\ref{NEEDED} documents how to compile and run the machine on a Unix
+system.
 
 % Future development
 %% What's missing
