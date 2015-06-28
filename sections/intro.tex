@@ -20,7 +20,7 @@ some insist on procedural languages, the rest on something in between. Each
 require distinct and often very complex implementations that are inherently
 difficult to optimize and evolve as the feature sets expand. Static or dynamic
 typing is another question that divides people that of like pineapple on
-pizza. Strong arguments exist for both and it often comes down to a matter of
+pizza; strong arguments exist for both and it often comes down to a matter of
 taste and preference.
 
 Intrinsic to a language is a platform on which to be executed, be it a desktop
@@ -38,8 +38,8 @@ machines are becoming increasingly relevant to modern computer science.
 
 In brief, an abstract machine relieves language creators of the burden of
 architecture specific implementation. By providing a unified platform they
-abstract away the underlying hardware specifics and can moreover provide a
-higher level of expressiveness than the bare-metal counterpart.
+abstract away the underlying hardware specifics and can provide a higher level
+of expressiveness than the bare-metal counterpart.
 
 There are many abstract machines available today, and several are industrial
 strength systems that are in use on billions of devices. What they generally
@@ -80,7 +80,8 @@ full specification as is found in Appendix~\ref{sec:appendix:spec} is not
 implemented. The Design chapter (Section~\ref{sec:design}) presents a lot of
 knowledge both for abstract machines in general and specific to \thename{}, not
 all of which is implemented. However, everything presented in Implementation
-chapter (Section~\ref{sec:implementation}) has been developed.
+chapter (Section~\ref{sec:implementation}) has been developed unless otherwise
+noted.
 
 \subsection{Structure of the report}
 
@@ -93,11 +94,10 @@ problems we believe it solves. Section~\ref{sec:implementation} describe the
 actual implementation of the machine and how we have dealt with various issues
 through process.
 
-Section~\ref{sec:evaluation} and~\ref{sec:further-development} evaluates
-the status of the project and discusses what the next steps towards a better
-product are.
+Section~\ref{sec:evaluation} evaluates the status of the project and presents
+some code analysis as well as benchmarking data.
 
-Some related work from which we have drawn inspiration is presented in
+Related work from which we have drawn inspiration is presented in
 Section~\ref{sec:related-work} and finally Section~\ref{sec:project-management}
 describe how we have managed the project, both technically and personally.
 
