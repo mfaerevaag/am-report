@@ -118,7 +118,7 @@ The result can be seen in the seen below, in
 figure~\ref{fig:eval:benchmark:stack}.
 \begin{figure}[H]
   \centering
-  \scalebox{0.8}[0.7]{\input{figures/stack}}
+  \scalebox{0.8}[0.6]{\input{figures/stack}}
   \caption{Mean running time of the stack workout}
 \label{fig:eval:benchmark:stack}
 \end{figure}
@@ -134,12 +134,13 @@ To benchmark recursion we have chosen to implement the classic Fibonacci
 function, defined as $Fn = F_{n-1} + F_{n-2}$ with the seed values of $F_0 = 0$
 and $F_1 = 1$. The function makes two recursive calls to itself per value of
 $n$, creating a recursion tree of depth $n$, with the leafs being seed
-values. Intuitively we know this creates the exponential running of $O(2^n)$,
-which could be proved by induction. The benchmark result is shown below, in
+values. Intuitively, we know this creates the exponential running of $O(2^n)$,
+which could be proved by induction. We will not include the proof here, as it is
+out the scope of this discussion. The benchmark result is shown below, in
 figure~\ref{fig:eval:benchmark:fib}.
 \begin{figure}[H]
   \centering
-  \scalebox{0.8}[0.7]{\input{figures/fib}}
+  \scalebox{0.8}[0.6]{\input{figures/fib}}
   \caption{Mean running time of $F(n)$}
 \label{fig:eval:benchmark:fib}
 \end{figure}
@@ -147,8 +148,10 @@ figure~\ref{fig:eval:benchmark:fib}.
 The graph shows the $F_n$ on x-axis and mean mean time on the y-axis. When
 analyzing the results, \thename{} are much closer to the performance of JVM. It
 is important to note that these are all naive implementations with no
-optimizations such as tail-recursion, which would have an significant impact on
-the running time.
+optimizations, such as tail-recursion, which would have a significant positive
+impact on the running time. We have noted a little bump in \thename{}'s
+execution time with $n = 0$, which is also noticeable in the graph. This is most
+likely caused by a bug, which we have not had the time to look further into.
 
 % invocation
 
@@ -156,13 +159,13 @@ The sub-routing benchmark is implemented in a similar fashion as the stack
 workout program, only the calculation is performed in a sub-routine which is
 invoked each iteration. All the stack operations done in the sub-routine in
 executed in constant time, which given the resulting running time of
-$T(n) = O(n) * k * O(1) = O(n)$, where $k$ is the number of stack
+$T(n) = O(n) \cdot O(k) = O(n)$, where $k$ is constant the number of stack
 operations. For invoking the sub-routine we use the \instr{invoke} instructions,
 while CLR uses {\tt call} and JVM uses {\tt invokestatic}. The result of the
 benchmark can be seen below, in figure~\ref{fig:eval:benchmark:invoc}.
 \begin{figure}[H]
   \centering
-  \scalebox{0.8}[0.7]{\input{figures/invoc}}
+  \scalebox{0.8}[0.6]{\input{figures/invoc}}
   \caption{Mean running time of sub-routine workout}
 \label{fig:eval:benchmark:invoc}
 \end{figure}
@@ -176,12 +179,12 @@ The last benchmark focuses on field operations on heap objects, namely the
 this by initially creating an instance of a simple heap object with a single
 integer field. It then does $n$ iterations of pushing it's field to the stack,
 incrementing it and popping it back to the heap object. The running time becomes
-the same as the sub-routine benchmark; $T(n) = O(n) * k * O(1) = O(n)$, where
-$k$ is the number of stack operations. The result of the
+the same as the sub-routine benchmark; $T(n) = O(n) \cdot O(k) = O(n)$, where
+$k$ is the constant number of stack operations. The result of the
 benchmark can be seen below, in figure~\ref{fig:eval:benchmark:heap}.
 \begin{figure}[H]
   \centering
-  \scalebox{0.8}[0.7]{\input{figures/heap}}
+  \scalebox{0.8}[0.6]{\input{figures/heap}}
   \caption{Mean running time of heap workout}
 \label{fig:eval:benchmark:heap}
 \end{figure}
@@ -348,7 +351,7 @@ figure~\ref{fig:eval:benchmark:jit}.
 
 \begin{figure}[H]
   \centering
-  \scalebox{0.8}[0.7]{\input{figures/jit}}
+  \scalebox{0.8}[0.6]{\input{figures/jit}}
   \caption{JIT comparing on JVM}
 \label{fig:eval:benchmark:jit}
 \end{figure}
