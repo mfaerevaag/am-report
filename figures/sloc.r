@@ -40,12 +40,12 @@
 
 require(tikzDevice)
 
-## tikz("./sloc.tex")
+tikz("./sloc.tex")
 
-par(mfrow=c(2,2))
+par(mfrow = c(2,1))
 
-rad <- 0.9
-cx <- 0.8
+rad <- 1.0
+cx <- 1.0
 
 slices <- c(541, 1030, 564, 340, 217, 190, 1170, 743)
 lbls <- c("engine+rtl", "instructions", "am", "stack", "thread", "gc+loader", "info tables+types", "utils and debuggin")
@@ -67,7 +67,7 @@ pie(slices, labels = lbls, main="SLOC per module", radius = rad, cex = cx)
 ## 2941 total
 
 slices <- c(446, 201, 894, 456, 102, 94,  258, 143, 227, 120 )
-lbls <- c("am_test", "byte_test", "instruction_test", "math_util_test", "meta_test", "scope_test", "stack_test", "thread_test", "type_conversion_test", "type_lattice_test")
+lbls <- c("am\_test", "byte\_test", "instruction\_test", "math\_util\_test", "meta\_test", "scope\_test", "stack\_test", "thread\_test", "type\_conversion\_test", "type\_lattice\_test")
 pie(slices, labels = lbls, main="Testing SLOC per module", radius = rad, cex = cx)
 
-## dev.off()
+dev.off()
