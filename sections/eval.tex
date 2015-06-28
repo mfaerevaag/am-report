@@ -93,7 +93,7 @@ processes running on the host machine, we run the each benchmark of each machine
 over several rounds. From this we can calculate the mean time for each
 parameter.
 
-For our micro benchmarks we have picked five different cases we wish to
+For our micro benchmarks we have picked four different cases we wish to
 test. These include stack operations, recursion, sub-routine invocation and
 field operations on heap object. We will go each in turn, analyzing the results.
 
@@ -119,14 +119,20 @@ figure~\ref{fig:eval:benchmark:stack}.
 \begin{figure}[H]
   \centering
   \scalebox{0.8}[0.6]{\input{figures/stack}}
-  \caption{Mean running time of the stack workout}
+  \caption{Mean running time of the stack workout.}
 \label{fig:eval:benchmark:stack}
 \end{figure}
 
-The graph's y-axis is the mean value of the time over all rounds. The x-axis
-holds the start parameter on a logarithmic scale. We can clearly see all
-machines JVM and CLR performing better than \thename{}. This means TODO
-dark-side
+The graph's y-axis is the mean value of time spent during all rounds and the
+x-axis represents the iterations of the stack routine performed. Due to the
+x-axis being logarithmic, it may immediately seem that the results are fairly
+close, but there is actually a vast difference in performance. Both JVM and CLR
+are about two orders of magnitude faster than \thename{} for all
+$n>10^6$. Interestingly however, \thename{} is faster up until that point, which
+suggests that JVM and CLR are either using special techniques for extremely
+stack heavy programs or that they spend a significant amount of time to start up
+the machinery. We are inclined to believe that the latter is the cause because
+it is true for the remaining test cases as well.
 
 % fibonacci
 
@@ -279,6 +285,7 @@ tenth of the total CPU resources. It was indeed not optimally
 implemented; Listing~\ref{lst:eval:gprof-pre} and~\ref{lst:eval:gprof-post}
 shows the specific code before and after optimization.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[language={[ANSI]C},%
   caption={The function \code{bytes2int} before optimization.},%
   label={lst:eval:gprof-pre}]
@@ -302,6 +309,7 @@ case 8: return __builtin_bswap64(*(int64_t*)bytes);
 default: return 0;
 }
 \end{lstlisting}
+\end{minipage}
 
 The optimized version of the function clocked in at the much better 1.4\% CPU
 time. Using this technique of measuring, pinpointing, patching and measuring
