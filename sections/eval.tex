@@ -94,17 +94,28 @@ over several rounds. From this we can calculate the mean time for each
 parameter.
 
 For our micro benchmarks we have picked five different cases we wish to
-test. These include stack operations, recursion, sub-routine invocation, boxing
-and field operations on heap object. We will go each in turn, analyzing the
-results.
+test. These include stack operations, recursion, sub-routine invocation and
+field operations on heap object. We will go each in turn, analyzing the results.
 
 % stack
 
 To benchmark the stack we have made a simple program which essentially does a
 lot of stack operations. A simple way to achieve this was to take a large number
-and substitute one and stop ones it becomes zero. This requires many push and
-pop operations, giving the stack a good workout. The result can be seen in the
-seen below, in figure~\ref{fig:eval:benchmark:stack}.
+and substitute until it becomes zero. More specifically, we start by using
+\instr{pushLiteral} with the \instr{large} prefix to get a large number on the
+stack. We there after push the literal one, push the large number again with
+\instr{pushElement} and perform substitution with \instr{sub}. To store the
+result, we duplicate it and use \instr{storeElement} to overwrite the initial
+number. Lastly we check if the result is zero, in which case it is not, we
+branch back to the top, starting over. This induces 10 stack operation per
+iteration, plus the initial one, which equals $10n + 1$, where
+$n = 1\ ...\ (2^{31} -1)$, giving the complexity of $O(n)$. CIL does not have an
+\instr{storeElement} instruction, but achieves the same effect by storing the
+value in a local variable and then loading it again, done with {\tt stloc} and
+{\tt ldloc}.
+
+The result can be seen in the seen below, in
+figure~\ref{fig:eval:benchmark:stack}.
 \begin{figure}[H]
   \centering
   \scalebox{0.8}[0.7]{\input{figures/stack}}
@@ -113,14 +124,19 @@ seen below, in figure~\ref{fig:eval:benchmark:stack}.
 \end{figure}
 
 The graph's y-axis is the mean value of the time over all rounds. The x-axis
-holds the start parameter on a logarithmic scale. We can clearly see JVM and CLR
-performing better than \thename{}. This means TODO dark-side
+holds the start parameter on a logarithmic scale. We can clearly see all
+machines JVM and CLR performing better than \thename{}. This means TODO
+dark-side
 
 % fibonacci
 
 To benchmark recursion we have chosen to implement the classic Fibonacci
 function, defined as $Fn = F_{n-1} + F_{n-2}$ with the seed values of $F_0 = 0$
-and $F_1 = 1$. The result is shown below, in figure~\ref{fig:eval:benchmark:fib}.
+and $F_1 = 1$. The function makes two recursive calls to itself per value of
+$n$, creating a recursion tree of depth $n$, with the leafs being seed
+values. Intuitively we know this creates the exponential running of $O(2^n)$,
+which could be proved by induction. The benchmark result is shown below, in
+figure~\ref{fig:eval:benchmark:fib}.
 \begin{figure}[H]
   \centering
   \scalebox{0.8}[0.7]{\input{figures/fib}}
@@ -129,31 +145,49 @@ and $F_1 = 1$. The result is shown below, in figure~\ref{fig:eval:benchmark:fib}
 \end{figure}
 
 The graph shows the $F_n$ on x-axis and mean mean time on the y-axis. When
-analyzing the results, \thename{} are much closer to the performance of JVM. CIL
-are still betterrrr TODO
+analyzing the results, \thename{} are much closer to the performance of JVM. It
+is important to note that these are all naive implementations with no
+optimizations such as tail-recursion, which would have an significant impact on
+the running time.
 
 % invocation
 
-Sub-routines
+The sub-routing benchmark is implemented in a similar fashion as the stack
+workout program, only the calculation is performed in a sub-routine which is
+invoked each iteration. All the stack operations done in the sub-routine in
+executed in constant time, which given the resulting running time of
+$T(n) = O(n) * k * O(1) = O(n)$, where $k$ is the number of stack
+operations. For invoking the sub-routine we use the \instr{invoke} instructions,
+while CLR uses {\tt call} and JVM uses {\tt invokestatic}. The result of the
+benchmark can be seen below, in figure~\ref{fig:eval:benchmark:invoc}.
 \begin{figure}[H]
   \centering
   \scalebox{0.8}[0.7]{\input{figures/invoc}}
   \caption{Mean running time of sub-routine workout}
+\label{fig:eval:benchmark:invoc}
 \end{figure}
 
-% boxing
-
-Boxing
+The graph shows TODO.
 
 % heap objects
 
-Heap objects (w/ fields)
+The last benchmark focuses on field operations on heap objects, namely the
+\instr{pushFieldHeapObject} and \instr{popFieldHeapObject} instructions. It does
+this by initially creating an instance of a simple heap object with a single
+integer field. It then does $n$ iterations of pushing it's field to the stack,
+incrementing it and popping it back to the heap object. The running time becomes
+the same as the sub-routine benchmark; $T(n) = O(n) * k * O(1) = O(n)$, where
+$k$ is the number of stack operations. The result of the
+benchmark can be seen below, in figure~\ref{fig:eval:benchmark:heap}.
+\begin{figure}[H]
+  \centering
+  \scalebox{0.8}[0.7]{\input{figures/heap}}
+  \caption{Mean running time of heap workout}
+\label{fig:eval:benchmark:heap}
+\end{figure}
 
-\subsubsection{Comparison with Existing Systems}
+The graph shows TODO.
 
-``Indentical'' programs in JVM, CIL
-
-Tables, graphs
 
 \subsubsection{Memory Footprint}
 
