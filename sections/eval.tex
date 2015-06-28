@@ -336,7 +336,9 @@ right before the code is meant to be executed, hence the name just-in-time. The
 translated machine code can then be cached and reused. Therefore, if a function
 is called multiple times, the machine can save time by paying the overhead of
 translating it to machine code, but then saving time every time the same code is
-to be executed.
+to be executed. A challenge with JITing is balancing the overhead of translating
+to machine code versus the saved time during execution. This overhead of
+just-in-time compilation is called the `startup time delay`.
 
 In our earlier performance analysis, we have disabled all forms for such
 optimizations to make the execution process of the different machines as similar
@@ -351,7 +353,9 @@ figure~\ref{fig:eval:benchmark:jit}.
 \label{fig:eval:benchmark:jit}
 \end{figure}
 
-We can see the huge benefit JIT compilation TODO
+We can see the huge benefit JIT compilation TODO. Even with small numbers, we
+see that the statup time delay that occurs when using JIT is still outweighed
+by the faster execution time.
 
 \subsection{Code Analysis}
 
