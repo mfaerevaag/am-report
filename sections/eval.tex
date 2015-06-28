@@ -1,10 +1,51 @@
+There are many aspects to evaluation of a software project. In this section we
+cover the most important factors. First we asses whether the overall goal of the
+project has been reached, whether it solves the problems that we have
+addressed. Disregarding the intention of the project we then look at how it
+performs compared to other abstract machine implementation, namely JVM and
+CIL. We then look at the architectural design in retrospect and determines
+whether there were any fundamental design flaws that we would or should have
+differently. We then go into the technical details of the system and describe
+the process by which we have performed performance measurements and
+corresponding optimization.
+
 \subsection{Paradigm Support}
 
-% good for dynamic
-%% composite types are dynamic
-Functional and dynamic languages
+The initial goal of the project was to implement an abstract machine more
+suitable for modern language paradigms than the popular contemporary
+solutions. Contained in this is the obvious challenge of actually implementing
+an abstract machine from scratch with all the bells and whistles required.
 
-The groundwork is there, can primitives be used to make support?
+To begin with we would like to stress the fact that we did not design the
+specification for \thename{}. We have been in close collaboration with our
+advisor Sven Karlsson who have done the all the concrete writing of it.
+
+A fundamental aspect of the design of \thename{} is that it exposes primitives
+that a compiler can use to construct a run-time system suitable for the language
+at hand. We believe this has been accomplished to a large extent.
+
+The concept of an \code{AnyType} capable of expressing arbitrary values can make
+code generation for dynamic languages much easier because variables do not have
+to declare their type and because the type can change during run-time. Composite
+types are similarly dynamic in the sense that members can be added and removed
+on demand.
+
+One of the most powerful features of \thename{} is the fact that at its core it
+is very simple and flexible which makes it capable of expressing many language
+features by combining those building blocks in various ways. There are few
+restrictions as to how the primitives can be used.
+
+As for functional language support, the way sub-routines work could be a
+significant improvement. In JVM and CIL a sub-routine \emph{must} be attached to
+an object, but \thename{} allows sub-routines to exists by themselves and can be
+loaded and executed from anywhere. The execution context can be controlled by
+managing the use of scopes, something that the compiler is free to do how it
+sees fit.
+
+The current implementation is not mature enough to be a sensible target for code
+generation, but it does serve as a proof-of-concept that the fundamental ideas
+work and could be made production ready. A serious effort could result in a
+significant improvement to what is otherwise available.
 
 \subsection{Performance Analysis}
 
