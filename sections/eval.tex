@@ -8,22 +8,103 @@ The groundwork is there, can primitives be used to make support?
 
 \subsection{Performance Analysis}
 
+When analyzing performance, results are relative to other implementations, as
+this gives natural standpoint on what is considered good performance, and what
+is considered bad. In our case it would be natural to compare the performance of
+\thename{} to related work on stack based abstract machines. Here we have chosen
+the previously mentioned Java Virtual Machine and Microsoft's Common Language
+Runtime.
+
+To make the the results of such a comparison as valuable as possible, it is
+beneficial to focus on isolated parts, as there are many wheels turning in a
+such a big piece of software. If one casts the net to wide the comparing, it can
+be difficult to pin pointing the reasons for differences and similarities. Even
+though JVM and CLR are both stack machines, they have characteristics which
+distinguish them and makes to directly compare to each other, or \thename{} for
+that matter.
+
+We will therefore do out analysis through micro benchmarking. Opposed to
+benchmarking in general, micro benchmarking focuses on isolated components or
+specific functionality.
+
 \subsubsection{Micro Benchmarking}
 
-Heap objects (w/ fields)
+One way of creating benchmarks could be to write three programs, as similar as
+possible, in programming languages which each has a front-end for the given
+machine. For instance, we could write source code in Java to run on JVM and C\#
+to run on CLR. The problem with this is that we cannot be sure of what code
+the compiler produces. Two very similar programs in each of these two languages,
+could in theory be compiled to be run very differently. To address this
+challenge, we choose to disassemble the compiled to could to each of the
+machines intermediate language, which is Java Bytecode and CIL. From the
+disassembled version we can analyze which instructions each compiler chosen, and
+in the case where they differ, we can manually alter them and assemble them back
+to an executable.
+
+When having two executables, one for JVM and one for CLR, and a \thename{} test
+program, which we are satisfied with being as similar as possible, we are ready
+to generate some results. We have chosen to generate the result through
+automated shell scripts, timing the execution time for a set of parameters for
+each machine. To make sure we did not get sporadic results caused by other
+processes running on the host machine, we run the each benchmark of each machine
+over several rounds. From this we can calculate the mean time for each
+parameter.
+
+For our micro benchmarks we have picked five different cases we wish to
+test. These include stack operations, recursion, sub-routine invocation, boxing
+and field operations on heap object. We will go each in turn, analyzing the
+results.
+
+% stack
+
+To benchmark the stack we have made a simple program which essentially does a
+lot of stack operations. A simple way to achieve this was to take a large number
+and substitute one and stop ones it becomes zero. This requires many push and
+pop operations, giving the stack a good workout. The result can be seen in the
+seen below, in figure~\ref{fig:eval:benchmark:stack}.
+\begin{figure}[H]
+  \centering
+  \scalebox{0.8}[0.7]{\input{figures/stack}}
+  \caption{Mean running time of the stack workout}
+\label{fig:eval:benchmark:stack}
+\end{figure}
+
+The graph's y-axis is the mean value of the time over all rounds. The x-axis
+holds the start parameter on a logarithmic scale. We can clearly see JVM and CLR
+performing better than \thename{}. This means TODO dark-side
+
+% fibonacci
+
+To benchmark recursion we have chosen to implement the classic Fibonacci
+function, defined as $Fn = F_{n-1} + F_{n-2}$ with the seed values of $F_0 = 0$
+and $F_1 = 1$. The result is shown below, in figure~\ref{fig:eval:benchmark:fib}.
+\begin{figure}[H]
+  \centering
+  \scalebox{0.8}[0.7]{\input{figures/fib}}
+  \caption{Mean running time of $F(n)$}
+\label{fig:eval:benchmark:fib}
+\end{figure}
+
+The graph shows the $F_n$ on x-axis and mean mean time on the y-axis. When
+analyzing the results, \thename{} are much closer to the performance of JVM. CIL
+are still betterrrr TODO
+
+% invocation
 
 Sub-routines
+\begin{figure}[H]
+  \centering
+  \scalebox{0.8}[0.7]{\input{figures/invoc}}
+  \caption{Mean running time of sub-routine workout}
+\end{figure}
+
+% boxing
 
 Boxing
 
-General use (stack, algorithms)
+% heap objects
 
-Recursion
-\begin{figure}[H]
-  \centering
-  \input{figures/fib}
-  \caption{Mean running time of $Fibonacci(n)$, with $n = 0..35$}
-\end{figure}
+Heap objects (w/ fields)
 
 \subsubsection{Comparison with Existing Systems}
 
