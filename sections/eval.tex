@@ -144,6 +144,7 @@ values. Intuitively, we know this creates the exponential running of $O(2^n)$,
 which could be proved by induction. We will not include the proof here, as it is
 out the scope of this discussion. The benchmark result is shown below, in
 figure~\ref{fig:eval:benchmark:fib}.
+
 \begin{figure}[H]
   \centering
   \scalebox{0.8}[0.6]{\input{figures/fib}}
@@ -151,13 +152,12 @@ figure~\ref{fig:eval:benchmark:fib}.
 \label{fig:eval:benchmark:fib}
 \end{figure}
 
-The graph shows the $F_n$ on x-axis and mean mean time on the y-axis. When
-analyzing the results, \thename{} are much closer to the performance of JVM. It
-is important to note that these are all naive implementations with no
-optimizations, such as tail-recursion, which would have a significant positive
-impact on the running time. We have noted a little bump in \thename{}'s
-execution time with $n = 0$, which is also noticeable in the graph. This is most
-likely caused by a bug, which we have not had the time to look further into.
+The graph shows the $F_n$ on x-axis and mean mean time on the y-axis. Here
+\thename{} is almost on par with JVM, both of which lack behind CLR. That is an
+indication of efficient sub-routine and stack memory mechanisms in
+\thename{}. It is important to note that these are all na\"ive implementations
+with no optimizations, such as tail-recursion, which would have a significant
+positive impact on the running time.
 
 % invocation
 
@@ -169,6 +169,7 @@ $T(n) = O(n) \cdot O(k) = O(n)$, where $k$ is constant the number of stack
 operations. For invoking the sub-routine we use the \instr{invoke} instructions,
 while CLR uses {\tt call} and JVM uses {\tt invokestatic}. The result of the
 benchmark can be seen below, in figure~\ref{fig:eval:benchmark:invoc}.
+
 \begin{figure}[H]
   \centering
   \scalebox{0.8}[0.6]{\input{figures/invoc}}
@@ -176,7 +177,10 @@ benchmark can be seen below, in figure~\ref{fig:eval:benchmark:invoc}.
 \label{fig:eval:benchmark:invoc}
 \end{figure}
 
-The graph shows TODO.
+Again \thename{} is \emph{relatively} close to JVM. It is interesting that the
+graph for both JVM and \thename{} is jagged for high values of $n$ while CLRs
+performance shows a more steady curve. Exactly what this is due to is difficult
+to say.
 
 % heap objects
 
