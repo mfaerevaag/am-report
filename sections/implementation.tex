@@ -106,39 +106,64 @@ cycle, thread management and exception handling. Besides the machine's exposed
 exception handling system there is an internal error handling mechanism which
 allows errors within the machine to be handled as gracefully possible.
 
-The machine is divided into several modules of which \code{am}, for abstract
-machine and implemented in \code{am.h/c}, is the most overarching. It defines a
-structure, the \code{am\_state} struct, which contains data that is generally
-available in a machine-wide context. We say ``generally'' because some parts of
-the system are by design ignorant of their context. A string table, for
-instance, is not aware of which thread is using it, and instructions do not know
-of the abstract machine state. The most important members of \code{am\_state}
-are a pointer to the code bytes and a pointer to the main thread. The state is
-initialized by loading in the code %TODO
+The implementation of the machine is divided into several modules each of which
+serve a specific purpose. Figure~\ref{fig:implementation:arch} shows the
+overarching architecture and which modules depend on each other.
 
-During the initialization phase of the machine approximately the following steps
-are carried out, in order: %TODO
+\textit{The Engine} module is the top-most control unit that is used to set
+everything in motion. It only implements two functions; \code{start} which
+initializes the other components and begins execution, and \code{stop} that
+frees the resources claimed by the machine and exits gracefully. The
+\textit{Abstract Machine} module is responsible for reading and the byte code,
+parsing it into opcodes, instruction prefixes and argument values and
+subsequently delegating the work to the \textit{Instruction Executer}. That is
+where the guts of the system lies and where all program logic is performed. It
+manipulates the stack through the \textit{Stack} module which implements the
+data structures and exposes an interface for push, popping, replacing and
+peeking into those. The \textit{Information Tables} modules is really three
+modules, one for each of the string, constant and metadata table which are all
+interfaces to global tables with functions to look up entries by various
+criteria. The \textit{Garbage Collector} is the interface to the memory managing
+unit, and is responsible for allocating memory on the heap and automatically
+releasing it when it is no longer in use. Finally, the \textit{Thread} module
+handles creation and destruction of threads in which all program code is
+executed.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\textwidth]{figures/arch}
+  \caption{The architecture of \thename{}. An arrow represents a dependency
+    where the module pointed \emph{from} depends on the module pointed
+    \emph{to}.}
+  \label{fig:implementation:arch}
+\end{figure}
+
+During the initialization phase the machine carries out approximately the
+following steps:
 
 \begin{enumerate}
 \item Parse command-line arguments
 \item Set up internal error handling mechanisms
-\item Initialize global abstract machine state
+\item Initialize the global abstract machine state
+\item Parse the input executable file
   \begin{enumerate}
   \item Load byte code from the executable
-  \item Load information tables %TODO not really
+  \item Load information tables (not implemented)
   \end{enumerate}
-\item Initialize root scope
+\item Initialize scope
   \begin{enumerate}
-  \item Load the the run-time library functions
+  \item Create an implicit root scope, ancestor to all future scopes
+  \item Load the the run-time library functions into the root scope
   \end{enumerate}
 \item Initialize main thread
   \begin{enumerate}
+  \item Allocate an actual thread
   \item Allocate stack
   \end{enumerate}
 \item Begin the instruction cycle in the main thread
 \end{enumerate}
 
-We will briefly explain each step in the following sections.
+The following sections details how the above steps are performed.
 
 \subsubsection{Command-line Arguments}
 \thename{} will eventually be run through an executable binary, most likely in a
