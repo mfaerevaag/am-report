@@ -12,12 +12,12 @@ essentially is all that is required to build \thename{} for a new platform. The
 standard libraries and architecture specific functions available differ with
 each machine and device, so we aim at relying on as few external libraries as
 possible and provide wrappers for the ones we use so that the implementation can
-be ported quickly.
+be ported easily.
 
 Secondly we do not want to rely on a garbage collector provided by languages
-like C++ and Java. We need to full control over where each bit of data is
-stored, mostly for performance reasons both in terms of memory footprint and
-execution speed.
+like C++ and Java. We need full control over where each bit of data is stored,
+mostly for performance reasons both in terms of memory footprint and execution
+speed.
 
 Third, speed is of the essence and C is notoriously fast, given that the code is
 well-written.
@@ -30,23 +30,7 @@ that it is a great exercise for becoming proficient with programming in general
 because it provides us with knowledge of the mechanisms that lie behind concepts
 that are generally taken for granted.
 
-For finding such memory leaks we use Valgrind~\footnote{Valgrind:
-  \url{http://valgrind.org/}}, and for profiling and benchmarking we use GNU
-gprof~\footnote{GNU gprof:
-  \url{https://sourceware.org/binutils/docs/gprof/}}. We have made use of shell
-scripts for automating benchmarking, and in turn the R programming
-language~\footnote{R Programming Language: ~\url{http://www.r-project.org/}} for
-doing statistical analysis on the generated results.
-
-For debugging we use gdb via GNU Emacs~\footnote{GNU Emacs:
-  \url{http://www.gnu.org/software/emacs}} and for analyzing memory usage and
-fixing memory leaks we use the Valgrind instrumentation tool\footnote{Valgrind:
-  \url{http://valgrind.org}}.
-
-The code is extensively documented using Doxygen~\footnote{Doxygen:
-  \url{http://www.stack.nl/~dimitri/doxygen}} style comments.
-
-\textbf{Note:} The code snippets presented in the following sections does not
+\textbf{Note:} The code snippets presented in the following sections do not
 always correspond directly with the code found in the actual
 implementation. They carry the gist of what we want to communicate but generally
 avoids unnecessary and redundant information not relevant to the individual
@@ -54,9 +38,9 @@ cases.
 
 \subsection{Code Style}
 
-The C languages frees the programmer to structure code and data in about as many
-ways as one can imagine. This can be both a blessing and a curse, and warrants
-some agreed upon conventions to maximize consistency.
+The C languages liberates the programmer to structure code and data in about as
+many ways as one can imagine. This can be both a blessing and a curse, and
+warrants some agreed upon conventions to maintain consistency.
 
 For a module of functionality we use a general pattern that consists of a struct
 containing the state or data of a piece of machinery, and corresponding prefixed
@@ -67,59 +51,30 @@ essentially mimics object orientation from other languages (C++, Java), but has
 the benefit of most functions being \term{pure}, i.e.~a function that only
 depends on its input, making testing and reasoning about the code easier.
 
-We use a few naming conventions that will be present in the code as well as code
-snippets found in this thesis: %TODO might be useless
-
-\begin{itemize}
-\item We use underscore to separate multi-word variable and function names.
-\item Structs are defined with \code{\_s} suffix and typedef'd to a name
-  without.\\Eg: \code{struct stack\_s \{...\}} and \code{typedef struct stack\_s
-    stack}.
-\item Enums are defined with \code{\_e} suffix and typedef'd to a name
-  without.\\Eg: \code{struct opcode\_e \{...\}} and \code{typedef enum opcode\_e
-    opcode}.
-\end{itemize}
-
 \subsection{Core Infrastructure}
 \label{sec:implementation:core}
-
-% Very general architecture (theres a vm, a file reader, instruction codes, etc)
-% What's in the VM state and Thread state?
-% How code bytes are handled
-% Instruction cycles
-% Internal error handling
-% Logging/debugging facilities
-% Graceful exits / clean up
-% Command line arguments
-
-% thread
-% instructions
-% stack
-% types
-% gc interface
-% symtab, strtab, ttable
 
 The infrastructure of \thename{} is the code that lays the basis for interaction
 between the individual parts of the system. It is a collection of machinery
 which hand control back and forth between each other, such as the instruction
 cycle, thread management and exception handling. Besides the machine's exposed
-exception handling system there is an internal error handling mechanism which
+exception handling system there is an internal error handling system which
 allows errors within the machine to be handled as gracefully possible.
 
 The implementation of the machine is divided into several modules each of which
 serve a specific purpose. Figure~\ref{fig:implementation:arch} shows the
 overarching architecture and which modules depend on each other.
 
-\textit{The Engine} module is the top-most control unit that is used to set
+The \textit{Engine} module is the top-most control unit that is used to set
 everything in motion. It only implements two functions; \code{start} which
 initializes the other components and begins execution, and \code{stop} that
 frees the resources claimed by the machine and exits gracefully. The
-\textit{Abstract Machine} module is responsible for reading and the byte code,
+\textit{Abstract Machine} module is responsible for reading the byte code,
 parsing it into opcodes, instruction prefixes and argument values and
 subsequently delegating the work to the \textit{Instruction Executer}. That is
 where the guts of the system lies and where all program logic is performed. It
 manipulates the stack through the \textit{Stack} module which implements the
-data structures and exposes an interface for push, popping, replacing and
+data structures and exposes an interface for pushing, popping, replacing and
 peeking into those. The \textit{Information Tables} modules is really three
 modules, one for each of the string, constant and metadata table which are all
 interfaces to global tables with functions to look up entries by various
@@ -157,8 +112,8 @@ following steps:
   \end{enumerate}
 \item Initialize main thread
   \begin{enumerate}
-  \item Allocate an actual thread
-  \item Allocate stack
+  \item Allocate a thread
+  \item Allocate a stack for it
   \end{enumerate}
 \item Begin the instruction cycle in the main thread
 \end{enumerate}
@@ -166,13 +121,13 @@ following steps:
 The following sections details how the above steps are performed.
 
 \subsubsection{Command-line Arguments}
-\thename{} will eventually be run through an executable binary, most likely in a
-command-line environment. The most common, and arguably the most efficient, way
-of customizing parameters and execution options is through command-line
-arguments, given directly to the executable when run. These arguments can be
-extended to do a number of things, but essentially we only require the name of
-the binary file to be executed and optionally customizing the level of
-verbosity, i.e. the amount of logging information to display.
+\thename{} is run through an executable binary, most likely in a command-line
+environment. The most common, and arguably the most efficient, way of
+customizing parameters and execution options is through command-line arguments,
+given directly to the executable when run. These arguments can be extended to do
+a number of things, but essentially we only require the name of the binary file
+to be executed and optionally customizing the level of verbosity, i.e. the
+amount of logging information to display. %TODO første del lidt derp?
 
 We follow common conventions by having two special arguments for displaying
 useful meta information about the \thename{} binary. These include the {\tt
@@ -186,25 +141,19 @@ in C's Standard Library.
 %TODO args for the executable
 
 \subsubsection{Internal Error Handling}
-% Why
-% Error handler
-% Signals
-% Cleanup
-% Error macro
 
-When writing software, history has shown that bugs will most likely find its way
-into the code. The do not expect \thename{} to be an exception, so rather than
-denying this fact, we try to remedy the situation by gracefully exiting the
-program, while also trying to some useful information on what went wrong. This
-way makes it easier for users to understand what is going on and reporting the
-problem so it can fixed.
+When writing software, history has shown that bugs are unavoidable, and we do
+not expect \thename{} to be an exception. Rather than denying this fact, we try
+to remedy the situation by gracefully exiting the program, while also trying to
+give some useful information about what went wrong. This makes it easier for
+users to understand what is going on and reporting the problem so it can fixed.
 
-Internal errors can occur two ways. Either by the machine checking the value of
-different parameters, ensuring they are of the expected format, in which the
-they are not we can cowardly stop the machine without crashing. Or an error can
-occur by the operating system signaling the machine that it is trying to do
-something illegal. In this we can catch the signal, which follows the
-POSIX-standard, and again gracefully exit the program.
+Internal errors can occur in two ways. Either by the machine checking the value
+of different parameters, ensuring they are of the expected format, and if they
+are not we can cowardly stop the machine without crashing. The other scenario is
+an error occuring by the operating system signaling the machine that it is
+trying to do something illegal. In this we can catch the signal, which follows
+the POSIX-standard, and again gracefully exit the program.
 
 When we say gracefully exit, we mean that we can stop running threads, free any
 allocated memory, print some information and set the return code of the
@@ -213,9 +162,10 @@ happened, but also to debug the problem.
 
 With checks, errors can be invoked through a special logging macro {\tt
   log\_err}, described in the \nameref{sec:implementation:core:debug} section
-below.
+below. %TODO hvad er checks?
 
 \subsubsection{ELF File Loading}
+
 The first thing the machine does upon start up is to load the input file that is
 going to be executed. The current implementation does not read information
 tables which means that only the byte code is loaded. Information table entries
@@ -224,20 +174,16 @@ purposes.
 
 In the \code{loader} module, we use the library Libelf\footnote{libelf:
   \url{https://directory.fsf.org/wiki/Libelf}} to parse and extract data from
-the input file. It provides the means to very easily parse ELF files and search
+the input file. It provides the means to easily parse ELF files and search
 through segments and sections, making the process of byte code loading quite
 simple indeed. The file is verified to be a valid, parsable ELF file before
-beginning any data extraction. Libelf exposes a function a to get the section
+beginning any data extraction. Libelf exposes a function to get the section
 following another by use of which the sections are iterated. We need to extract
 the data of the \code{.text} section which is where the byte code is stored in
 its entirety. Thus for each section we simply check its name and if it matches
 we copy the bytes from the section into the abstract machine state's code field.
 
 \subsubsection{Instruction Cycle}
-% general loop (check with whats in design)
-% instruction functions signature
-% role of instructions vs vm (who fetches what)
-% byte code address is into elf, ie offset from first byte when loaded
 
 The fundamental means of operation in the machine is the execution of
 instructions that are parsed and interpreted from byte code. Each thread runs
@@ -250,35 +196,29 @@ Listing~\ref{lst:implementation:instruction-cycle}
 while (thread is running) {
   fetch opcode
   fetch potential arguments
-  execute instruction corresponding to opcode
   update program counter
+  execute instruction corresponding to opcode
 }
 \end{lstlisting}
 
-Each task is performed by different modules of the machine. The abstract
-machine, \code{am}, module is responsible for reading byte code including
-reading the opcodes, parsing arguments and in turn executing the function that
-implements the individual functions. The instruction module,
-\code{instruction.h/c} is where instruction routines are defined, one function
-per instruction. All instruction functions take a \code{thread\_state*} argument
-that they use to manipulate the stack, change the program counter, access scopes
-and so on. Generally the abstact machine does not do look ups into information
-tables and other logic, rather its responsibility is to read and parse the byte
-code and delegate the rest of the work to other modules.
+All instruction functions take a \code{thread\_state*} argument that they use to
+manipulate the thread's stack, change the program counter, access scopes and so
+on.
 
 As an example consider the following byte code stream:
 
 %TODO needs correct opcode value
 \code{0: 0xFC, 1: 0x10, 2: 0x00, 3: 0x00, 4: 0x05, 5: 0x39, ...}
 
-And let the program counter be $pc = 0$. The machine will carry out the following:
+And let the program counter be $pc = 0$. The machine will carry out the
+following:
 
 \begin{enumerate}
 \item Read instruction prefixes
   \label{item:read-prefix}
   \begin{enumerate}
-  \item Look for bytes that are valid prefix values which is any value greater
-    than or equal to \code{0xFC} (decimal 252).
+  \item Look for bytes that are valid prefix values which currently is any value
+    greater than or equal to \code{0xFC} (decimal 252).
   \item The byte at $pc=0$, \code{0xFC}, is a valid prefix, namely the
     \code{large} prefix.
   \item Set the \code{pre\_large} flag in the executing thread's state and
@@ -317,29 +257,30 @@ Section~\ref{sec:implementation:instr}.
 
 \subsubsection{Logging and Debugging}
 \label{sec:implementation:core:debug}
-% Logging macros
-% Debug functions (print\_stack)
-% Debug instructions
 
 \thename{} has a logging system, found in the {\tt logger.h} module. It handles
 all messages sent by all components of the machine and decides whether to print
 them to {\tt stdout}. This decision is based on a logging level, which is part
-of the global state of the machine. The logging level sets the `barrier` for
-which a message should be printed. The levels includes {\tt brief}, {\tt normal}
-and {\tt verbose} which can be customized through command-line arguments, but
-defaults to {\tt normal}. As each log message is also categorized with a level,
-the logging module decides, given the current logging level, if it should be
-printed. The message level are {\tt error}, {\tt warning} and {\tt info}.
+of the global state of the machine. The logging level sets the ``barrier'' for
+when a message should be printed. The available levels includes {\tt brief},
+{\tt normal} and {\tt verbose} which can be customized through command-line
+arguments, but defaults to {\tt normal}. As each log message is also categorized
+with a level, the logging module decides, given the current logging level, if it
+should be printed. The message level are {\tt error}, {\tt warning} and {\tt
+  info}.
+% TODO burde der ikke være et ``none'' level og burde log level og msg level
+% ikke hedde det samme?
 
 If the logging level is set to brief, only warnings will be printed, if set to
-normal, warnings will also be printed, and lastly, is set to verbose, everything
+normal, warnings will also be printed, and lastly, if set to verbose, everything
 will be printed.
 
 A log message is sent through an interface of macros, exposed by the {\tt
   logger.h} header-file. Each message level has two logging macros, logging a
 message of the given level. The two macros include on which takes a string, and
-one, suffixed with `f`, which takes a formatted string and a variable number of
-arguments.
+one, suffixed with ``f'', which takes a formatted string and a variable number
+of arguments.
+
 \begin{ccode}
 #define log_warn(msg)                             \
   do {                                            \
@@ -349,87 +290,77 @@ arguments.
   } while (0)
 \end{ccode}
 
-The {\tt log\_err} macro, will in addition to log an error, clean up and stop the
-machine, as it cannot safely continue.
+The {\tt log\_err} macro, will in addition to logging an error message also
+clean up and stop the machine, as it cannot safely continue.
 
-For debugging during development there are an extra macro for printing a message
-prefixed with file name, function name and line number. In addition the is one
-suffixes with `f`, which takes a formatted string in the same manner as the
-logging macros.
+For debugging during development there is an extra macro for printing a message
+prefixed with file name, function name and line number. In addition there are
+one suffixes with ``f'', which takes a formatted string in the same manner as
+the logging macros. %TODO forvirrende
 
 The logging messages are only displayed if the {\tt DEBUG} macro value is
 defined. This value is automatically set through the build system, if not making
 a release build through the {\tt release} target.
 
-
 \subsection{Stacks}
 \label{sec:implementation:stacks}
 \input{sections/implementation-stack}
-% vm initialization
-% instruction cycle
-% memory layout (stack per thread, heap area, code area)
-% thread
-
-
-\subsection{Execution Model}
-% \label{sec:implementation:execmodel}
-% \input{sections/implementation-execmodel}
-
 
 \subsection{Information Tables}
 \label{sec:implementation:infotables}
-The three information tables handled by \thename{} are all implemented in the
+
+The three information tables available in \thename{} are all implemented in the
 most simplistic way possible, with the intention being; less is more. With that
 being said, this might not be as apparent with the meta table, than with the
-string- and constants table. As for the reasons explained in TODO.
+string- and constants table. As for the reasons explained in TODO. %XXX
 
 The constants- and string table are almost identical in implementation. They are
 both parsed from the executable file, where they are stored as static lists of
 elements. This means we can parse the size of each list and allocate internal
 arrays of the same size and type. The type for the internal string table will
-simply be a list strings, or rather {\tt char *}'s, as they are encoded as
+simply be a list of strings, or rather {\tt char *}'s, as they are encoded as
 Modified UTF-8, which are null-byte terminated. As for the constants table, they
 are stored as simple arrays of bytes. It is the compilers job of keeping track
 of the bytes' encoding. Therefore, the same constant can be interpreted as
 different numbers, depending on the type it is expected to have.
+%TODO ^ stod der ikke tidligere at Modified UTF8 ikke var null terminated?
 
-For parsing bytes to numbers, as signed and unsigned integers, and
+For parsing bytes to numeric values whether as signed or unsigned integers, or
 floating-point numbers, there are special utility functions located in the {\tt
   byte.h} module. These are extensively tested for overflow, sign errors,
 endianness errors and other common pitfalls when decoding numbers to C's
 built-in types. In total there are 26 unit tests, all located in the module's
-respective test suite, found in {\tt test/byte\_test.c}. The test suite are kept
-dry by using macros to generate tests for a multiple of edge cases. For more
-information on how we decode more complex encoding, as floating-point precision
-numbers, see section~\ref{sec:implementation:meta:types}.
+respective test suite, found in {\tt test/byte\_test.c}. The test suites are
+kept ``DRY'' by using macros to generate tests for multiple of edge cases. For
+more information on how we decode more complex encoding, as floating-point
+precision numbers, see Section~\ref{sec:implementation:meta:types}.
 
 Each element in the constants- and string table are parsed lazily. If we were to
 parse both tables on initialization, it would create an undesirable overhead,
-depending on their size. To encapsulate this, each table has lookup function
-which checks if the element on the given index is {\tt NULL}, in which case it
-is first parsed from the executable and stored in the internal table. Due to the
-fact that we did not have time to finish the assembler, the data not currently
-being parsed from the executable, but rather taken from hardcoded test data. The
-interface is on the other hand is set, encapsulating the code which needs to be
-changed.
+depending on their size. To mitigate this, each table has lookup functions which
+check if the element on the given index is {\tt NULL}, in which case it is first
+parsed from the executable and stored in the internal table. Currently the data
+is taken from hardcoded test data, but interface is defined, encapsulating the
+code which needs to be changed.
 
-The metadata table is a little more complex and therefor requires a more complex
-implementation. This is due to the design of the meta information system,
-explained in section~\ref{sec:implementation:meta}. Unfortunately, due to the
-same reasons as with the constant and string tables, this has not been
-implemented. Also, as with above, the interface is, it just returns hardcoded
-test data instead of parsing anything from an executable.
-
+The metadata table is a little more complex and therefore requires a more
+complex implementation. This is due to the design of the meta information
+system, explained in Section~\ref{sec:implementation:meta}.
+%  Unfortunately, due
+% to the same reasons as with the constant and string tables, this has not been
+% implemented. Also, as with above, the interface is, it just returns hardcoded
+% test data instead of parsing anything from an executable.
+%XXX det er da lavet?
 
 \subsection{Heap Objects}
 
 \thename{} treats heap object as simple chunks of bytes, allocated and tracked
-by the garbage collector. The only meta information a heap objects has a simple
-type pointer, describing the type of its content, and in therefore the size. To
-make the internal data representation able to hold objects of different sizes,
-the content of the object is implemented with a flexible array (TODO: new
-term?). Here the last element in the internal struct is an empty array, just
-used a reference, or handle, to the location of the data.
+by the garbage collector. The only information common to all heap objects is a
+type pointer describing the type of its content and thus also its size. To make
+the internal data representation able to hold objects of different sizes, the
+content of the object is implemented with a flexible array. Here the last
+element in the internal struct is an empty array, just used a reference, or
+handle, to the location of the data.
 
 The garbage collector is responsible for making sure the following memory is
 already allocated and is large enough to hold the value of its given type. As
@@ -438,27 +369,26 @@ collector has a set interface, separated from the actual implementation. With
 this encapsulation, only a type is needed to get a reference to an allocated
 piece of memory with the appropriate size.
 
-Heap objects are referenced through the {\tt Ref<t>}, where {\tt t} is the type
-of the object's content. There are special instruction for creating heap
-objects, where {\tt box} is one of them. TODO: explained elsewhere?
-
+Heap objects are referenced through the {\tt Reference<t>} type, where {\tt t}
+is the type of the object's content.
+% There are special instruction for creating heap objects, where {\tt box} is
+% one of them. TODO: explained elsewhere?
 
 \subsection{Threading}
-% Abstraction
-% Structure (tree)
-%% Main thread
 
 To support concurrent programming fundamental mechanisms of threading has to be
 supported. These include creating and destroying threads while also having
 synchronization structures for mutual exclusion, such as mutexes.
 
-We have done this by wrapping existing implementations of threading libraries.
-This way we can easily change the threading back-end by choosing which library
-wrapper to be compiled with the executable. The interface for threads will
-therefor be the same, regardless of which library is handling the logic.
+We have done this by wrapping existing implementations of threading
+libraries. This way we can easily change the threading back-end by choosing
+which library wrapper to be compiled with the executable. The interface for
+threads will therefore be the same, regardless of which library is handling the
+logic.
 
-The thread interface is defines in {\tt thread.h}, while the back-ends will live
-in {\tt thread\_<lib>.c}.
+The thread interface is defined in {\tt thread.h}, while the back-ends are
+implemented in {\tt thread\_<lib>.c}. The current back-end uses the pthreads
+library.
 
 The abstract machine itself utilizes threading by always running programs
 through threads. That way, all errors will safely be handled without crashing
@@ -502,11 +432,11 @@ resolution in a scope is carried out by iterating the array of symbols and
 comparing names with the name that is being searched for. This is simple and
 inefficient but sufficient for small test programs.
 
-The obviously superior implementation would be a hash map, where a symbol's
-names is hashed into an integer and stored in an array indexed by the hashed
+The obviously superior implementation would be a hash map, where a symbol's name
+is hashed into an integer value and stored in an array indexed by the hashed
 value of the name. This requires an array that is as large as the output of the
 hash function which is likely to be unacceptable since most hash functions
-compute at least 32-bit meaning resulting in a 4.4 billion long array. Instead
+compute at least 32-bit resulting in a 4.4 billion elements long array. Instead
 the desired size of array is chosen, $n$, and the hash keys are computed
 $\mod n$ to find the index. It is possible for two different names to have the
 same $\mod$'d value, called a collision. To mitigate this each entry in the
@@ -528,29 +458,6 @@ stack, respectively.
 
 \subsection{Testing}
 \input{sections/implementation-testing}
-
-% Assembler
-%% Simple parsing/emitting
-%% Label calculations (offsets)
-
-% Object model
-%% Virtual tables
-%% (Un)boxing
-
-% Execution model
-%% Single stack
-%% Return values as output arguments
-%% No frame pointer(?)
-
-% Binary format (ELF)
-%% Sections
-%% Type encoding
-%% Instructions
-%%% Argument encoding
-
-% Exception handling
-
-% Debugging information
 
 %%% Local Variables:
 %%% mode: latex
