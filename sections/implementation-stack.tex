@@ -6,15 +6,16 @@ and retrieved by the Last In, First Out principle.
 
 Each element on a stack holds information about both the \textit{declared} and
 \textit{actual} type of data that it contains. Details on this is described in
-\ref{NEEDED}. The data is a simple array of bytes, stored in big endian order,
-i.e. the most significant bit is at the lowest memory address.
+\ref{NEEDED}. The data part of a stack element is a simple array of bytes,
+stored in big endian order, i.e.~the most significant bit is at the lowest
+memory address.
 
 \subsubsection{Memory Layout}
 
 Arguably the most intuitive way to construct a stack is to use a simple array of
 a fixed initial size and handle operations by keeping track of the number of
-elements in the stack. A push operation thus increments the number of elements
-and assigns a value to the new top-most slot. A pop operation will
+elements in the stack. A push operation would thus increments the number of
+elements and assigns a value to the new top-most slot. A pop operation will
 correspondingly decrement the number of elements in the stack and potentially
 return the element that is being removed. When the number of elements in the
 stack exceeds the initial size of the containing array more memory must be
@@ -26,20 +27,20 @@ allocation\cite{man-realloc} which arguably is an expensive operation. Since the
 stack is by far the most frequently used means of operation in \thename{} it is
 critical that it performs well.
 
-Another important thing to consider is that the content of a stack element
-depends on the type of the element, and thus have varying sizes. An element
-whose type is \code{Int8} requires a single byte for storage while an element of
-type \code{Int32} requires 4 bytes of storage. Since we do not want to waste
-memory on redundant bytes, that prevents us from implementing stack elements as
-fixed size structures laid out in an array as described above. We have solved
-the problem by implementing stack elements as a singly linked list going from
-the top element down to the bottom. The memory used by the stack should be
-contiguous, to avoid a large amount of allocations and deallocations, thus the
-elements in the linked list must all reside one after another in memory. The
-actual content of an element is stored \textit{in between} the linked list
-nodes, and the \code{next} pointer simply points to the memory address following
-its content data bytes (if there is another element following
-it). Figure~\ref{fig:implementation:stack-layout} shows how the stack elements
+An important thing to consider is that the content of a stack element depends on
+the type of the element, and thus have varying sizes. An element whose type is
+\code{Int8} requires a single byte for storage while an element of type
+\code{Int32} requires 4 bytes of storage and static arrays can be arbitrarily
+large. Since we do not want to waste memory on redundant bytes, that prevents us
+from implementing stack elements as fixed size structures laid out in an array
+as described above. We have solved the problem by implementing stack elements as
+a singly linked list going from the top element down to the bottom. The memory
+used by the stack should be as contiguous as possible, to avoid a large amount
+of allocations and deallocations, and the elements in the linked list should
+reside one after another in memory. The actual content of an element is stored
+\textit{in between} the linked list nodes, and the \code{next} pointer simply
+points to the memory address following its content data
+bytes. Figure~\ref{fig:implementation:stack-layout} shows how the stack elements
 are laid out.
 
 \begin{figure}[H]
@@ -52,10 +53,10 @@ are laid out.
 The C language does not support variable length arrays, which means that an
 array must have its length declared, otherwise the type is regarded as
 incomplete. However, line~\ref{code:stack-element:flexible-data} in
-Listing~\ref{lst:implementation:stack:element} shows feature known as
+Listing~\ref{lst:implementation:stack:element} shows a feature known as a
 \code{flexible array} that allows the last field of a struct to be declared as a
 size-less array. We take advantage of exactly that so that we can easily
-interpret the \code{data} field of an element as an array of bytes.
+interpret the \code{data} field of an element as an array of bytes of any size.
 
 What is left to solve is the problem of a stack growing beyond its initial
 size. As mentioned, reallocation of the memory used by the stack works, but
@@ -68,8 +69,8 @@ reallocation. The exposed interface of the stack consists of a set of stack
 operation functions that essentially maps operations onto segments by selecting
 the appropriate segment, and potentially what index of its elements that will be
 the target of a given operation. Thus the segments are hidden in the
-implementation and are solely internal data structures which users need not know
-of.
+implementation and are solely internal data structures which users of the stack
+are ignorant of.
 
 \begin{remark}
   A segmented stack is not a novel idea. They are used by the Go programming
@@ -91,11 +92,11 @@ the segment and is used to check whether the segment has room for more elements.
 
 \begin{figure}[h]
   \centering
-  \begin{subfigure}[a]{.49\textwidth}
-    \begin{lstlisting}[language={[ANSI]C},%
-  caption={Structure defining the stack},%
-  label={lst:implementation:stack:element}]
+  \begin{lstlisting}[language={[ANSI]C},%
+    caption={Structure defining the stack},%
+    label={lst:implementation:stack:element}]
 struct stack_element {
+    /* points to next element in the upward direction */
     struct stack_element_s *next;
 
     int actual_type;
@@ -103,26 +104,7 @@ struct stack_element {
 
     byte data[]; (*@\label{code:stack-element:flexible-data}@*)
 }
-    \end{lstlisting}
-  \end{subfigure}
-  \begin{subfigure}[a]{.49\textwidth}
-    \begin{lstlisting}[language={[ANSI]C},%
-  caption={Structure defining a segment of the stack},%
-  label={lst:implementation:stack:segment}]
-struct stack_segment_s {
-    int size;
-    int length;
-
-    stack_element *head;
-
-    void *content;
-    char *data_cursor;
-
-    struct stack_segment_s *next;
-    struct stack_segment_s *prev;
-}
-    \end{lstlisting}
-  \end{subfigure}
+  \end{lstlisting}
 \end{figure}
 
 A segment has a limited amount of space for elements but the stack itself is
@@ -130,17 +112,16 @@ unbounded as a result of the segment list; there is no limit to how many
 segments can be allocated, except the amount of physical or virtual memory
 available to the machine.
 
-%TODO: what can be that big? arrays?
 Stack elements can be arbitrarily large. For instance fixed size arrays stored
-on the stack will be as large as need be, and might be bigger than the defined
-segment size. Thus, before pushing an element (as shown in
+on the stack are as large as their type indicates, and might be bigger than the
+defined segment size. Thus, before pushing an element (as shown in
 Listing~\ref{lst:implementation:stack:operations}) we check whether the element
 can fit into a segment, and if not a segment is allocated with the size
 explicitly given. The new segment is allocated the required size for the element
 plus the default segment size as to allow for more elements to be pushed and
 minimize the segment handling overhead.
 
-\subsubsection{Optimizing Memory Footprint}
+\subsubsection{Caching Stack Segments}
 
 A new segment is allocated when the last active segment becomes full, but is not
 immediately freed when it becomes empty. Instead a number of segments are cached
@@ -152,49 +133,12 @@ course of one loop iteration. However when the iteration pops the values off
 again the new segment will become empty, which without the cached segments would
 result in the segment being freed. With the cached segments the newly allocated
 segment is saved and is simply rewired into the stack when it is needed again.
-% TODO: this could be further optimized by detecting such loops and
-% increasing the size of the current segment. aint nobody got time for
-% that.
 
 When there are more inactive segments than defined by
-\code{STACK\_NUM\_CACHED\_SEGMENTS} a segment will be freed. This is trivial
-because all of the segments and its elements' data lies within the region
-pointed to by \code{content}, so it is simply freed.
-
-\subsubsection{Operations}
-
-Stack operations are implemented as functions with a \code{stack\_} prefix and
-their first parameter is a pointer to the stack on which the operation is to be
-performed. To give sense of how it works in practice,
-Listing~\ref{lst:implementation:stack:operations} shows the source code for the
-\code{push} operation.
-
-\begin{minipage}{\linewidth}
-\begin{lstlisting}[language={[ANSI]C},
-  caption={Source code of the \code{push} stack operation},
-  label={lst:implementation:stack:operations}]
-void stack_push(stack *s, stack_element *se)
-{
-    if (se->actual_type->size > STACK_SEGMENT_SIZE) {
-        stack_push_sized_segment(s, type->size + STACK_SEGMENT_SIZE);
-    }
-    else if (stack_will_overflow(s, se)) { (*@\label{code:stack-push:will-overflow}@*)
-        stack_segment *old_seg = s->last_segment;
-        se->next = old_seg->head; (*@\label{code:stack-push:link-segments}@*)
-
-        stack_push_segment(s);
-    }
-
-    stack_segment_push_element(s->last_segment, se);
-}
-\end{lstlisting}
-\end{minipage}
-
-Line~\ref{code:stack-push:will-overflow} makes sure that there is room for the
-stack element in the current segment. If there is not a new segment is created
-and the \code{next} pointer of the new element is linked to the last element of
-the previous segment so that the elements are in principle a single linked
-list. The element is then pushed onto the segment.
+\code{STACK\_NUM\_CACHED\_SEGMENTS} a segment will be freed. This is a trivial
+operation because the all of the segment's data and elements' data lie within
+the segment's memory allocation, so it is simply freed and there is no need to
+free individual elements.
 
 %%% Local Variables:
 %%% mode: latex
