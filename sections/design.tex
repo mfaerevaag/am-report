@@ -1,4 +1,4 @@
-In the following we will outline  design of \thename{} and give a detailed
+In the following we will outline the design of \thename{} and give a detailed
 description of each area of functionality. The design is heavily tied to the
 \thename{} specification, but further includes some considerations for
 implementation, i.e.~the design of the implementation.
@@ -9,14 +9,13 @@ in an efficient manner. The overarching idea is that by exposing much of the
 underlying low-level constructs we provide very flexible means for compilers to
 do things the way that is most suitable for their particular requirements,
 without having to conform to a tight object-model or strict type system. This
-involves exposing constructs like scopes, object model internals (field and
-member management and modification), thread management and type system. Further
-the type system is aimed at being strict enough to guarantee type safety as far
-as possible, but flexible enough for dynamic languages. Compilers are free to
-select which features to utilize, meaning for instance that for a strictly
-statically typed language, the dynamic typing mechanisms can be disregarded and
-all method dispatches can be wired statically.
-% TODO more?
+involves exposing constructs like scopes, object model internals, thread
+management and the type system. Further the type system is aimed at being strict
+enough to guarantee type safety as far as possible, but flexible enough for
+dynamic languages. Compilers are free to select which features to utilize,
+meaning for instance that for a strictly statically typed language, the dynamic
+typing mechanisms can be disregarded and all method dispatches can be wired
+statically.
 
 \textbf{Note:} Because the specification is such a central document to the
 design we will not cite it directly throughout the thesis. Instead we refer to
@@ -25,35 +24,32 @@ Appendix~\ref{appendix:spec} where it is included in its entirety.
 \subsection{Memory and Object Model}
 
 \thename{} uses the common stack and heap memory model. Each running thread has
-their own evaluation stack that is local to itself. Other threads, whether
-parent or child can not access elements on another thread's stack, neither by
-direct memory addressing (TODO: maybe with unsafe code?) or by use of the
-\code{StackReference} type. The only means by which a thread can make data from
-its stack available to others is by boxing it, i.e.~moving it to the heap and
-track it by reference. The heap is a single, usually large, globally shared
-memory region where data is stored and modified by use of references. It is
-managed fully by the garbage collector, which means that all allocations and
-deallocations are made through an interface. Internally the garbage collector is
-regarded as a ``black box'', meaning that no assumptions to its inner workings
-are made, and it is assumed to efficiently free unused memory when possible. The
-only exception to this is that the object model defines a sub-routine on heap
-object called \code{finalize} which is called before the garbage collector frees
-the objects memory. It is used for an object to be able to properly free any
-resources it might be using, such as open files or network connections, and is
-directly analogous to C++'s destructor method on classes.
+its own evaluation stack that is local to itself. Other threads, whether parent
+or child can not access elements on another thread's stack, neither by direct
+memory addressing or by use of the \code{StackReference} type. The only means by
+which a thread can make data from its stack available to others is by boxing it,
+i.e.~moving it to the heap and track it by a reference. The heap is a single
+globally shared memory region where data is stored and modified by use of
+references. It is managed fully by the garbage collector, which means that all
+allocations and deallocations are made through an interface. Internally the
+garbage collector is regarded as a ``black box'', meaning that no assumptions to
+its inner workings are made, and it is assumed to efficiently free unused memory
+when possible. The only exception to this is that the object model defines a
+sub-routine on heap objects called \code{finalize} which is called before the
+garbage collector releases the object's memory. It is used for an object to be
+able to properly free any resources it might be using, such as open files or
+network connections, and is directly analogous to C++'s destructor method on
+classes.
 
 The object model defines how objects are laid out in heap and how their content
 is described by the type system. \thename{} uses a simple but very flexible
 object model. The general idea is that a heap object is described by the
 \code{Composite} type which is capable of expressing arbitrarily complex data
-structures. In addition to what is described by the type a heap object includes
+structures. In addition to what is described by the type, a heap object includes
 a reference to an object of the \code{AnyType} type. The purpose of this is to
 provide language implementations the means to associate some arbitrary
 information to objects. It could used for any kind of metadata storage,
 implementation of class methods, polymorphism, etc.
-
-
-
 
 \subsection{Execution Model}
 \label{sec:design:exec}
@@ -74,25 +70,24 @@ group from another instruction, in our case the \code{invoke} family of
 instructions. \thename{} does not currently support either static or dynamic
 linking and hence all byte code is stored in a single stream of bytes. A
 sub-routine is simply defined by a designated subset of those bytes that,
-usually, performs an specific task and subsequently passes control back to the
+usually, performs a specific task and subsequently passes control back to the
 caller. In \thename{} each sub-routine has a name, a low-address that is the
-entry point and a high-address which is the last instruction byte belonging to
+entry point, and a high-address which is the last instruction byte belonging to
 it. The machine does not restrict the address bounds, so the same code bytes can
-potentially be shared by multiple sub-routines, however rare that case might
-be. In addition they define the type or arguments that are expected.
+potentially be shared by multiple sub-routines, however rare that scenario might
+be. In addition they define the type of arguments that are expected to be found
+on the stack.
 
-Most CPU architectures define a \emph{calling convention} which defines how
+Most CPU architectures define a \textit{calling convention} which defines how
 parameters are passed to sub-routines and how values are returned from
-them. Parameters to a subroutine must be passed into the stack prior to an
+them. Parameters to a sub-routine must be pushed into the stack prior to an
 \instr{invoke} instruction. The sub-routine code can then peek upward into the
 stack to retrieve or replace them. \thename{} has no notion of return values as
-commonly used by other architectures. Rather, pass-by-reference parameters are
-used to pass values back to the caller. The callee allocates space on the stack
-or the heap and sub-routines must accept corresponding reference type parameters
-which it can then ``fill'' with the values that are to be returned. This is a
-flexible method that allows any number of values to be passed back to the
-caller, and further does not require any dedicated instructions for returning
-values.
+commonly used by other architectures. Instead the callee allocates space on the
+stack and sub-routines must accept corresponding parameters which it can then
+``fill'' with the values that are to be returned. This is a flexible method that
+allows any number of values to be passed back to the caller, and further does
+not require any dedicated instructions for returning values.
 
 \subsection{Scopes}
 \label{sec:design:scopes}
@@ -104,50 +99,49 @@ lexical mechanism. With dynamic scoping a name is resolved when it is
 \emph{evaluated}, that is, it depends on the execution context or state of the
 program. With lexical scoping a name is resolved when it is \emph{defined},
 meaning that resolution depends on the name's lexical location in the source
-code (hence the name). Dynamic scoping can be confusing and make it difficult to
-reason about a program's behavior. It can lead to unwanted or unexpected results
-because the programmer has to be very careful not to use identical names in
-different locations that might be evaluated in the same execution
-context. Lexical scoping makes it easier to figure out what a program will do
-and harder to shoot yourself in the foot. While dynamic scoping has more or less
-disappeared from modern language implementation\cite{cse341} it is still used in
-some places. An interesting example are C macros (and indeed macros in general)
-which do no form of resolution by themselves, it is essentially simple text
-replacement. Macros are a prime example of how dynamic scoping can be very
-useful, but also of the severe issues and frustration that it can cause.
+code. Dynamic scoping can be confusing and make it difficult to reason about a
+program's behavior. It can lead to unwanted or unexpected results because the
+programmer has to be very careful not to use identical names in different
+locations that might be evaluated in the same execution context. Lexical scoping
+makes it easier to figure out what a program will do and harder to shoot
+yourself in the foot. While dynamic scoping has more or less disappeared from
+modern language implementation\cite{cse341} it is still used in some places. An
+interesting example are C macros (and indeed macros in general) which do no form
+of resolution by themselves, it is essentially simple text replacement. Macros
+are a prime example of how dynamic scoping can be very useful, but also of the
+severe issues and frustration that it can cause.
 
 Scopes are usually organized in tree structures, where each scope has exactly
 one parent and zero or more children. Name resolution starts in one specific
 scope, and if a matching name is found then the value of the name is determined
-immediately. If the name was not found in the current scope then resolution
+immediately. If the name is not found in the current scope then resolution
 continues in the scope's parent, repeatedly. As a result a name can be override,
 known as \textit{shadowing}, by a child scope by binding a value to a name that
 is also used by the parent scope.
 
 \thename{} exposes run-time functions for managing scopes, more specifically
 pushing and popping them on demand. That means that by default a new scope is
-\textit{not} introduced when a sub-routine is invoked, compilers must handle
-this manually. This way a compiler is completely free to introduce scopes
-according to the semantics of a language specification, and there is very little
+\emph{not} introduced when a sub-routine is invoked, compilers must handle this
+manually. This way a compiler is completely free to introduce scopes according
+to the semantics of a language specification, and there is very little
 performance overhead by manual scope management; the internal procedures are the
 same as if the machine would introduce scopes automatically.
 
 Scopes can be used to as the means to implement various different language
 features. A global scope like C's or JavaScript's can be achieved simply by
 having all other scopes be children (or grand-children) of it. Module systems
-(think Java's \code{package} and \code{import}) can be constructed by combining
+like Java's \code{package} and \code{import}, can be constructed by combining
 multiple scopes into a larger context specific for each module. On a more
-detailed level C-like languages introduce new scopes in every block, usually
-marked with braces, such as if-statements, switch cases, function bodies, and so
+detailed level, C-like languages introduce new scopes in every block, usually
+marked with braces, such as if-statements, switch cases, function bodies and so
 on.
-
 
 \subsection{Executable File Format}
 
 \thename{} reads executable files written in the Executable Linkable Format
-(ELF). ELF is a widely used format for executable binary files format that is
-standard for Unix based systems (OpenBSD, Linux, Solaris, etc\cite{NEEDED}). It
-is a simple and very flexible format that is not specific to any platform or
+(ELF). ELF is a widely used format for executable binary files that is standard
+on Unix based systems (OpenBSD, Linux, Solaris, etc\cite{NEEDED}). It is a
+simple and very flexible format that is not specific to any platform or
 architecture but is a container format for such. That means that it provides
 structures for organizing bits and bytes into sections and defines headers that
 describe the file in terms of purpose and functionality.
@@ -168,18 +162,13 @@ purpose desired. There are no restrictions by the format per s\'e.
 
 An ELF file is described by headers defined in the file itself. The overarching
 file header that describes the remaining file organization is the ELF header. It
-details the attributes of the file such as the machine architecture on which the
-file can be executed, endianess, ELF format version and so on. Further it
-defines where in the file that section and segment headers are located, their
-size and how many there are. In turn the section and segment headers describe
-their entries in the same manner. The general idea is that the starting
-location, size of entry and amount of entries are defined and from that the data
-can be extracted correctly.
-
-All sections have, among other information, a name. Executable ELF files usually
-contain a section named \code{.text} which is where the instructions of a
-program are stored. This is also the case for \thename{}. %TODO more, or remove?
-%TODO info tables.
+details the attributes of the file such as the architecture on which the file
+can be executed, endianess, ELF format version and so on. Further it defines
+where in the file that section and segment headers are located, their size and
+how many there are. In turn the section and segment headers describe their
+entries in the same manner. The general idea is that the starting location, size
+of entry and amount of entries is defined and from that the data can be
+extracted correctly.
 
 The fact that ELF is such a widely used format, and a standard for Unix systems
 enables much easier porting of existing tools and libraries to run on
@@ -190,12 +179,6 @@ architectures. That effectively means that an extensive compiler collection and
 tools are available at a fraction of the effort that it would take to implement
 them from scratch.
 
-% headers
-% segs(progs)/secs
-% .text section
-% string tab
-% easy porting (gcc, binutils)
-
 \subsection{Information Tables}
 
 \thename{} executable files define three distinct kinds of information tables
@@ -204,26 +187,26 @@ code. The exceptions are inlined literal values and jump tables for the
 \instr{switch} instruction (explained in
 Section~\ref{sec:design:isa:control-flow}). Byte code makes references to
 entries in the tables by use of indices produced by compilers, and which are
-given by integral values. Indices overlap so a concrete index will point to
-different entries depending on which table a given instruction assumes that the
-index is into.
+given by integral values. Indices are private to each table so an index value
+will point to different entries depending on which table a given instruction
+assumes that the index is into.
 
 The most simple table is the string table which is a list of immutable UTF-8
-character strings. It is to store and retrieve any string that a program might
-use, both for identifying scope symbols, run-time functions, fields etc. It is
-also the place where compilers must store strings that are used in ordinary
-program logic. Strings in the string table must be unique, both because it is
-redundant to store duplicates and because it enables the machine to compare
-strings for equality simply by comparing their indices. That saves a lot of look
-up operations which would otherwise sum up to a significant performance cost.
+character strings. It is used to store and retrieve any string that a program
+might use, both for identifying scope symbols, run-time functions, fields
+etc. It is also the place where compilers must store strings that are used in
+ordinary program logic. Strings in the string table must be unique, both because
+it is redundant to store duplicates and because it enables the machine to
+compare strings for equality simply by comparing their indices. That saves a lot
+of look up operations which would otherwise sum up to a significant performance
+cost.
 
 Rather than using the regular UTF-8 encoding standard, we have chosen a
 derivative version named Modified UTF-8. This encoding has the UTF-8 character
 {\tt U+0000} encoded as the bytes {\tt 0xC0}, {\tt 0x80}, rather than a null
 byte ({\tt 0x00}). This enables functions to interpret UTF-8 strings as regular
-null-terminating strings, like the C programming language.
+null-terminating strings, like the C programming language. %TODO wat?
 
-% TODO does it contain types?
 Next is the constant table that contains any type of value for use in
 programs. Values are retrieved by a program by use of the \instr{pushConstant}
 instruction which takes an index into the table and pushes the value onto the
@@ -232,38 +215,30 @@ in the default \code{Int8} argument type nor the large \code{Int32} enabled by
 the \code{large} prefix. Constant entries can be arbitrarily large and can thus
 also be used to store array literals. In some cases a compiler will be able to
 optimize the total code size by storing recurring constant values in the
-constant table rather than inlining them in instruction.
+constant table rather than inlining them in instructions.
 
 The last and most complex table is the meta-data table. It contains information
 about all types, sub-routines and fields. All entries are represented in the
 DWARF debugging format (explained in Section~\ref{sec:design:types:dwarf}) which
 is parsed by the machine into internal data structures. Meta-data is retrieved
-like constants, by use of the \instr{pushMeta} instruction.
-%TODO more
+similar to constants, by use of the \instr{pushMeta} instruction.
 
-The three tables together are similar to JVMs concept of a constant pool that
-``... contains several kinds of constants, ranging from numeric literals known
+These three tables together are similar to JVMs concept of a constant pool that
+``[...] contains several kinds of constants, ranging from numeric literals known
 at compile-time to method and field references that must be resolved at
 run-time.''\cite[Section 2.5.5]{jvm-spec}.
 
 \subsection{Stack Management}
 \label{sec:design:stack-mgmt}
-%% Basic
-%% Stack vs. Register
-%%% (see background)
-%% Threaded
-%% Stack element
-%%% Type
-%% Manipulation (instr)
 
-A stack is an abstract data type, fundamental in the fields of algorithms and
-computer science. At its core, it is a very simple model consisting of two
-essential functions, {\it push} and {\it pop}, as visualized in
-figure~\ref{fig:stack}. Push adds an element to the top of a stack, while pop
-removes the top most element. As an analogy, imagine a pile of dishes: when
-adding a new dish it becomes the new top-most dish in the pile. This sequence of
-adding and taking from a collection of element is called Last In, First Out
-(LIFO).
+A stack is an abstract data structure, fundamental for many fields of computer
+science. At its core it is a simple model consisting of two essential functions,
+{\it push} and {\it pop}, as visualized in figure~\ref{fig:stack}. Push adds an
+element to the top of a stack, while pop removes the top-most element. As an
+analogy, imagine a pile of dishes: when adding a new dish it becomes the new
+top-most dish in the pile, and you can only remove the most recently added
+dish. This sequence of adding and removing from a collection of elements is
+called Last In, First Out (LIFO).
 \begin{figure}[h]
   \centering
   \includegraphics[scale=0.6]{images/stack.png}
@@ -271,48 +246,27 @@ adding and taking from a collection of element is called Last In, First Out
   \label{fig:stack}
 \end{figure}
 
-% The stack was first introduced in 1946 by Alan Turing, while he was working on
-% the Automatic Computing Engine (ACE)~\footnote{Automatic Computing Engine (ACE):
-% \url{http://en.wikipedia.org/wiki/Automatic_Computing_Engine}} at the National
-% Physical Laboratory (NPL)~\footnote{National Physical Laboratory:
-% \url{http://en.wikipedia.org/wiki/National_Physical_Laboratory_(United_Kingdom)}}
-% in the UK:
-% \begin{quote}
-%   [Alan Turing] outlined a method for leaving one line of work being carried out
-%   on the computer, calling up a subsidiary line, and then returing to the first
-%   line when finished with the subsidiary line. He called the calling up and
-%   returning routines BURY and UNBURY.~(\textcite[82]{newton})
-% \end{quote}
-% Here, BURY and UNBURY are synonymous with push and pop.
-
-% @book{newton,
-% author    = "David E. Newton",
-% year      = 2003,
-% title     = "Alan Turing : a study in light and shadow",
-% publisher = "[Philadelphia]: Xlibris",
-% ISBN      = 9781401090791
-% }
-
-Although, essentially, one cannot take the second element from top without first
-removing the top most element, the model can easily be modified to support such
-operations. For instance, a common stack operation is {\it peek}, which reads
-the value of the top element without actually removing it. This can easily be
-done by popping, storing the value and pushing it back to the stack. Other
-operations can be implemented in a similar fashion. %TODO: thats not how we actually do it
+Although one cannot pop the second element from the top without first removing
+the top most element, the model can easily be modified to support such
+operations. For instance, a common stack operation is that of reading the value
+of an element a number of slots into the stack without modifying anything, known
+as {\it peeking}.
 
 \subsubsection{Stack vs. Register Machine}
+
 Machines can implement the stack model virtually and execute it directly in
 hardware, but as we are designing an abstract machine, we will only discuss the
 virtual aspect. Regardless, such a machine is commonly called a \term{stack
-  machine}.
+  machine}. %TODO forvirrende
 
 The most common notation in arithmetic formulas and statements are the infix
 notation, where the operator is written between its operands: $1 + 2$. One can
 express the same statement with prefix notation, also called \term{Polish
-  notation}: $+\ 1\ 2$. When programming stack machines, one uses what is called
-the \term{reverse Polish notation}, which is in fact postfix notation:
-$1\ 2\ +$. By using this notation, one can easily convert this into stack
-operations, where $1\ 2\ +$ becomes:
+  notation}: $+\ 1\ 2$, a style commonly used in the family of Lisp
+languages. When programming stack machines, one uses what is called the
+\term{reverse Polish notation}, which is in fact postfix notation: $1\ 2\ +$. By
+using this notation, one can easily convert this into stack operations, where
+$1\ 2\ +$ becomes:
 \begin{stackops}
   \op{push 1}{1}
   \op{push 2}{2,\ 1}
@@ -323,56 +277,55 @@ Here the {\tt add} operation pops two elements, adds them together and pushes
 the result back onto the stack.
 
 As briefly discussed in Section~\ref{sec:background:stack-vs-register}, a
-register machine TODO
+register machine TODO %XXX
 
 \subsubsection{Stack Organization}
-% All stacks will initially have a single activation frame
 
 Stacks in \thename{} are unbounded, meaning that they can be arbitrarily large
-and that stack overflows never can occur (if the machine runs out of memory
+and that stack overflows can never occur (if the machine runs out of memory
 entirely it is treated as a memory error, not a stack overflow). Throughout the
 report, we will say that the stacks \term{grows downwards}. This is because
-physically, the top most element of the stack is located at a low address in the
-host computers memory. Therefore, as more elements are pushed to the stack, they
-will get higher addresses, making the stack grow downwards in memory.
+physically, the top most element of the stack is located at the highest address
+in memory. Therefore, as more elements are pushed to the stack, they will get
+higher addresses, making the stack grow downwards in memory.
 
-A stack element will consist of some type information along with the actual data
-bytes. The type information consist of a declared type, but also an actual
-type. For statically typed languages, these will most likely (TODO: ?) be the
-same. For dynamic languages this is required to keep track of an element's type,
-as it is allowed to assign a value type an element, which was originally
-declared with an other type.
+A stack element consists of some type information along with the actual data
+bytes. The type information consists of a declared type and an actual type. For
+statically typed languages, these will most likely be the same. For dynamic
+languages this is useful for keeping track of an element's type, as it, in some
+cases, is allowed to assign a value to an element which is different from the
+originally declared type.
 
 \subsubsection{Stack Manipulation}
-As mentioned above, there will we instructions for doing simple stack
-manipulations, for instance {\tt push} and {\tt pop}. As we will see later,
-these two instructions alone will be very limiting, and make the job of writing
-a compiler very tedious. Therefor, we will need more instructions, making more
-complex manipulations more convenient.
+
+As mentioned above, there are instructions for doing simple stack manipulations
+such as {\tt push} and {\tt pop}. As we will see later, these two instructions
+alone are very limiting, and make the job of writing a compiler very
+tedious. Therefore we will need more expressive instructions that simplifies
+complex stack manipulations.
 
 When we later describe the execution model of the machine, we will see that we
 need instructions for pushing an popping elements further up the stack. For
-instance, if we want to access the arguments given to a subroutine, they will be
-located up the stack. The compiler will therefor need an effective method of
-duplicating that element onto the top of the stack, making is accessible for
-further computation. Also it will need to push an element to a specific position
-up the stack, effectively returning a value to the caller.
+instance, if we want to access the arguments given to a sub-routine, they will
+be located upward in the stack. The compiler will need an effective method of
+duplicating those elements onto the top of the stack, making is accessible for
+further computation. Also it will need to push an element back to a specific
+position up the stack, i.e.~replacing elements, effectively returning a value to
+the caller.
 
-Such versions of the push and pop operations will take an displacement argument,
-saying how many places up the stack it is to push to or pop from. To make this
+Such versions of the push and pop operations will take a displacement argument,
+defining how many places up the stack it is to push to or pop from. To make this
 as convenient as possible, the displacement will be from the top of the stack,
-meaning displacement 0 will be the top of the stack. Exception handling will
-have to be utilized when using a displacement which is not allowed, for instance
-outside the stack or its own scope.
+meaning displacement 0 will be the top of the stack, 1 is the second to the top
+element and so on.
 
-Lets call these two instructions {\tt pushElement} and {\tt
-  storeElement}. Unlike {\tt push}, which adds a new element to the stack, the
+In addition to {\tt push}, which adds a new element to the stack, the
 specification defines {\tt pushElement} to overwrite the element at the given
 displacement. This is more convenient as this does not change the displacement
 of the following elements, though it requires some planning, as there will have
 to be an element on the stack with the purpose of being overwritten. {\tt
   storeElement} will pop of the top-most element and place it at the given
-displacement.
+displacement. %TODO forvirrende
 
 Also, unlike our previous stack example, the {\tt push} instruction, or rather
 the {\tt pushElement} instruction, will not take a value as an argument. Rather
@@ -387,101 +340,90 @@ Here we can see some simple operations using the {\tt pushElement} and {\tt
   \op{pushElement 0}{3,\ 1,\ 1,\ 3}
 \end{stackops}
 
+%XXX jeg synes at hele det her afsnit mangler noget arbejde
 
 \subsection{Threading}
 \label{sec:design:threading}
+
 Big chip manufacturers like Intel, have always been under big pressure to
 deliver ever faster processors, year after year. For around the last decade, the
-technological development of processors has been focused adding cores rather
+technological development of processors has been focused on adding cores rather
 than increasing the clock speed, which already started to stagnate around
-2004~\cite{sutter}. With multiple processors, or popularly called a multi-core
-processor, processes may actually run in parallel, i.e. running at the same
-time, rather than just concurrently where multiple processes actually share the
-same processor.
+2004~\cite{sutter}. With multiple cores per processing unit, popularly called a
+multi-core processor, processes may actually run in parallel, i.e.~running at
+the same time, rather than just concurrently where multiple processes actually
+share the same processor.
 
+%TODO what?@første sætning
 A thread is typically the smallest unit of executable instructions by a
-processor. A process being run by an operating system therefore had one thread
-which the operating systems scheduler delegated CPU time to. With multi-core
-processors, the notion of a single process having multiple threads arose, making
+processor. A process being run by an operating system therefore has one thread
+which the operating system's scheduler delegates CPU time to. With multi-core
+processors, the notion of a single process having multiple threads arose,
+making %XXX
 
 Although multi-threading is a very interesting feature, it also raises a lot of
-challenges when designing machines. Different threads cannot directly read and
-write to the same place, or address, in memory without taking data races into
-account, which is a common mistake when writing multi-threaded programs. If
-multiple threads are reading and writing to the same memory, it is impossible
-for the threads to base any logic on it, as another thread can change its value
-at any time, effectively pulling the rug from under you. This problem as been
-named the mutual exclusion problem, and is solved by using synchronization
-structures.
+challenges when designing the execution model. Different threads cannot directly
+read and write to the same location, or address, in memory without taking data
+races into account, which is a common mistake when writing multi-threaded
+programs. If multiple threads are reading and writing to the same memory, it is
+impossible for the threads to base any logic on it, as another thread can change
+its value at any time, effectively pulling the rug from under you. This problem
+as been named the mutual exclusion problem, and is solved by using
+synchronization structures.
 
-Our machine will both support threading and synchronization structures
-therefor. As we are using a stack machine, each thread has to have its own
-state, including its own stack. In other words, all stacks are private and
-cannot be shared across threads. This can though be facilitated by using heap
-object which are referenced from multiple threads' stack.
-
-\subsubsection{Tasks and Transactions}
-TODO
-% Multiple executables may execute simultaneously.
-% Task and transaction semantics is supported. A transaction is considered
-% executed by the thread starting it. A spawned task is independent of the spawn-
-% ing thread and may be executed by the spawning thread or some other thread.
-% However, tasks will not migrate between threads so the thread which started
-% execution of a task will also complete the task.
-
-% Tasks do not share stacks with the spawning thread, spawning task, or any
-% other task. Implementations may, however, execute tasks using the stack of the
-% executing thread. The executed task is not allowed to access any stack space
-% beyond its initial set of stack elements. The implementation must throw an
-% exception if any such offending access is attempted.
+\thename{} supports threading and synchronization structures therefor. As we are
+using a stack machine, each thread has to have its own state, including its own
+stack. In other words, all stacks are private and cannot be shared across
+threads. This can however be facilitated by using heap object which are
+referenced from multiple threads' stack.
 
 \subsubsection{Thread Pool}
+
 Creating and destroying system threads is not free. If a new thread is created
-on demand, it would create significant overhead. Another problem with this model
-is the risk of resource thrashing. If there is no limit on the number of threads
+on demand it would create significant overhead. Another problem with this model
+is the risk of resource thrashing. If there is no limit to the number of threads
 that can be created, it can intentionally or unintentionally be exposed to heavy
 abuse. A solution to both of these challenges is having what is called a
-\term{thread pool}. On machine initialization, a set number of threads is
+\term{thread pool}. Upon machine initialization, a fixed number of threads is
 pre-initialized and stored in a data structure. When a thread tries to spawn a
-new thread, it is given one from the thread pool. If the thread pool is empty,
-it has to wait for a thread to become vacant.
+new thread, it is given one from the thread pool, and if the thread pool is
+empty, it has to wait for a thread to become vacant.
 
 This model, although effective, also brings with it some
-challenges. Specifically, when the thread pool is empty. The spawning thread
-cannot stop and wait until a new thread is vacant, as this would block the whole
-thread. Rather, the machine will use a work queue. A work queue manages the
-thread pool so other threads does not need to wait for a thread to become
-vacant, and thereafter fight with each other of whom gets to take it. The
+challenges. Specifically, when the thread pool is empty, the spawning thread
+cannot stop and wait (busy-waiting) until a new thread is vacant, as this would
+block the whole thread. Rather, the machine will use a work queue, which manages
+the thread pool so other threads does not need to wait for a thread to become
+vacant, and afterwards fight with each other about whom gets to take it. The
 spawning threads would give the task which it wants run in a new thread, to the
 work queue. The queue would monitor the thread pool and as soon as a thread
-becomes free, it would take the task first in the work queue and run in.
+becomes free, it would take the task first in the work queue and run in. This is
+called scheduling and constitutes a whole field of research per s\'e.
 
 \subsubsection{Errors and Exceptions}
+
 Two types of errors can occur; internal errors in the machine and errors
-produced by the program the machine is executing. Internal errors will most
+produced by the program that the machine is executing. Internal errors will most
 likely occur in some child thread and not in the process' original thread. If
-that is the case we would stop that thread and gracefully stop the machine if it
+that is the case we can stop that thread and gracefully stop the machine if it
 cannot safely continue. If the error occurs in the process' original thread, we
-will in most cases still be able to catch the signal sent by the OS and
-gracefully stop.
+will in most cases still be able to catch the signal sent by the OS and exit
+gracefully.
 
 When the program being executed produces an \term{exception} it will percolate
-up through a defined set of exception handlers until it is handled. If there is
-no way of handling the exception it called an uncaught exception. It that case
-the machine will print some information on the exception and stop. It will not
-attempt to join all threads (TODO) as it cannot know how long this will
-take. Therefore all threads are exited and memory is freed, ensuring no memory
-leaks.
-
-TODO: Exception handling
-
+up through a defined set of user-defined exception handlers until it is
+handled. If there is no way of handling the exception it is called an uncaught
+exception, and the machine will print some information on the exception and
+stop. It will not attempt to join all threads (TODO) as it cannot know how long
+this will take. Therefore all threads are exited and memory is freed, ensuring
+no memory leaks.
 
 \subsection{Types}
 \label{sec:design:types}
 
 The type system of \thename{} aims to enable efficient implementation of both
 dynamically and statically typed languages. That gives rise to a need for an
-adaptable system that is capable of describing arbitrarily complex types along
+adaptable system that is capable of expressing arbitrarily complex types along
 with potential storage layout information for languages that require explicit
 memory layout of objects. Moreover the system must be flexible and modifiable
 during run-time, e.g.~to allow dynamic languages to add and remove members of an
@@ -490,26 +432,27 @@ object while still being able to properly type check the code.
 \subsubsection{DWARF}
 \label{sec:design:types:dwarf}
 
-Types are expressed in the DWARF format\cite{dwarf}. DWARF is a format mainly
+Types are expressed in the DWARF format\cite{dwarf} which is a format mainly
 used to describe debug information for executable files, essentially by
 describing the source code of a program and mappings into to the compiled
 binary. It is used in many modern compilers\footnote{Usages include GCC, Clang
   and Go} and is commonly used in combination with ELF binaries. It provides a
-method to describe everything from source code locations, scopes, exception
-handling, compilation units, linking information, etc. The primary building
-block of DWARF information is the Debug Information Entry (DIE). It consists of
-a DWARF tag that describes the kind of entry, and a set of attributes that
-further defines the characteristics of an entry. Tags and attributes can be
-nested which enables types to be as intricate as necessary. It is worth to
-mention that DWARF is simply a \emph{format}, and while there are libraries to
-help read and write the format, they are not part of the DWARF specification.
+way to describe everything from source code locations, scopes and exception
+handling to compilation units, linking information and shared libraries. The
+primary building block of DWARF information is the Debug Information Entry
+(DIE). It consists of a DWARF tag that describes the kind of entry, and a set of
+attributes that further defines the characteristics of an entry. Tags and
+attributes can be nested which enables types to be as intricate as necessary. It
+is worth mentioning that DWARF is simply a \emph{format} specification, and
+while there are libraries to help read and write the format, they are not part
+of the DWARF specification.
 
 We do not use the full set of features provided by DWARF, rather we only use
 DIEs for type information in ELF files. We would most likely also use DWARF to
-facilitate proper debugging, but that is beyond the scope of this thesis.
+facilitate proper debugging, but that is beyond the scope of this project.
 
-DWARF DIEs are tree structures and we will use indention based notation to
-present them. Listing~\ref{lst:design:dwarf:basic} shows how we can use DWARF to
+DWARF DIEs are tree structures for which we will use indention based notation to
+present. Listing~\ref{lst:design:dwarf:basic} shows how we can use DWARF to
 express a 32-bit signed integer. Note that the name ``int'' has no special
 meaning in DWARF, but consumers of DWARF may put special meaning into names.
 
@@ -529,12 +472,12 @@ and will usually be a leaf in the DWARF tree. For types that \emph{are}
 compound, the approach is to store DIEs in an indexed table and reference types
 by their index location in the table. In the above, the type's index is
 designated by the \code{<1>}. By doing this no type ever has to be duplicated,
-because any other types simply reference the same index. Tags start with the
+because any other type can simply reference it by its index. Tags start with the
 \code{DW\_TAG\_} prefix while attributes use \code{DW\_AT\_}, all of which are
 simply names for integer constants defined by the DWARF specification.
 
 Listing~\ref{lst:design:dwarf:complex} shows a more complex example with a
-subprogram (i.e.~a subroutine) that returns a pointer to the integer type
+subprogram (i.e.~a sub-routine) that returns a pointer to the integer type
 defined above.
 
 \begin{lstlisting}[
@@ -552,28 +495,28 @@ defined above.
 \end{lstlisting}
 
 It is shown how type \code{<2>} is defined as a pointer to the type \code{<1>},
-which in C lingo is \code{int*}. Type \code{<3>} defines a subroutine whose name
-is ``foo'' and returns a \code{<2>}, again in C lingo that would be \code{int
-  *foo()}. This is the fundamental way that the DWARF format expresses types; it
-is simple but very flexible and powerful.
+which in C lingo would be \code{int*}. Type \code{<3>} defines a sub-routine
+whose name is ``foo'' and returns a \code{<2>}, again in C lingo that would be
+\code{int (*foo)(void)}. This is the fundamental way that the DWARF format
+expresses types; it is simple but very flexible and powerful.
 
 There are scores of attributes and tags defined in the specification, but we do
 not nearly use all of them. Because the format is so simple it is easy to add
-new tags and attributes, simply by defining a new tag or attribute and a
-corresponding numeric constant and documenting it. \thename{} defines some tags
-TODO.
+new tags and attributes by defining a name for the new entry and a corresponding
+numeric constant and documenting it.
 
 DWARF DIEs are, as mentioned, tree structures which is effective for expressing
-types but is not very compact for storage,and can result in potentially unwieldy
-data. There are more than one way to store the tree structure in a compact
-manner, one of which we will describe here. TODO (which one does bfd use?).
+types but is not very compact for storage, and can result in potentially
+unwieldy type data. There are more than one way to store the tree structure in a
+compact manner, one of which we will describe here. %XXX fjern eller skriv om
+                                                    %LEB128
 
 \subsubsection{\thename{}'s Types System}
 
 \thename{} provides a set of built-in types, encompassing both primitive types
 as well as references, arrays and composite types. Further there is the concept
 of a meta kinds which essentially wraps type definitions, type references,
-subroutines, etc.~into a unified meta-data kind which are all stored in a single
+subroutines, etc.~into a unified metadata kind which are all stored in a single
 table in the executable.
 
 Compilers can map their primitive types to the ones provided by \thename{}, and
@@ -588,84 +531,82 @@ Below is a description of the various kinds of simple types provided.
   integer numbers. E.g. {\tt Int32} and {\tt UInt16}.
 
 \item[Boolean] \hfill\\
-  A {\tt Boolean} type with the values `true` or `false`.
+  A {\tt Boolean} type with the value `true` or `false`.
 
 \item[Floating point values] \hfill\\
-  32-bit or 64-bit floating point numbers, in the IEEE 753-1985 or IEEE 755-1985
-  standard representation, respectively named {\tt Ieee32} and {\tt Ieee64}.
+  32-bit or 64-bit floating point numbers, in the IEEE~753-1985 and
+  IEEE~755-1985 standard representation, respectively named {\tt Ieee32} and
+  {\tt Ieee64}.
 
 \item[Address] \hfill\\
   Unsigned integer value representing a memory address, named {\tt
-    Address}. This is considered unsafe, and will therefore only be possible in
-  code declared as `unsafe`.
+    Address}.
 
-\item[Abstract] \hfill\\
-  Type which can take any value at run-time, named {\tt AnyType}. Large values
-  will be boxed on the heap to make space for it.
+\item[Abstract types] \hfill\\
+  A type which can take any value at run-time, named {\tt AnyType}. Large stack
+  initialized values will be boxed on the heap to make space for it.
 \end{description}
 
 % reference
 
 The machine has a set of reference types, with the most fundamental being the
 {\tt Reference <t>} type. This allows heap objects to be referenced from the
-stack. As the name suggests, it will take a type of the object it referenced as
-argument. In the opposite scenario, there is a {\tt StackReference <t>} type,
-allowing passing references directly to stack references. This type may not be
-boxed, nor passed to threaded tasks. This will save programs from major pitfalls
-in concurrent programs (?).
+stack. It is an example of a compound type that defines the type of the object
+it references by referring to another type definition. In the opposite scenario,
+there is a {\tt StackReference <t>} type, allowing passing of references
+directly to stack references.
 
-To support variable argument calling conventions, letting a subroutine take an
-arbitrary number of arguments, a special reference type is needed. This is done
-through an {\tt ArgumentReference}, allowing a subroutine to iterate over its
-given arguments. Also, to referencing a subroutine will be done through a {\tt
-  CodeReference <signature>}, taking the signature which it implements. This is
-a meta type, described below.
+To support variable argument calling conventions, i.e.~letting a sub-routine
+take an arbitrary number of arguments, a special reference type is needed. This
+is done through an {\tt ArgumentReference}, allowing a sub-routine to iterate
+over its given arguments.
 
 % arrays
 
-The machine supports two types of arrays; a static and a dynamic type. Both will
-be generic, taking the type of its values. This could be to other arrays,
-allowing an array to be multi-dimensional. The static variant will also take a
-lower and higher limit of values, aptly named {\tt StaticArray
-  <t><lowerLimit><higherLimit>}. The dynamic variant will not take the limits,
-as therefore named {\tt DynamicArray <t>}. To allow it to grow dynamically, it
-will be instanced and put on the heap. It will therefore be referenced through a
-{\tt Reference} type.
+\thename{} supports two types of arrays; a static fixed length and a dynamically
+sized kind. Both are compound types that define the type of its elements. This
+could be to other arrays, allowing an array to be multi-dimensional without
+specialized types. The static variant additionally defines a lower and upper
+index of available slots. The dynamic variant does not define those limits
+because it can grow dynamically during run-time because of which it will be
+always be located on the heap. It will therefore be referenced through a {\tt
+  Reference} type.
 
 % composite
 
-To support custom types, similar to a struct in the C programming language,
-there will be a {\tt Composite <t+>} type. This will take an arbitrary number of
-type arguments, describing its member. Though not visible from the type
-signature, each member will have a name, allowing for convenient referencing (TODO).
+To support custom types, similar to a struct in C, there is a {\tt Composite
+  <t+>} type. This is a collection of an arbitrary number of other types,
+describing its member. Though not visible from the type signature, each member
+has a name, allowing for convenient referencing.
 
-Lastly, the machine will have a set of meta types, describing types by them
-selves. These include {\tt Type}, {\tt Signature} and {\tt TypeSignature}. (TODO)
+Lastly, the machine has a set of meta types, describing types by them
+selves. These include {\tt Type}, {\tt Signature} and {\tt
+  TypeSignature}. %XXX
 
 \subsection{Instruction Set Architecture}
 \label{sec:design:isa}
 
 The interface by which compilers and programmers interact with \thename{} is
 defined by the Instruction Set Architecture (ISA). It is the language that the
-machine understands and provides the means to utilize all of the above described
+machine understands and provides the means to utilize all of available
 functionality. It is exactly the same as the x86 instruction set is to the x86
 CPU architecture.
 
-The \thename{} ISA is a set of instructions which are relatively low-level, as
+The \thename{} ISA is a set of instructions which are relatively high-level, as
 compared to ordinary hardware implemented instruction sets. The abstraction
-level of the \thename{} is aimed at being high enough for uncomplicated
+level of the \thename{} is aimed at being high enough for straightforward
 implementation of high-level constructs but low enough for efficient code
-generation. It can be divided into four overarching categories of functionality,
-namely stack manipulation, numeric operations, control flow and heap related
-instructions.
+generation and execution. It can be divided into four overarching categories of
+functionality, namely stack manipulation, numeric operations, control flow and
+heap related instructions.
 
 Most instructions require one or more parameters that define the exact behavior
 of execution. By default, the arguments are read from the byte code stream, but
 several instructions have \emph{indirect} variants that read one or more of
 their arguments from elements on the stack instead of from the byte code
 stream. This enables much more flexible and dynamic programs because arguments
-to an instructions can be computed at run-time rather than having to statically
-determine arguments.
+to an instructions can be computed at run-time rather than having to be
+statically determined.
 
 There is a set of instruction \emph{prefixes} that modify how an instruction is
 interpreted in terms of arguments, safety and exception handling. Technically
@@ -673,8 +614,8 @@ they are simply predefined byte values that are parsed before an instruction is
 executed. For instance, integer arguments are by default read as 8-bit values,
 but may be extended to 32-bits by providing the \code{large} prefix. Another
 prefix, \code{noOverflow}, will make overflowing arithmetic throw an
-exception. Prefixes generally only take effect for a single instruction and are
-reset at the end of an execution cycle.
+exception. Prefixes only take effect for a single instruction and are reset at
+the end of every instruction cycle.
 
 The following describes each of the four categories of instructions in detail
 and highlights some of the most interesting examples.
@@ -685,12 +626,12 @@ The stack manipulating instructions facilitate the functionality described in
 Section~\ref{sec:design:stack-mgmt}. It can be argued that all instructions are
 stack manipulations since almost every instruction will leave the stack
 changed. However we define stack manipulations as the instructions that either
-add or remove an element on the stack without causing \textit{side effects}. A
-side effect is essentially anything that results in changes in the heap. Control
-flow and numeric instructions are not considered stack manipulations either.
+add or remove an element on the stack without causing \textit{side effects},
+which is essentially anything that results in changes in the heap. Neither
+control flow nor numeric instructions are considered stack manipulations.
 
 The stack manipulating instructions mostly consist of set of push-instructions
-that push values onto the stack. What that values represents and how it is
+that push values onto the stack. What that values represent and how it is
 obtained differs between the individual instructions, the most fundamental of
 which are described below.
 
@@ -724,11 +665,10 @@ which are described below.
 \item[\instr{pushMeta}:]
 
   Metadata is, as mentioned in Section~\ref{NEEDED}, a wrapping kind
-  encompassing type information, field information and sub-routine
-  information. The \instr{pushMeta} takes an index into the metadata table and
-  places the corresponding value on the stack. This is required for many of the
-  indirect instruction variants, eg.~where a type reference is read from the
-  stack.
+  encompassing type-, field- and sub-routine information. The \instr{pushMeta}
+  takes an index into the metadata table and places the a metadata reference on
+  the stack. This is required for many of the indirect instruction variants,
+  eg.~where a type reference is read from the stack.
 
 \item[\instr{pushUninitialized}:]
 
@@ -736,7 +676,7 @@ which are described below.
   stack according to the type. The value of the element is initialized to 0
   regardless of the type, meaning that it is not guaranteed to be a valid value
   before properly initialized. A use case is for allocating local variables and
-  out parameters (for return values) for use in sub-routines.
+  ``out'' parameters for return values in sub-routines.
 
 \item[\instr{pop}:]
 
@@ -748,21 +688,21 @@ which are described below.
 \subsubsection{Numeric and Logical Operations}
 
 \thename{} supports the usual range of logic operations including \emph{and},
-\emph{or}, \emph{xor} and bit-wise shifts along with the arithmetic operations
-of addition, subtraction, multiplication, division and remainder. Unlike JVM we
-only provide a single instruction per operator which takes care of proper type
-detection and potential conversion. That makes it much simpler to write generic
-arithmetic code without having to create specialized versions for each
-combination of types.
+\emph{or}, \emph{xor}, negation and bit-wise shifts along with the arithmetic
+operations of addition, subtraction, multiplication, division and
+remainder. Unlike JVM we only provide a single instruction per operator which
+takes care of proper type detection and potential conversion. That makes it much
+simpler to write generic arithmetic code without having to create specialized
+versions for each combination of types.
 
-The \instr{shl} and \instr{shr}, for shift left and shift right, performs logical
-shifts. That is, they displace shift bits in the given direction and simply pads
-with 0-bits in the opposite direction. The \instr{ashr} instruction performs an
-\textit{arithmetic shift} to the right which means that the sign-bit of an
-integer value is extended. The sign-bit is simply the left-most bit (we are
-using big endian representation) and is extended regardless of the sign of the
-type. In effect that gives the following results (number are in binary
-representation):
+The \instr{shiftLeft} and \instr{shiftRight}, for shift left and shift right,
+performs logical shifts. That is, they displace bits in the given direction and
+simply pads with 0-bits in the opposite direction. The \instr{arithmeticShift}
+instruction performs an \textit{arithmetic shift} to the right which means that
+the sign-bit of an integer value is extended. The sign-bit is simply the
+left-most bit (we are using big endian representation) and is extended
+regardless of the sign of the type. In effect that gives the following results
+(number are in binary representation):
 \[
 0b1001 shl 2  = 0b0100 \\
 0b1001 shr 2  = 0b0010 \\
@@ -770,35 +710,35 @@ representation):
 \]
 
 It is worth noting that we do not provide an arithmetic left shift instruction
-because it is mostly redundant since there is right-most bit is insignificant
-and does not usually make sense to extend.
+since it is mostly redundant because the right-most bit is insignificant and
+does not usually make sense to extend.
 
-Numeric values can be converted other numeric types using the \instr{convert}
+Numeric values can be converted to other numeric types using the \instr{convert}
 instruction. It takes a type as a parameter and will convert a value on the
 stack to the provided one. The \instr{convert} instruction is only defined for
-numeric values and is thus not meant or able to be used for converting and
-casting any other type.
+numeric values and is thus not meant or able to be used for converting or
+casting composite or reference types.
 
-In addition all arithmetic instruction have so-called saturated variants which
-compute values that are saturated within the bounds of a given type in case of
-overflowing or underflowing results. Consider adding the values $255$ and $2$
-both as unsigned 8-bit integral values (UInt8). The maximum value of a UInt8 is
-$255$ meaning that $255+2=257$ will result in an overflow. Using the normal
+All arithmetic instruction have so-called saturated variants which compute
+values that are saturated within the bounds of a given type in case of
+overflowing or underflowing results. Consider adding the values $255$ and $2$ as
+8-bit unsigned integral values (UInt8). The maximum value of a UInt8 is $255$
+meaning that $255+2=257$ will result in an overflow. Using the normal
 \instr{add} instruction the result will be truncated to $1$ because the excess
 bytes are ignored, but with the saturated variant the result will remain $255$
 because the overflow is detected and the value is capped at the maximum
 possible. The same is true for underflowing values with both signed and unsigned
 values.
 
-% TODO: the names of the ops might change with new specs
 The last form of numeric operation is comparison of values. We provide the usual
-equality (\instr{ceq}), less-than (\instr{clt}) and greater-than (\instr{cgt})
-checks, each of which pushes a boolean value describing the result back onto the
-stack. Comparing to zero is a fairly common operation so to avoid the need for
-pushing the value $0$ on the stack we provide variants of each comparison
-instruction that only takes a single argument and compares it to zero. Another
-common comparison is that of a null-reference, i.e.~a reference that points to
-nothing for which we provide the instruction \instr{cmpnull}.
+equality (\instr{compareEqual}), less-than (\instr{compareLessThan}) and
+greater-than (\instr{compareGreaterThan}) checks, each of which pushes a Boolean
+type value describing the result back onto the stack. Comparing to zero is a
+fairly common operation so to avoid the need for pushing the value $0$ on the
+stack we provide variants of each comparison instruction that only takes a
+single argument and compares it to zero. Another common comparison is that of a
+null-reference, i.e.~a reference that points to nothing for which we provide the
+instruction \instr{compareNull}.
 
 \subsubsection{Heap Related Instructions}
 
@@ -816,17 +756,16 @@ must be executed so as to mark the object ready for garbage collection. Note
 that releasing an object does \emph{not} free its memory region, but rather
 ``releases'' the object into the hands of the garbage collector. This pattern is
 similar to how Objective-C manages object creation, namely by use of the
-\code{alloc} and \code{init} methods, which allocates and initializes an object
-it, respectively.
+\code{alloc} and \code{init} methods, which allocates and initializes an object,
+respectively.
 
 There is a whole family of instructions for getting and setting fields of
 objects, which correlates to the members of a composite type. The general
-structure of field instructions is the same, the difference lies in \emph{where}
-the field is retrieved from. Fields can be retrieved from any location that
-defines a composite type, which means either a stack element, heap object or the
-global scope. Following is the description of the simplest forms, namely the
-global scope, but the information applies to the whole set of field
-instructions:
+structure of field instructions is the same, the difference lies in where the
+field is retrieved from. Fields can be retrieved from any location that defines
+a composite type, which means either a stack element, heap object or the global
+scope. Following is the description of the simplest forms, namely the global
+scope, but the information applies to the whole set of field instructions:
 
 \begin{description}
 
@@ -847,7 +786,7 @@ Finally there is the \instr{box} and \instr{unbox} instructions that are used to
 move values between the stack and the heap. \instr{box} takes value and moves it
 to the heap by wrapping it in a heap object. The type of the heap object will be
 the same as the value's type but wrapped in a reference type. Correspondingly,
-\instr{unbox} takes a reference to a heap object, unpacks it's value and pushes
+\instr{unbox} takes a reference to a heap object, unpacks its value and pushes
 it onto the stack with the type that the consumed reference was referencing.
 
 \subsubsection{Control Flow}
@@ -857,8 +796,8 @@ it onto the stack with the type that the consumed reference was referencing.
 form of control flow are simple branching instruction. We provide three distinct
 ones all of which take a target address from where execution should
 continue. The target address must lie within the currently executing
-sub-routines address bounds, otherwise the operation is considered
-illegal. The simple branching instructions are:
+sub-routine's address bounds, otherwise the operation is considered illegal. The
+simple branching instructions are:
 
 \begin{description}
 
@@ -868,7 +807,8 @@ illegal. The simple branching instructions are:
 
 \item[\instr{brtrue}:]
 
-  Branches to the provided target address if the top of the stack is a truthy boolean value.
+  Branches to the provided target address if the top of the stack is a truthy
+  boolean value.
 
 \item[\instr{brfalse}:]
 
@@ -877,12 +817,11 @@ illegal. The simple branching instructions are:
 
 \end{description}
 
-% TODO: example scenario of `call' use (switch-like statement?)
 Sometimes it is useful to be able to return to the call site, but without the
 overhead and added complexity of proper sub-routines. This is supported via the
 \instr{call} instruction which works like the unconditional branch, \instr{br},
-with the addition that control will be handed back upon execution of
-\instr{return}.
+with the addition that control will be handed back upon execution of a
+\instr{return} instruction.
 
 Finally there are proper sub-routines which are defined in the executable file
 and can be looked up during run-time by their id. The fundamental instruction
@@ -905,7 +844,7 @@ arbitrarily deep recursion. Activation elements are stored on the stack and the
 happen in a First-In-First-Out manner.
 
 For performance critical scenarios we provide a switch/case instruction that
-does constant time case branching by using a jump table. The concept is
+does constant time case branching by means of a jump table. The concept is
 relatively simple and is an example of a variable-length instruction. The
 \instr{switch} instruction has the following format:
 
@@ -935,51 +874,6 @@ instructions, but the general criteria is that functionality that is
 library rather than instructions. Run-time functions are invoked in the same way
 as user-defined sub-routines so compilers do not have to take special measures
 and distinguish between them.
-
-% local vars
-% sub-routines
-
-% Examples of how to map things to our model ()
-%% Classes
-%% Inheritance
-%% HoF
-%% Polymorphism
-
-% Type system
-%% Representation (DWARF)
-%% Typed instructions
-%% Run-time type checking
-%% Dynamic types
-%%% !!!
-
-% Executable format
-%% ELF
-%%% It's tried-and-true
-%%% Everybody else uses it so we can port stuff easier
-
-% Object model
-%% Hash maps
-%%% The efficiency of them
-%% Dynamic dispatches
-
-% Threading
-%% Tasks and transactions
-%%% Shared stack elements
-%% ?!
-%% Thread Pool
-%%% Resource thrashin
-
-% Closures
-
-% Memory management
-%% Garbage collection
-
-% ISA
-%% Highlight the most important instructions, explain how they facilitate the above
-
-% Mem model
-%% Standard heap and stack, stack per thread, global heap
-%%
 
 %%% Local Variables:
 %%% mode: latex
