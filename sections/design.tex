@@ -66,7 +66,7 @@ creating and destroying threads.
 \label{sec:design:exec:sub-routine}
 
 A sub-routine is a set of instructions that can be executed, or invoked, as a
-group from another instruction, in our case the \code{invoke} family of
+group from another instruction, in our case the \instr{invoke} family of
 instructions. \thename{} does not currently support either static or dynamic
 linking and hence all byte code is stored in a single stream of bytes. A
 sub-routine is simply defined by a designated subset of those bytes that,
@@ -94,10 +94,10 @@ not require any dedicated instructions for returning values.
 
 At its core, a scope is simply a mapping from names to values that define the
 bindings available at any given point during execution. The available bindings
-depend on the scoping rules used, and can generally be divided into dynamic and
-lexical mechanism. With dynamic scoping a name is resolved when it is
-\emph{evaluated}, that is, it depends on the execution context or state of the
-program. With lexical scoping a name is resolved when it is \emph{defined},
+depend on the scoping rules used, and can generally be divided into the two
+mechanisms: dynamic and lexical. With dynamic scoping a name is resolved when it
+is \emph{evaluated}, that is, it depends on the execution context or state of
+the program. With lexical scoping a name is resolved when it is \emph{defined},
 meaning that resolution depends on the name's lexical location in the source
 code. Dynamic scoping can be confusing and make it difficult to reason about a
 program's behavior. It can lead to unwanted or unexpected results because the
@@ -115,9 +115,9 @@ Scopes are usually organized in tree structures, where each scope has exactly
 one parent and zero or more children. Name resolution starts in one specific
 scope, and if a matching name is found then the value of the name is determined
 immediately. If the name is not found in the current scope then resolution
-continues in the scope's parent, repeatedly. As a result a name can be override,
-known as \textit{shadowing}, by a child scope by binding a value to a name that
-is also used by the parent scope.
+continues in the scope's parent, repeatedly. As a result, a name can be
+overridden, known as \textit{shadowing}, by a child scope by binding a value to
+a name that is also used by the parent scope.
 
 \thename{} exposes run-time functions for managing scopes, more specifically
 pushing and popping them on demand. That means that by default a new scope is
@@ -143,14 +143,14 @@ on.
 on Unix based systems (OpenBSD, Linux, Solaris, etc\cite{NEEDED}). It is a
 simple and very flexible format that is not specific to any platform or
 architecture but is a container format for such. That means that it provides
-structures for organizing bits and bytes into sections and defines headers that
+structures for organizing bits and bytes into sections and defining headers that
 describe the file in terms of purpose and functionality.
 
 ELF files are not necessarily executable files, they can be only linkable (hence
-the name) meaning for instance that there is no execution entry point
-defined. \thename{} does not currently support linking why we will not go into
-details about linkable files; this section is about executables only but most of
-the information applies to both.
+the name) meaning for instance, that there is no execution entry point
+defined. \thename{} does not currently support linking, which is why we will not
+go into details about linkable files; this section is about executables only,
+but most of the information applies to both.
 
 The contents of an ELF file is stored in segments which in turn contain
 sections. Generally speaking, segments contain information that is useful for
@@ -161,16 +161,16 @@ format by design is flexible and can be used in whatever manner and for whatever
 purpose desired. There are no restrictions by the format per s\'e.
 
 An ELF file is described by headers defined in the file itself. The overarching
-file header that describes the remaining file organization is the ELF header. It
-details the attributes of the file such as the architecture on which the file
-can be executed, endianess, ELF format version and so on. Further it defines
-where in the file that section and segment headers are located, their size and
-how many there are. In turn the section and segment headers describe their
-entries in the same manner. The general idea is that the starting location, size
-of entry and amount of entries is defined and from that the data can be
-extracted correctly.
+file header that describes the remaining file organization is the `ELF
+header`. It details the attributes of the file such as the architecture on which
+the file can be executed, endianess, ELF format version and so on. Further it
+defines where in the file that section and segment headers are located, their
+size and how many there are. In turn the section and segment headers describe
+their entries in the same manner. The general idea is that the starting
+location, size of entry and amount of entries is defined and from that the data
+can be extracted correctly.
 
-The fact that ELF is such a widely used format, and a standard for Unix systems
+The fact that ELF is such a widely used format, and standard for Unix systems,
 enables much easier porting of existing tools and libraries to run on
 \thename{}. GCC and GNU Binutils\footnote{GNU Binutils:
   \url{http://www.gnu.org/software/binutils}} are examples of software that is
@@ -195,17 +195,18 @@ The most simple table is the string table which is a list of immutable UTF-8
 character strings. It is used to store and retrieve any string that a program
 might use, both for identifying scope symbols, run-time functions, fields
 etc. It is also the place where compilers must store strings that are used in
-ordinary program logic. Strings in the string table must be unique, both because
-it is redundant to store duplicates and because it enables the machine to
-compare strings for equality simply by comparing their indices. That saves a lot
-of look up operations which would otherwise sum up to a significant performance
-cost.
+ordinary program logic. All strings found in the string table must be unique,
+both because it is redundant to store duplicates and because it enables the
+machine to compare strings for equality simply by comparing their indices. That
+saves a lot of look up operations which would otherwise sum up to a significant
+performance cost.
 
 Rather than using the regular UTF-8 encoding standard, we have chosen a
 derivative version named Modified UTF-8. This encoding has the UTF-8 character
 {\tt U+0000} encoded as the bytes {\tt 0xC0}, {\tt 0x80}, rather than a null
 byte ({\tt 0x00}). This enables functions to interpret UTF-8 strings as regular
-null-terminating strings, like the C programming language. %TODO wat?
+null-terminating strings, which is how the C Programming Language handles
+them. %TODO wat? watfix?
 
 Next is the constant table that contains any type of value for use in
 programs. Values are retrieved by a program by use of the \instr{pushConstant}
@@ -294,12 +295,13 @@ bytes. The type information consists of a declared type and an actual type. For
 statically typed languages, these will most likely be the same. For dynamic
 languages this is useful for keeping track of an element's type, as it, in some
 cases, is allowed to assign a value to an element which is different from the
-originally declared type.
+originally declared type. This only concerns abstract data types, which we will
+get back to in section~\ref{sec:design:types}, when discussing the type system.
 
 \subsubsection{Stack Manipulation}
 
 As mentioned above, there are instructions for doing simple stack manipulations
-such as {\tt push} and {\tt pop}. As we will see later, these two instructions
+such as \instr{push} and \instr{pop}. As we will see later, these two instructions
 alone are very limiting, and make the job of writing a compiler very
 tedious. Therefore we will need more expressive instructions that simplifies
 complex stack manipulations.
@@ -308,10 +310,10 @@ When we later describe the execution model of the machine, we will see that we
 need instructions for pushing an popping elements further up the stack. For
 instance, if we want to access the arguments given to a sub-routine, they will
 be located upward in the stack. The compiler will need an effective method of
-duplicating those elements onto the top of the stack, making is accessible for
+duplicating those elements onto the top of the stack, making it accessible for
 further computation. Also it will need to push an element back to a specific
-position up the stack, i.e.~replacing elements, effectively returning a value to
-the caller.
+position up the stack, i.e.~replacing an element, effectively returning a value
+to the caller.
 
 Such versions of the push and pop operations will take a displacement argument,
 defining how many places up the stack it is to push to or pop from. To make this
@@ -319,28 +321,27 @@ as convenient as possible, the displacement will be from the top of the stack,
 meaning displacement 0 will be the top of the stack, 1 is the second to the top
 element and so on.
 
-In addition to {\tt push}, which adds a new element to the stack, the
-specification defines {\tt pushElement} to overwrite the element at the given
-displacement. This is more convenient as this does not change the displacement
-of the following elements, though it requires some planning, as there will have
-to be an element on the stack with the purpose of being overwritten. {\tt
-  storeElement} will pop of the top-most element and place it at the given
-displacement. %TODO forvirrende
+To address this, we have the instructions \instr{pushElement} and
+\instr{storeElement}. The former will take the element at the given
+displacement, without removing it, and push it to the top of the stack. The
+latter will pop off the top-most element and push it to the given displacement,
+effectively overwriting that element. This convention requires that the caller
+has pushed an element to the stack with the sole purpose of being
+overwritten. %TODO wat? watfix?
 
-Also, unlike our previous stack example, the {\tt push} instruction, or rather
-the {\tt pushElement} instruction, will not take a value as an argument. Rather
-it will take the element at the given displacement and push onto the top of the
-stack. There will be separate instructions for adding new elements onto the
-stack, for instance {\tt pushConstant}.
+There will be separate instructions for adding new elements onto the
+stack, namely \instr{pushLiteral} and \instr{pushConstant}, making the
+\instr{push} instruction obsolete.
 
-Here we can see some simple operations using the {\tt pushElement} and {\tt
-  popElement} operations.
+Here we can see some simple operations using the \instr{pushElement} and
+\instr{storeElement} instructions.
 \begin{stackops}
   \op{-}{3,\ 1,\ 1}
   \op{pushElement 0}{3,\ 1,\ 1,\ 3}
+  \op{storeElement 2}{3,\ 3,\ 1}
 \end{stackops}
 
-%XXX jeg synes at hele det her afsnit mangler noget arbejde
+%XXX jeg synes at hele det her afsnit mangler noget arbejde. watfix?
 
 \subsection{Threading}
 \label{sec:design:threading}
@@ -354,12 +355,13 @@ multi-core processor, processes may actually run in parallel, i.e.~running at
 the same time, rather than just concurrently where multiple processes actually
 share the same processor.
 
-%TODO what?@første sætning
-A thread is typically the smallest unit of executable instructions by a
-processor. A process being run by an operating system therefore has one thread
-which the operating system's scheduler delegates CPU time to. With multi-core
-processors, the notion of a single process having multiple threads arose,
-making %XXX
+%TODO wat? @første sætning watfix?
+A thread is typically the smallest sequence of executable instructions handled
+by a processor. A process being run by an operating system therefore has one
+thread which the operating system's scheduler delegates CPU-time to, allowing it
+to execute said instructions. With multi-core processors, the notion of a single
+process having multiple threads arose, making it possible for tasks to run
+concurrently. A process utilizing this feature is called multi-threaded. %XXX watfix?
 
 Although multi-threading is a very interesting feature, it also raises a lot of
 challenges when designing the execution model. Different threads cannot directly
@@ -367,9 +369,9 @@ read and write to the same location, or address, in memory without taking data
 races into account, which is a common mistake when writing multi-threaded
 programs. If multiple threads are reading and writing to the same memory, it is
 impossible for the threads to base any logic on it, as another thread can change
-its value at any time, effectively pulling the rug from under you. This problem
-as been named the mutual exclusion problem, and is solved by using
-synchronization structures.
+its value at any time, effectively pulling the rug out from under you. This
+problem as been named the \term{mutual exclusion problem}, and is solved by
+using synchronization structures, such as semaphores and monitors.
 
 \thename{} supports threading and synchronization structures therefor. As we are
 using a stack machine, each thread has to have its own state, including its own
@@ -407,16 +409,16 @@ produced by the program that the machine is executing. Internal errors will most
 likely occur in some child thread and not in the process' original thread. If
 that is the case we can stop that thread and gracefully stop the machine if it
 cannot safely continue. If the error occurs in the process' original thread, we
-will in most cases still be able to catch the signal sent by the OS and exit
-gracefully.
+will in most cases still be able to catch the signal sent by the operating
+system and exit gracefully.
 
 When the program being executed produces an \term{exception} it will percolate
 up through a defined set of user-defined exception handlers until it is
 handled. If there is no way of handling the exception it is called an uncaught
 exception, and the machine will print some information on the exception and
-stop. It will not attempt to join all threads (TODO) as it cannot know how long
-this will take. Therefore all threads are exited and memory is freed, ensuring
-no memory leaks.
+stop. It will not attempt to join all threads as it cannot know how long this
+would take. Therefore all threads are exited and memory is freed, ensuring no
+memory leaks.
 
 \subsection{Types}
 \label{sec:design:types}
@@ -498,7 +500,7 @@ It is shown how type \code{<2>} is defined as a pointer to the type \code{<1>},
 which in C lingo would be \code{int*}. Type \code{<3>} defines a sub-routine
 whose name is ``foo'' and returns a \code{<2>}, again in C lingo that would be
 \code{int (*foo)(void)}. This is the fundamental way that the DWARF format
-expresses types; it is simple but very flexible and powerful.
+expresses types; it is simple, yet very flexible and powerful.
 
 There are scores of attributes and tags defined in the specification, but we do
 not nearly use all of them. Because the format is so simple it is easy to add
@@ -526,25 +528,25 @@ expressing any other conceivable type however complex.
 Below is a description of the various kinds of simple types provided.
 
 \begin{description}
-\item[Integer values] \hfill\\
-  Includes all combinations of 8-bit, 16-bit and 32-bit, signed or unsigned
-  integer numbers. E.g. {\tt Int32} and {\tt UInt16}.
+\item[Integers] \hfill\\
+  Integer types include all combinations of 8-, 16-, 32- and 64-bit, signed or
+  unsigned, integer numbers. E.g. {\tt Int32} and {\tt UInt16}.
 
 \item[Boolean] \hfill\\
-  A {\tt Boolean} type with the value `true` or `false`.
+  A Boolean type with the possible values of `true` or `false`.
 
-\item[Floating point values] \hfill\\
-  32-bit or 64-bit floating point numbers, in the IEEE~753-1985 and
-  IEEE~755-1985 standard representation, respectively named {\tt Ieee32} and
-  {\tt Ieee64}.
+\item[Floating-point numbers] \hfill\\
+  Non-integer numbers will be represented by floating-point precision numbers,
+  either 32-bit or 64-bit, named {\tt Ieee32} and {\tt Ieee64}. These will
+  respectively follow the IEEE~753-1985 and IEEE~755-1985 standard of
+  representation.
 
 \item[Address] \hfill\\
-  Unsigned integer value representing a memory address, named {\tt
-    Address}.
+  Unsigned integer value representing a memory address, named {\tt Address}.
 
 \item[Abstract types] \hfill\\
   A type which can take any value at run-time, named {\tt AnyType}. Large stack
-  initialized values will be boxed on the heap to make space for it.
+  initialized values will be boxed on the heap to make space for them.
 \end{description}
 
 % reference
@@ -567,10 +569,10 @@ over its given arguments.
 sized kind. Both are compound types that define the type of its elements. This
 could be to other arrays, allowing an array to be multi-dimensional without
 specialized types. The static variant additionally defines a lower and upper
-index of available slots. The dynamic variant does not define those limits
-because it can grow dynamically during run-time because of which it will be
-always be located on the heap. It will therefore be referenced through a {\tt
-  Reference} type.
+index of available slots. The dynamic variant does not define those limits as it
+can grow dynamically during run-time, because of which it will be always be
+located on the heap. It will therefore be referenced through a {\tt Reference}
+type.
 
 % composite
 
@@ -617,6 +619,8 @@ prefix, \code{noOverflow}, will make overflowing arithmetic throw an
 exception. Prefixes only take effect for a single instruction and are reset at
 the end of every instruction cycle.
 
+% TODO: more on prefixes. what about suffixes? XXX
+
 The following describes each of the four categories of instructions in detail
 and highlights some of the most interesting examples.
 
@@ -642,10 +646,10 @@ which are described below.
   Fetches an element from upward into the stack and pushes a copy back onto the
   stack. This is useful, and indeed required, for loading arguments in
   sub-routines and can be used by a compiler to implement local variables. We
-  further provide the opposite mechanism; an instruction for storing a value
-  back into an element upward into the stack, i.e.~replacing the value of a
-  stack element. The source element and the target element must have either the
-  same or unifiable types.
+  further provide the opposite mechanism; the \instr{storeElement} instruction
+  for storing a value back into an element upward into the stack, i.e.~replacing
+  the value of a stack element. The source element and the target element must
+  have either the same or unifiable types.
 
 \item[\instr{pushLiteral}:]
 
@@ -701,13 +705,13 @@ simply pads with 0-bits in the opposite direction. The \instr{arithmeticShift}
 instruction performs an \textit{arithmetic shift} to the right which means that
 the sign-bit of an integer value is extended. The sign-bit is simply the
 left-most bit (we are using big endian representation) and is extended
-regardless of the sign of the type. In effect that gives the following results
-(number are in binary representation):
-\[
-0b1001 shl 2  = 0b0100 \\
-0b1001 shr 2  = 0b0010 \\
-0b1001 ashr 2 = 0b1110 \\
-\]
+regardless of the sign of the type. In effect, that gives the following results
+(numbers are in binary representation): % TODO: mention endianness earlier
+\begin{align*}
+  {\tt 0b1001}\ \ \ shl\  2 &= {\tt 0b0100} \\
+  {\tt 0b1001}\ \ \ shr\  2 &= {\tt 0b0010} \\
+  {\tt 0b1001}\     ashr\ 2 &= {\tt 0b1110}
+\end{align*}
 
 It is worth noting that we do not provide an arithmetic left shift instruction
 since it is mostly redundant because the right-most bit is insignificant and
@@ -725,7 +729,7 @@ overflowing or underflowing results. Consider adding the values $255$ and $2$ as
 8-bit unsigned integral values (UInt8). The maximum value of a UInt8 is $255$
 meaning that $255+2=257$ will result in an overflow. Using the normal
 \instr{add} instruction the result will be truncated to $1$ because the excess
-bytes are ignored, but with the saturated variant the result will remain $255$
+bytes are ignored, but with the saturated variant the result will remain $256$
 because the overflow is detected and the value is capped at the maximum
 possible. The same is true for underflowing values with both signed and unsigned
 values.
@@ -829,19 +833,19 @@ for executing a sub-routine is \instr{invoke}, but in the same manner as the
 field operations, there is a family of invocation instructions that determines
 the scope in which the sub-routine will be looked up.
 
-\instr{invoke} takes a sub-routine definition argument which contains
-information about the byte address bounds and parameter types. When executed,
-the current thread's program counter will be set to the lowest address of the
-sub-routine's byte address bounds. Execution will then continue from there until
-a \instr{return} instruction occurs which will set the program counter back to
-the instruction following the \instr{invoke} that initiated the call (i.e.~the
-address of the call site).
+The \instr{invoke} instruction takes a sub-routine definition argument which
+contains information about the byte address bounds and parameter types. When
+executed, the current thread's program counter will be set to the lowest address
+of the sub-routine's byte address bounds. Execution will then continue from
+there until a \instr{return} instruction occurs which will set the program
+counter back to the instruction following the \instr{invoke} that initiated the
+call (i.e.~the address of the call site).
 
 Both \instr{call} and the \instr{invoke} family of instructions allow
 arbitrarily deep recursion. Activation elements are stored on the stack and the
 \instr{return} instruction determines the call site information by finding the
 \emph{top-most} activation element. That means calls/invocations and returns
-happen in a First-In-First-Out manner.
+happen in a First-In, First-Out (FIFO) manner.
 
 For performance critical scenarios we provide a switch/case instruction that
 does constant time case branching by means of a jump table. The concept is
@@ -874,6 +878,8 @@ instructions, but the general criteria is that functionality that is
 library rather than instructions. Run-time functions are invoked in the same way
 as user-defined sub-routines so compilers do not have to take special measures
 and distinguish between them.
+
+% TODO: mention scope functions?
 
 %%% Local Variables:
 %%% mode: latex
