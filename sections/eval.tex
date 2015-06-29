@@ -34,15 +34,15 @@ member by name.
 
 One of the most powerful features of \thename{} is the fact that at its core it
 is very simple and flexible which makes it capable of expressing many language
-features by combining those building blocks in various ways. There are few
-restrictions as to how the primitives can be used.
+features by combining the provided building blocks in various ways. There are
+few restrictions as to how the primitives can be used.
 
 As for functional language support, the way sub-routines work could be a
 significant improvement. In JVM and CIL a sub-routine \emph{must} be attached to
 an object, but \thename{} allows sub-routines to exists by themselves and can be
-loaded and executed from anywhere. The execution context can be controlled by
-managing the use of scopes, something that the compiler is free to do how it
-sees fit.
+loaded and executed from anywhere facilitation first-class functions. The
+execution context can be controlled by managing the use of scopes, something
+that the compiler is free to do how it sees fit.
 
 The current implementation is not mature enough to be a sensible target for code
 generation, but it does serve as a proof-of-concept that the fundamental ideas
@@ -59,52 +59,50 @@ the previously mentioned Java Virtual Machine and Microsoft's Common Language
 Runtime.
 
 To make the the results of such a comparison as valuable as possible, it is
-beneficial to focus on isolated parts, as there are many wheels turning in a
-such a big piece of software. If one casts the net to wide the comparing, it can
-be difficult to pin pointing the reasons for differences and similarities. Even
-though JVM and CLR are both stack machines, they have characteristics which
-distinguish them and makes to directly compare to each other, or \thename{} for
-that matter.
+beneficial to focus on isolated functionality, as there are many wheels turning
+in a such a big piece of software. If one casts the net too wide, it can be
+difficult to interpret what results are indicating. Even though JVM and CLR are
+both stack machines, they have characteristics which distinguish them and makes
+to directly compare to each other, or \thename{} for that matter. %XXX wat@sidste sætning
 
-We will therefore do out analysis through micro benchmarking. Opposed to
-benchmarking in general, micro benchmarking focuses on isolated components or
+We will therefore perform analysis through so-called micro benchmarking, which
+as opposed to benchmarking in general, focuses on isolated components or
 specific functionality.
 
 \subsubsection{Micro Benchmarking}
 
-One way of creating benchmarks could be to write three programs, as similar as
+One way of creating benchmarks would be to write small programs, as similar as
 possible, in programming languages which each has a front-end for the given
 machine. For instance, we could write source code in Java to run on JVM and C\#
-to run on CLR. The problem with this is that we cannot be sure of what code
-the compiler produces. Two very similar programs in each of these two languages,
-could in theory be compiled to be run very differently. To address this
-challenge, we choose to disassemble the compiled to could to each of the
-machines intermediate language, which is Java Bytecode and CIL. From the
-disassembled version we can analyze which instructions each compiler chosen, and
-in the case where they differ, we can manually alter them and assemble them back
-to an executable.
+to run on CLR. The problem with this is that we cannot be sure of what code the
+compiler produces. Two very similar programs in each of these two languages,
+could likely be compiled to very different byte code. To address this issue, we
+disassembled the compiled code to each of the machine's intermediate languages,
+namely Java Bytecode and CIL. From the disassembled code we analyzed which
+instructions each compiler emitted and in cases where they differed
+substantially, we manually altered them and assemble them back to an executable.
 
-When having two executables, one for JVM and one for CLR, and a \thename{} test
-program, which we are satisfied with being as similar as possible, we are ready
-to generate some results. We have chosen to generate the result through
-automated shell scripts, timing the execution time for a set of parameters for
-each machine. To make sure we did not get sporadic results caused by other
-processes running on the host machine, we run the each benchmark of each machine
-over several rounds. From this we can calculate the mean time for each
-parameter.
+Having two executables, one for JVM and one for CLR, and a \thename{} test
+program, which we are satisfied with being as similar as possible, we start
+measuring their performance. We ran the tests through automated shell scripts
+that measured the execution time for a set of parameters for each machine. To
+make sure we did not get sporadic results caused by other processes running on
+the host machine, we ran each benchmark of each machine over several
+rounds. From this we calculated the mean running time for each parameter on each
+machine.
 
-For our micro benchmarks we have picked four different cases we wish to
-test. These include stack operations, recursion, sub-routine invocation and
-field operations on heap object. We will go each in turn, analyzing the results.
+We have picked four different cases that we wish to measure, namely stack
+operations, recursion, sub-routine invocation and field operations on heap
+object. We will go through each in turn, analyzing the results.
 
 % stack
 
-To benchmark the stack we have made a simple program which essentially does a
-lot of stack operations. A simple way to achieve this was to take a large number
-and substitute until it becomes zero. More specifically, we start by using
-\instr{pushLiteral} with the \instr{large} prefix to get a large number on the
-stack. We there after push the literal one, push the large number again with
-\instr{pushElement} and perform substitution with \instr{sub}. To store the
+To benchmark the stack we made a simple program which essentially just does a
+lot of trivial stack operations. A simple way to achieve this was to take a
+large number and decrement it until it becomes zero. More specifically, we start
+by using \instr{pushLiteral} with the \instr{large} prefix to get a large number
+on the stack. We there after push the literal one, push the large number again
+with \instr{pushElement} and perform subtraction with \instr{sub}. To store the
 result, we duplicate it and use \instr{storeElement} to overwrite the initial
 number. Lastly we check if the result is zero, in which case it is not, we
 branch back to the top, starting over. This induces 10 stack operation per
@@ -112,7 +110,7 @@ iteration, plus the initial one, which equals $10n + 1$, where
 $n = 1\ ...\ (2^{31} -1)$, giving the complexity of $O(n)$. CIL does not have an
 \instr{storeElement} instruction, but achieves the same effect by storing the
 value in a local variable and then loading it again, done with {\tt stloc} and
-{\tt ldloc}.
+{\tt ldloc}. %TODO er det måske overkill at forklare, evt vise koden?
 
 The result can be seen in the seen below, in
 figure~\ref{fig:eval:benchmark:stack}.
@@ -136,36 +134,43 @@ it is true for the remaining test cases as well.
 
 % fibonacci
 
-To benchmark recursion we have chosen to implement the classic Fibonacci
-function, defined as $Fn = F_{n-1} + F_{n-2}$ with the seed values of $F_0 = 0$
-and $F_1 = 1$. The function makes two recursive calls to itself per value of
-$n$, creating a recursion tree of depth $n$, with the leafs being seed
-values. Intuitively, we know this creates the exponential running of $O(2^n)$,
-which could be proved by induction. We will not include the proof here, as it is
-out the scope of this discussion. The benchmark result is shown below, in
-figure~\ref{fig:eval:benchmark:fib}.
+To benchmark recursion we implemented the classic Fibonacci function, defined
+as:
+
+\begin{equation*}
+  fib(n) = \begin{cases}
+    0                   & n = 0 \\
+    1                   & n = 1 \\
+    fib(n-1) + fib(n-2) & \text{otherwise}
+  \end{cases}
+\end{equation*}
+
+The implementation is intentionally na\"ive, resulting in exponential running
+time $O(2^n)$, which could be proved by induction. We will not include the proof
+here, as it is irrelevant for this discussion. The benchmark result is shown
+below, in figure~\ref{fig:eval:benchmark:fib}.
 
 \begin{figure}[H]
   \centering
   \scalebox{0.8}[0.6]{\input{figures/fib}}
-  \caption{Mean running time of $F(n)$}
+  \caption{Mean running time of $fib(n)$}
 \label{fig:eval:benchmark:fib}
 \end{figure}
 
-The graph shows the $F_n$ on x-axis and mean mean time on the y-axis. Here
-\thename{} is almost on par with JVM, both of which lack behind CLR. That is an
-indication of efficient sub-routine and stack memory mechanisms in
-\thename{}. It is important to note that these are all na\"ive implementations
-with no optimizations, such as tail-recursion, which would have a significant
-positive impact on the running time.
+The graph shows the $fib(n)$ on x-axis and mean time on the y-axis. \thename{}
+is almost on par with JVM, both of which lack behind CLR. That is an indication
+of efficient sub-routine and stack memory mechanisms in \thename{}. It is
+important to remember that these are all na\"ive implementations with no
+optimizations such as tail-recursion or dynamic programming techniques, which
+would have a significant impact on the running time.
 
 % invocation
 
 The sub-routing benchmark is implemented in a similar fashion as the stack
 workout program, only the calculation is performed in a sub-routine which is
-invoked each iteration. All the stack operations done in the sub-routine in
+invoked each iteration. All the stack operations done in the sub-routine are
 executed in constant time, which given the resulting running time of
-$T(n) = O(n) \cdot O(k) = O(n)$, where $k$ is constant the number of stack
+$T(n) = O(n) \cdot O(k) = O(n)$, where $k$ is the constant number of stack
 operations. For invoking the sub-routine we use the \instr{invoke} instructions,
 while CLR uses {\tt call} and JVM uses {\tt invokestatic}. The result of the
 benchmark can be seen below, in figure~\ref{fig:eval:benchmark:invoc}.
@@ -192,6 +197,7 @@ incrementing it and popping it back to the heap object. The running time becomes
 the same as the sub-routine benchmark; $T(n) = O(n) \cdot O(k) = O(n)$, where
 $k$ is the constant number of stack operations. The result of the
 benchmark can be seen below, in figure~\ref{fig:eval:benchmark:heap}.
+
 \begin{figure}[H]
   \centering
   \scalebox{0.8}[0.6]{\input{figures/heap}}
@@ -219,30 +225,31 @@ algorithmic optimization, but rather focused on designing suitable data
 structures and writing maintainable and concise code that we would be able to
 cope with the inevitable changes during the course of the project. As Rob Pike
 states it in his first Rule of Programming: ``You can't tell where a program is
-going to spend its time.''\cite{pike-rules}. When the machine had reached a
-maturity level that assured us that no further major changes to the overarching
-design were necessary we started to analyze the code at a much more detailed
-level.
+going to spend its time. Bottlenecks occur in surprising places, so don't try to
+second guess and put in a speed hack until you've proven that's where the
+bottleneck is.''\cite{pike-rules}. When the machine had reached a maturity level
+that assured us that no further major changes to the overarching design were
+necessary we started to analyze the code at a much more detailed level.
 
 Memory leaks are extremely difficult to avoid when writing any non-trivial C
 code. One has to meticulously track allocated memory chunks and free them at
-just the right time and place to prevent invalid read and writes. The fact that
+just the right time and place to prevent invalid reads and writes. The fact that
 C largely does not care about what some collection of bytes represents and
-allows virtually any casting does not make this easier. One-off errors are very
+allows virtually any casting does not make this easier. One-off errors are
 common when dealing with arrays and pointers which are indeed a central part of
 the \thename{} implementation. Luckily there are tools available to aid in
 profiling and pinpointing problematic parts of the code. The absolutely
 brilliant instrumentation tool Valgrind\footnote{Valgrind:
-  \url{http://valgrind.org}} has been an invaluable help in detecting memory
+  \url{http://valgrind.org}} has been an invaluable help for detecting memory
 errors and have allowed us to fix, to our knowledge, all problematic leaks.
 
-Valgrind consists of several different tools that analyzes different things such
-as threads, stack operations, caches and memory. We have used the memory error
-detector called Memcheck. When an executable is run through Valgrind it is able
-to track allocations and the corresponding releases made during the entire
-execution. If an allocation does not have exactly one corresponding free
-operation it is either a leak or a double free (when the same memory region is
-attempted to be release more than once).
+Valgrind consists of several different tools that analyze different things like
+threads, stack operations, caches and memory. We have used the memory error
+detector called Memcheck for finding leaks. When an executable is run through
+Valgrind it is able to track allocations and the corresponding releases made
+during the entire execution. If an allocation does not have exactly one
+corresponding free operation it is either a leak or a double free (i.e.~a single
+memory region attempted to be released more than once).
 
 The output from Memcheck includes a list of errors and a summary of the leaked
 amount of memory. When we initially ran Valgrind with the fibonacci test program
@@ -271,31 +278,32 @@ you exactly where errors are introduced:
 
 An allocation is being made in the function \code{stack\_create\_element} and is
 not released when the program exits. In this case we were not properly releasing
-temporary stack elements. Being aware of the issue we changed the way stack
-elements were created and the result was a sum total of 40 bytes leaked all of
-which are test data structures that are irrelevant for the actual performance
-analysis.
+temporary stack elements, and being aware of the issue we changed the way stack
+elements are created resulting in a sum total of 40 bytes leaked, all of which
+are test data structures that are irrelevant for the actual performance
+analysis. It is important to run multiple types of test programs through
+Valgrind, because each of them may expose errors in differents parts of the
+code.
 
-The other form of profiling we did was by use of the equally wonderful tool
-called gprof\footnote{GNU gprof:
-  \url{https://sourceware.org/binutils/docs/gprof/}} (for GNU profiler). It
-works in a somewhat different way than Valgrind: executables are compiled with a
-special profiling flag that injects profiling code into the binary. When the
-file is executed it generates data that is then run through gprof that performs
-the analysis. The output is a detailed overview of the CPU time spent in each
-function. It is important to avoid profiling optimized binaries because some
-crucial information can be lost during when the compiler performs various code
-transformations. For example, if the compiler inlines a function into another,
-the former will appear to be using the resources that are actually spent by the
-inlined function.
+The other form of profiling we did was by use of the equally great tool called
+gprof\footnote{GNU gprof: \url{https://sourceware.org/binutils/docs/gprof/}}
+(for GNU profiler). It works in a somewhat different way than Valgrind:
+executables are compiled with a special profiling flag that injects profiling
+code into the binary. When the file is executed it generates data that is then
+run through gprof that performs the analysis. The output is a detailed overview
+of the CPU time spent in each function. It is important to avoid profiling
+optimized binaries because some crucial information can be lost when the
+compiler performs various code transformations. For example, if the compiler
+inlines a function into another, the former will appear to be using the
+resources that are actually spent by the inlined function.
 
 As an example of how we used gprof to pinpoint bottlenecks, an initial analysis
 showed that 9\% of the total running time was spent in the function
 \code{bytes2int} which converts a sequence of bytes into an integral C value. It
 is a frequent operation but we found it is suspicious to be using almost one
-tenth of the total CPU resources. It was indeed not optimally
-implemented; Listing~\ref{lst:eval:gprof-pre} and~\ref{lst:eval:gprof-post}
-shows the specific code before and after optimization.
+tenth of the total CPU resources. It was indeed not optimally implemented;
+Listing~\ref{lst:eval:gprof-pre} and~\ref{lst:eval:gprof-post} shows the
+specific code before and after optimization.
 
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[language={[ANSI]C},%
@@ -353,21 +361,20 @@ the modules interoperate.
 
 A common form of optimization in modern abstract machines is the process of
 compiling a program run-time, rather than prior to execution. This technique is
-called just-in-time compilation, or JIT. This allows sections of code to be
-translated to machine code which host machine can execute directly. This is done
-right before the code is meant to be executed, hence the name just-in-time. The
+called just-in-time compilation, or JIT.\@This allows sections of code to be
+translated to machine code which the host machine can execute directly. This is
+done just before the code is going to be executed, hence the name. The
 translated machine code can then be cached and reused. Therefore, if a function
 is called multiple times, the machine can save time by paying the overhead of
 translating it to machine code, but then saving time every time the same code is
 to be executed. A challenge with JITing is balancing the overhead of translating
 to machine code versus the saved time during execution. This overhead of
-just-in-time compilation is called the `startup time delay`.
+just-in-time compilation is called the ``startup time delay''.
 
 In our earlier performance analysis, we have disabled all forms for such
-optimizations to make the execution process of the different machines as similar
-as possible. Below we can see an example of the heap workout benchmark being run
-on JVM with and without JIT optimization. The result can be seen below, in
-figure~\ref{fig:eval:benchmark:jit}.
+optimizations to make the execution process of the different machines closer to
+that of \thename{}. Figure~\ref{fig:eval:benchmark:jit} shows a benchmark of the
+heap workout being run on JVM with and without JIT compilation.
 
 \begin{figure}[H]
   \centering
@@ -376,9 +383,12 @@ figure~\ref{fig:eval:benchmark:jit}.
 \label{fig:eval:benchmark:jit}
 \end{figure}
 
-We can see the huge benefit JIT compilation TODO. Even with small numbers, we
-see that the statup time delay that occurs when using JIT is still outweighed
-by the faster execution time.
+The benefit of JIT compilation is striking, it runs more than an order of
+magnitude faster. Even with small numbers, we see that the statup time delay
+that occurs when using JIT is still outweighed by the faster execution
+time. This is obviously a very simple program which means that the JIT process
+will be very short, and thus the cost of JITting is most certainly higher for
+larger programs.
 
 \subsection{Code Analysis}
 
@@ -418,10 +428,6 @@ succeeded in this. However, as we have optimized the code, some algorithms have
 become more complex and difficult to grasp at first sight, but that is something
 we find unavoidable to some extent.
 
-\subsubsection{Tests, coverage}
-
-
-
 \subsection{Documentation}
 
 The code is fairly well documented using Doxygen, which has been a help when
@@ -432,7 +438,8 @@ decent amount of explanation.
 Appendix~\ref{NEEDED} documents how to compile and run the machine on a Unix
 system.
 
-% Future development
+\subsection{Future Development}
+% XXX
 %% What's missing
 %% What could be different
 %% What would next steps be
