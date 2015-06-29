@@ -1,8 +1,3 @@
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: "../report"
-%%% End:
-
 There are other projects, previous and current, that attempt to solve the same
 or similar problems as we are with \thename{}. Here we present the ones we find
 most interesting and from which we have drawn inspiration.
@@ -10,11 +5,11 @@ most interesting and from which we have drawn inspiration.
 \subsection{Parrot VM}
 
 The Parrot Virtual Machine\footnote{\url{http://www.parrot.org}} is a project
-that attempts to solve similar issues as \thename{}. Most importantly almost solely
-focuses on efficient support of dynamically typed languages. Moreover it aims to
-provide very flexible interoperability between any language ported to Parrot; as
-the docs say: ``In theory, you will be able to write a class in Perl, subclass
-it in Python and then instantiate and use that subclass in a Tcl
+that attempts to solve similar issues as \thename{}. Most importantly it almost
+solely focuses on efficient support of dynamically typed languages. Moreover it
+aims to provide flexible interoperability between any language ported to Parrot;
+as the docs say: ``In theory, you will be able to write a class in Perl,
+subclass it in Python and then instantiate and use that subclass in a Tcl
 program.''\cite{parrot-docs}.
 
 An interesting aspect of Parrot is that it completely hides the lowest-level
@@ -95,16 +90,16 @@ rather than the static type of the object.
 % btw DLR is dead
 
 The Dynamic Language Runtime~\cite{dlr} was developed by Microsoft and ran on
-top of the Dynamic Language Runtime. It provided support for several dynamic
-language features such as a dynamic type system, method dispatch and code
-generation.
+top of the Common Language Runtime. It provided support for several dynamic
+language features such as a dynamic type system, dynamic method dispatch and
+dynamic code generation.
 
 When handling method calls in a dynamic language, the machine is forced to do
 some extra look-ups to find the correct method, as it is unable to statically
 deduce which function is to be used. This creates some overhead and can easily
 make the running time of dynamic languages slow. DLR remedies this by using
 dynamic call sites with method caching. This technique is often referred to as
-inline caching, where the results of a method look-ups are stored in an limited
+inline caching, where the results of method look-ups are stored in a limited
 data-structure. This saves the machine of many consecutive look-ups. This
 optimization technique was first developed by Smalltalk 80~\cite{deutsch}.
 
@@ -112,8 +107,7 @@ Dynamic types are handled by the meta class {\tt DynamicMetaObject}. These
 classes provide dynamic functionality to objects by having several virtual
 methods handling setting, getting and method invocation. DLR offers even higher
 abstraction and convenience with the two sub-classes {\tt DynamicObject} and
-{\tt ExpandoObject}. Methods include {\tt TryCreateInstance} and {\tt
-  TryInvoke}.
+{\tt ExpandObject}. Methods include {\tt TryCreateInstance} and {\tt TryInvoke}.
 
 Through the .NET Framework, DLR was used by popular implementations of dynamic
 languages, such as Python and Ruby, named
@@ -121,16 +115,21 @@ IronPython~\footnote{\url{http://ironpython.net/}} and
 IronRuby~\footnote{\url{http://ironruby.net/}}. The development of DLR has been
 discontinued since 2010. According to a former Microsoft developer, this has to
 do with Microsoft's lack of commitment towards dynamic
-languages~\cite{schementi}\cite{cooper}. In spite of this, as a result of being
-in the .NET Framework, DLR has made its way into the new Roslyn compiler.
+languages~\cite{schementi}\cite{cooper}. In spite of this and as a result of
+being in the .NET Framework, DLR has made its way into the new Roslyn compiler.
 
-Most compilers are `black-boxed`, where one gives the compiler some source code
-and it either gives you an executable or a list of errors, with little say on
-how or what happens inside the compiler. The Roslyn compiler is a complete
-rewrite of the C\# and Visual Basic (VB) compilers, opening the `black-box`. It
-now exposes APIs to central components of the compiler, such as the parser,
-symbol table, language binders and the intermediate language emitter (code
-generation). This gives the programmer vasts amounts of flexibility and enables
-him/her of parsing code, doing different kinds of analysis and evaluating code
-dynamically. The latter is a valuable tool when doing meta-programming,
-i.e. programs writing programs.
+Most compilers are ``black-boxed'', where one gives the compiler some source
+code and it either gives you an executable or a list of errors, with little say
+on how or what happens inside the compiler. The Roslyn compiler is a complete
+rewrite of the C\# and Visual Basic (VB) compilers, opening the
+``black-box''. It now exposes APIs to central components of the compiler, such
+as the parser, symbol table, language binders and the intermediate language
+emitter (code generation). This gives the programmer vasts amounts of
+flexibility and enables him/her of parsing code, doing different kinds of
+analysis and evaluating code dynamically. The latter is a valuable tool when
+doing meta-programming, i.e.\ programs writing programs.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../report"
+%%% End:
