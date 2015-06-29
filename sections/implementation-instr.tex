@@ -33,23 +33,20 @@ addition to being on the stack, pointers to activation elements are saved as a
 linked list in the thread state making it possible to retrieve its information
 without having to search through the stack. Among others, it is used to check
 whether the program counter is exceeding the address bounds of the current
-sub-routine, which will result in an implicit return. %TODO: er det rigtigt?
-
+sub-routine, which will result in an implicit return.
 
 \subsubsection{Prefixes and Suffixes}
 
-Instructions can be prefixed or suffixed to invoke special behavior. TODO.
+Instructions can be prefixed or suffixed to modify the behavior of certain
+instructions.
+%TODO note om large prefix
 
-The {\tt noOverflow} prefix will enabled the machine to throw exceptions if
-overflow occurs when executing the following instruction. This might for
-instance be desired when executing arithmetic instruction, to ensure that the
-arithmetic operation does not induce overflow which could induce unwanted
-behavior.
-
-Overflow is detected differently for different arithmetic operations and operand
-types. This is required as different as types have different maximum and minimum
-values. We will briefly explain the challenge of handling overflow in different
-scenarios and how \thename{} currently, and imperfectly, tackles them.
+The {\tt noOverflow} prefix signals the machine to throw exceptions if overflow
+occurs when executing the following arithmetic instruction. Overflow is detected
+differently for the various arithmetic operations and operand types. This is
+required as different as types have different maximum and minimum values. We
+will briefly explain the challenge of handling overflow in different scenarios
+and how \thename{} currently, and imperfectly, tackles them.
 
 Looking at how to detect overflow when doing arithmetic operations on {\em
   signed integer} operands, we have to take the size of the the operands' type
@@ -58,14 +55,15 @@ the rage of -128 to 127. Knowing the type's maximum and minimum value, we can
 deduce whether the operation will induce over- or underflow on operand $a$ and
 $b$. In the case where the operation is addition, we check if operand $b$ is
 larger than zero {\em and} operand $a$ is lesser than the sum of the type's
-maximum value and $b$'s inverse. This can be denoted in the following
-mathematical formula:
+maximum value and $b$'s inverse. This can be denoted in the following formula:
+
 \label{eq:overflow}
 \begin{equation}
   overflow = (b > 0) \wedge (a > max - b)
 \end{equation}
 
 In a similar fashion we can detect underflow by:
+
 \begin{equation}
   underflow = (b < 0) \wedge (a < min - b)
 \end{equation}
@@ -76,12 +74,14 @@ the two equations. In the case of multiplication we use division, etc.
 For unsigned integers the case is a little simpler, as the operand cannot be
 negative. Therefore, when doing addition, underflow can per definition not
 occur:
+
 \begin{equation}
   a + b > 0, \qquad when\ a > 0, b > 0
 \end{equation}
 
 For substitution, we only needs to check if the $b$ operand is greater
 than $a$, which will result in a negative number, thus inducing underflow.
+
 \begin{equation}
   a - b < 0, \qquad when\ a > 0, b > a
 \end{equation}
@@ -90,13 +90,13 @@ These fairly simple solutions has shown through tests, to work well where the
 operand precision is not {\tt Int64} or {\tt UInt64}. The reason for this is
 that all overflow check function promote each operand to an {\tt int64\_t} or
 {\tt uint64\_t}, which prevents overflow of all operands with lower
-precision. In the case of 64-bit integers, there is a risk of the check it self
+precision. In the case of 64-bit integers, there is a risk of the check itself
 to overflow. More precisely, $a < min - b$ will overflow if $b$ is
 positive. There is not good solution for this, other than to use a higher
 precision number for the tests. As C does not have any built-in data types of
 larger precision, one would have to use multi-precision numbers which would
 require some time to implement. We have chosen to note the short comings of the
-current solution and focus our attention else where (TODO).
+current solution and focus our attention else where.
 
 Both
 GCC~\footnote{\url{https://gcc.gnu.org/onlinedocs/gcc/Integer-Overflow-Builtins.html}}
@@ -109,66 +109,67 @@ operation on the promoted operands. The result is then cast to the original
 precision. If the casted result does not equal the infinite precision result,
 overflow has occurred, which is indicated by the functions return value. We have
 chosen to not use these to hold the implementation as library independent as
-possible TODO.
+possible TODO. %XXX
 
 Detecting overflow for floating-point precision numbers is somewhat more
 challenging, due to the more complex nature of its implementation. The C
-Standard Library has built-in constants for finding the a float's maximum value;
+Standard Library has built-in constants for finding a float's maximum value;
 {\tt FLT\_MIN} and {\tt FLT\_MAX} for single precision, {\tt DBL\_MIN} and {\tt
   DBL\_MAX} for double precision. These could in theory be used in the same
 fashion as above, creating an efficient solution, given that we could do
-built-in arithmetic operations on them. This is unfortunately, as {\tt FLT\_MAX
-  - 1}, for instance, is regarded as undefined behavior and will on most
-platforms equal to {\tt FLT\_MAX}. Inducing undefined behavior when trying to
-deduce whether an instruction is safe, renders it's point moot.
+built-in arithmetic operations on them. This is unfortunate, as {\tt FLT\_MAX -
+  1}, for instance, is regarded as undefined behavior and will on most platforms
+be equal to {\tt FLT\_MAX}. Inducing undefined behavior when trying to deduce
+whether an instruction is safe, renders it's point moot. %TODO lidt forvirrende
 
-We have therefor chosen to use a simple, but also sub optimal, solution. When,
+We have therefore chosen to use a simple but also sub-optimal solution. When,
 for instance, adding two floats together that should produce overflow, the
 resulting value will become equal to {\tt FLT\_MAX} (in the case of single
-precision). We therefor check whether the result of each operation either equals
-the maximum or minimum value for the given precision. In cases where an
+precision). We therefore check whether the result of each operation either
+equals the maximum or minimum value for the given precision. In cases where an
 operation equals exactly the maximum or minimum value, an overflow exception
-will be thrown, even though under- or overflow will not have occurred. TODO:
+will be thrown, even though under- or overflow might not have occurred. TODO:
 need more comment?
-
 
 \subsubsection{Arithmetic}
 
 The arithmetic operations we have implemented is addition, substitution,
-multiplication, division, remainder and negate. With the exception of the
-latter, these are all binary operations, used through polish-reverse notation,
+multiplication, division, remainder and negation. With the exception of the
+latter, these are all binary operations, used through reverse-polish notation,
 or suffix notation. We have made use of C's build in operators to make this as
 efficient as possible. As the machine enforces strong typing, an exception will
 be thrown if the operands are not of the same type. The only exception is if the
 operand is of {\tt AnyType}, where it will automatically be converted to a
 matching type.
 
-Different types has to be handled differently to ensure correct
+Different types have to be handled differently to ensure correct
 computations. For instance, an integer type cannot be used in the same way as a
 floating-point number. To do this, we interpret the operands to its
-corresponding C built-in type, perform the operation, and convert them back to
-its machine standard machine type. We cannot rely on GCC to cast the types
-directly, as this would be platform independent. Different platform use
-different endianness and standards for storing number in memory.
+corresponding C built-in type, perform the operation, and converting them back
+to its standard machine type. We cannot rely on GCC to cast the types directly,
+as this would be platform dependent; different platform use different endianness
+and standards for storing number in memory.
 
 These binary arithmetic operations are very similar in implementation, so we
 have chosen to use C macros to keep the code base tidy, and not have to repeat
 our selves. In summary this macro does the following:
+
 \begin{enumerate}
   \item Ensure the top two stack elements are of the same type or {\tt AnyType}
   \item Pop them off the stack
-  \item Align the types if {\tt AnyType}
+  \item Align the types if either is {\tt AnyType}
   \item Allocate space for the result
   \item Decode the operands to their corresponding C type
-  \item Perform operation
+  \item Perform the arithmetic operation
   \item If the {\tt noOverflow} prefix is set, check for overflow
   \item Encode result back to machine type
   \item Push the result to the stack
 \end{enumerate}
 
+%XXX står også i design (måske flere steder)
 The machine also supports saturated version of the arithmetic instructions. The
-saturated version will ensure that overflow will result in the types respective
-maximum or minimum value, in stead of creating undefined behavior. As an example
+saturated variants ensure that overflow will result in the types respective
+maximum or minimum value, instead of creating undefined behavior. As an example
 with {\tt Int8}, which has the minimum value of -128, the operation $-128 + -1$
 will result in -129, thus causing underflow. Without the saturated version this
 would become 127, shown by the binary calculation:
@@ -192,11 +193,7 @@ either {\tt 0x00} or {\tt 0x01}, and flips its value.
 In addition we also have two sets of compare instructions, either comparing two
 numeric operands of matching type or comparing a single numeric operand to zero
 (or null). Each category includes equals, lesser-than and greater-than
-instructions. All push a {\tt Boolean} result value to the stack.
-
-
-\subsubsection{Indirect Variants}
-% TODO
+instructions, all of which push a {\tt Boolean} result value to the stack.
 
 %%% Local Variables:
 %%% mode: latex
