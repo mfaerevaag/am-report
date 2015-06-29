@@ -50,6 +50,7 @@ work and could be made production ready. A serious effort could result in a
 significant improvement to what is otherwise available.
 
 \subsection{Performance Analysis}
+\label{sec:eval:performance}
 
 When analyzing performance, results are relative to other implementations, as
 this gives natural standpoint on what is considered good performance, and what
@@ -213,10 +214,55 @@ CLR, but continues to be have a better startup time.
 
 \subsubsection{Memory Footprint}
 
+% TODO: missing review
+
+When analyzing the memory footprint of \thename{} we used the absolutely
+brilliant instrumentation tool Valgrind~\footnote{Valgrind:
+  \url{http://valgrind.org}}. It takes the program which is to be run as
+argument, and does so in a sand-boxed environment, allowing it to analyze the
+programs resource consumption together with multitudes of other things. To
+target the machine's memory consumption specifically, we utilize one of
+Valgrind's many built-in tools, one of which is called Massif~\footnote{Massif
+  Heap Profiler: \url{http://valgrind.org/docs/manual/ms-manual.html}}. This is
+a heap profiler, able of analyzing the amount of allocated memory of each
+function in the given program.
+
+We have made a heap profile of \thename{} running the Fibonacci recursion
+benchmark, shown in the previous section. We have run Valgrind with the
+following arguments, and the result can be seen in
+figure~\ref{fig:heap-profile}, generated with
+Massif-Visualizer~\footnote{Massif-Visualizer:
+  \url{http://milianw.de/tag/massif-visualizer}}.
+
+{\tt valgrind --tool=massif --time-unit=B bin/am}
+
 \begin{figure}[H]
   \centering
   \includegraphics[scale=0.35]{figures/fig-mem}
+  \caption{Heap profile of \thename{} running Fibonacci benchmark program}
+\label{fig:heap-profile}
 \end{figure}
+
+The graph shows the memory heap size (in kB) on the y-axis and bytes allocated
+and freed on the x-axis. Having the x-axis in bytes gives an alternative
+representation of time, more beneficial when the actual running time is
+irrelevant. Looking at the graph we see a pyramid shaped memory usage over the
+duration of the program. The inner red fill of the pyramid is that used by the
+the machine's stack, while the outer linings are information tables, threads
+etc. This shows us that during start-up, memory is consumed by the information
+tables and other core infrastructure, but following memory is solely consumed by
+the stack. This makes good sense, as the Fibonacci benchmark does not mutate the
+machines state, with exception of the main thread's stack. The stack keeps
+growing til half way into the program, and thereafter it declines at the same
+pace. This pattern occurs because of how the Fibonacci program generates a very
+deep recursion tree, as mentioned in the previous section. For each recursion,
+two sub-routine invocations occur, resulting in two new activation frames being
+pushed to the stack. When the the recursion tree finally ends in a leaf, the
+value of $F(n)$ is found, and the value is returned all the way up the recursion
+tree, popping activation elements as it goes, until eventually being returned to
+the original caller.
+
+The result are in summary showing no unnecessary or unexpected use of memory.
 
 \subsubsection{Optimization}
 
@@ -238,10 +284,9 @@ C largely does not care about what some collection of bytes represents and
 allows virtually any casting does not make this easier. One-off errors are
 common when dealing with arrays and pointers which are indeed a central part of
 the \thename{} implementation. Luckily there are tools available to aid in
-profiling and pinpointing problematic parts of the code. The absolutely
-brilliant instrumentation tool Valgrind\footnote{Valgrind:
-  \url{http://valgrind.org}} has been an invaluable help for detecting memory
-errors and have allowed us to fix, to our knowledge, all problematic leaks.
+profiling and pinpointing problematic parts of the code. Valgrind has been an
+invaluable help for detecting memory errors and have allowed us to fix, to our
+knowledge, all problematic leaks.
 
 Valgrind consists of several different tools that analyze different things like
 threads, stack operations, caches and memory. We have used the memory error
