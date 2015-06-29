@@ -198,13 +198,9 @@ If none of the rules apply it will mean that at least one of the given operands
 is of a type not supporting arithmetic operations. In this case, an exception
 will be thrown.
 
-If a type is converted to a type of smaller size, the value it truncated and
-will have the chance of overflowing, changing the value of the number. The {\tt
-  noOverflow} prefix defines if an exception should be thrown if overflow
-occurs. There are though, separate instruction for saturated arithmetic
-operations, where overflow is handled by saturating the number of the given
-type. For instance, converting {\tt 0xFFFF} of type {\tt Int16} to {\tt Int8}
-will become {\tt 0xFF}.
+If a type is converted to a type of smaller size, the value it truncated and has
+a risk of overflowing, changing the value of the number. The {\tt noOverflow}
+prefix defines if an exception should be thrown if overflow occurs.
 
 \subsubsection{Fields}
 \label{implementation:meta:fields}

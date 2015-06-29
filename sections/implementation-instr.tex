@@ -166,22 +166,10 @@ our selves. In summary this macro does the following:
   \item Push the result to the stack
 \end{enumerate}
 
-%XXX står også i design (måske flere steder)
-The machine also supports saturated version of the arithmetic instructions. The
-saturated variants ensure that overflow will result in the types respective
-maximum or minimum value, instead of creating undefined behavior. As an example
-with {\tt Int8}, which has the minimum value of -128, the operation $-128 + -1$
-will result in -129, thus causing underflow. Without the saturated version this
-would become 127, shown by the binary calculation:
-\begin{align}
-    & \quad {\tt \ \ 1000 \ 0000} \\
-  + & \quad {\tt \ \ 1111 \ 1111} \\
-  = & \quad {\tt 1 \ 0111 \ 1111}
-\end{align}
-
-Here we can see the eight right-most bits in the binary number {\tt 1 0111 1111}
-is 127, while the left-most bit is spilled. The saturated version will detect
-this, and rather return the minimum value -127.
+The saturated variants of the arithmetic instructions are implemented by
+checking whether an overflow or underflow will occur in which case the value is
+bounded within the limits of the given type.
+%TODO it's not really
 
 Logical operations include {\tt and}, {\tt or}, {\tt xor}, {\tt not}, and left-
 and right-wise bit-shift ({\tt shl} and {\tt shr}) (TODO: {\tt ashr}). With the
