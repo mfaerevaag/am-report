@@ -1,9 +1,9 @@
 A complete abstract machine implementation is not only made up of the system
 that interprets byte code. It can include various components that either work
 completely isolated or interfaces with the byte code interpreter. Exactly what
-other components are part of the system varies widely with among machines. In
-the following we will describe three such components that we have either made a
-phony implementation of or that would have been essential additions to the
+other components are part of the system varies widely among machines. In the
+following we will describe three such components that we have either made a
+phony implementation of or which would have been an essential addition to the
 system.
 
 \subsection{Garbage Collector}
@@ -28,7 +28,7 @@ object is regarded as garbage and will be freed. Tracing garbage collectors work
 by maintaining a graph representation of allocated objects that it can use to
 infer which objects are garbage and which are still in use. This is known as
 mark-and-sweep collection because the collector, upon collection, traverses the
-graph and marks objects that are still on use. It then sweeps the heap and
+graph and marks objects that are still in use. It then sweeps the heap and
 reclaims the resources used by the objects that were not marked as being in use.
 
 \thename{} uses a garbage collector through the interface defined in
@@ -48,11 +48,12 @@ reclaims the resources used by the objects that were not marked as being in use.
 
 We have made a phony implementation of that interface using \code{malloc} for
 allocation and left the rest of the functions unimplemented, which basically
-means that all allocations are leaked. This is not a big issue when developing
-the machine, because we do not need to run memory heavy programs, but for any
-actual use it is critical that the garbage collector works. As with the
-threading, the implementation is wrapped in auxiliary function to simplify the
-process of changing the actual implementation without changing the interface.
+means that all heap allocations are leaked. This is not a big issue when
+developing the machine, because we do not need to run memory heavy programs, but
+for any actual use it is obviously critical that the garbage collector works. As
+with the threading, the implementation is wrapped in auxiliary function to
+simplify the process of changing the actual implementation without changing the
+interface.
 
 The biggest advantage of using a garbage collector is that it prevents most
 memory leaks and can significantly simplify development. It does however come
@@ -71,7 +72,7 @@ any time, nor is verifier aware of the interpreter. It is however usually
 implemented as a tier above the interpreter in the complete machine meaning that
 code must pass the verifier before it is allowed to be executed.
 
-The byte code verifier is different from the system that generates the byte
+The byte code verifier is separated from the system that generates the byte
 code. A compiler is responsible for verifying the semantics and syntax of a
 particular language, which is something the machine and byte code verifier is
 obviously unaware of.
@@ -93,13 +94,11 @@ for a verifier for \thename{}, and give a brief description of each. Some of the
 below are inspired by the Java Virtual Machine's specification of byte code
 verifier\cite{jvm-spec}.
 
-%TODO maybe more on each?
-
 \subsubsection{Instructions Prefixes and Arguments}
 
 Section 8.4 of \thename{} specification constrains the order and composability
-of some op-code prefixes. For instance \code{vtable} and \code{static} cannot be
-composed and \code{unsafe} must directly proceed the instruction op-code.
+of some op-code prefixes. For instance the \code{unsafe} prefix must directly
+proceed the instruction op-code.
 
 Arguments to instructions can be verified in terms of size, type and
 existence. Instructions take an argument, \emph{must} do so because the
@@ -131,11 +130,11 @@ stack.
 \subsubsection{Data-Flow Analysis}
 
 One of the most common programming errors is to attempt to dereference an
-uninitialized reference. Another is to use an index of an statically sized array
-which is outside the bounds of the array. Analysis of the flow of data in a
-program can reveal many such errors, usually by constructing a so-called
-Control-Flow Graph, which represents what code paths might be taken during
-execution.
+uninitialized or null-value reference. Another is to use an index of an
+statically sized array which is outside the bounds of the array. Analysis of the
+flow of data in a program can reveal many such errors, usually by constructing a
+so-called Control-Flow Graph, which represents what code paths might be taken
+during execution.
 
 \subsubsection{Type Checking}
 
@@ -148,9 +147,9 @@ type safety, exactly because the types are determined and sometimes constructed
 at run-time. The verifier must thus do ``what it can'', and remaining mismatched
 types will result in run-time errors.
 
-
 \subsection{Assembler and Linker}
 
+%TODO remove first paragraph? at least don't mention that svenka didnt finish his sheit
 The assembler and linker will be implemented through porting (TODO: define?)
 parts of the GNU Toolchain. The necessary components are the GNU
 Assembler~\cite{gnu:as}, {\bf as}, commonly known as GAS, and the GNU Linker,
@@ -163,7 +162,7 @@ process, where each file are compiled separately and finally linked together
 with a linker. {\bf ld} is the standard linker for GCC, TODO.
 
 The GNU Assembler is actually a family of assemblers, supporting many
-front-ends, or languages. Many other assemblers needs to pass over the source
+front-ends, or languages. Many other assemblers need to pass over the source
 code multiple times to be able to produce a valid output, while {\bf as} was
 designed to do assemble in a single pass. This makes for a more complex assembly
 process, but in turn removes the overhead of passing over the source code
@@ -177,7 +176,6 @@ even compare in performance.
 
 % TODO: more
 
-
 \subsection{Byte Code Optimizer}
 
 Compilers that generates byte code will almost always do heavy optimizations of
@@ -186,8 +184,8 @@ itself. It can either be an isolated component sitting in between the verifier
 and the interpreter or it can be integrated in the machine where it optimizes
 code when it is found to be suitable. When integrated in the machine, code that
 is executed repeatedly (known as a Hot-Spot) can be further optimized because
-even small optimizations in a Hot-Spot can result in great overall run-time cost
-reductions.
+even small optimizations in a Hot-Spot can result in great overall run-time
+improvements.
 
 Code optimization is a whole research area in itself, and so there are
 multitudes of algorithms for detecting and optimizing certain constructs of
@@ -264,10 +262,9 @@ is never called it is redundant and can be safely removed from the program,
 saving space and file loading time.
 
 Looping constructs can, among other transformations, be optimized by detecting
-\textbf{loop-invariant code}, i.e. code that is evaluated in each loop
+\textbf{loop-invariant code}, i.e.~code that is evaluated in each loop
 iteration, but always evaluates to the same value. Such code can be moved
 outside the body of the loop so as only to evaluate the code once.
-
 
 %%% Local Variables:
 %%% mode: latex
