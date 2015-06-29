@@ -1,10 +1,10 @@
 \subsection{Tools and Languages}
 
-We have implemented \thename{} in the C programming language, more specifically
-using the C99 standard with GNU extensions by use of GCC\footnote{The GNU
-  Compiler Collection: \url{https://gcc.gnu.org}}. There are both pros and cons
-of using a relatively low-level language (as compared to other available
-languages), but we found that the benefits outweighed the disadvantages.
+We have implemented \thename{} in the C Programming Language, more specifically
+using the C99 standard with GNU extensions by use of GCC~\cite{gnu:gcc}. There
+are both pros and cons of using a relatively low-level language (as compared to
+other available languages), but we found that the benefits outweighed the
+disadvantages.
 
 First of all C is extremely portable; GCC is available on \textit{a lot} of
 architectures, and all modern operating systems ship with a C compiler which
@@ -121,13 +121,17 @@ following steps:
 The following sections details how the above steps are performed.
 
 \subsubsection{Command-line Arguments}
-\thename{} is run through an executable binary, most likely in a command-line
-environment. The most common, and arguably the most efficient, way of
-customizing parameters and execution options is through command-line arguments,
-given directly to the executable when run. These arguments can be extended to do
-a number of things, but essentially we only require the name of the binary file
-to be executed and optionally customizing the level of verbosity, i.e. the
-amount of logging information to display. %TODO første del lidt derp?
+The common way, and arguably the only way the makes sense, of customizing the
+parameters of an executable is through command-line arguments, given directly to
+the executable when run. These arguments can be extended to do a number of
+things, but essentially we only require the name of the binary file to be
+executed and optionally customizing the level of verbosity, i.e. the amount of
+logging information to display. %TODO første del lidt derp? watfix?
+
+The input file is set with the {\tt --file} (or {\tt -f}) argument, and the
+verbosity level is set with either {\tt --brief} ({\tt -b}) or {\tt--versbose}
+({\tt -v}). For more information on logging, see
+section~\ref{sec:implementation:core:debug} below.
 
 We follow common conventions by having two special arguments for displaying
 useful meta information about the \thename{} binary. These include the {\tt
@@ -137,8 +141,6 @@ useful meta information about the \thename{} binary. These include the {\tt
 For ease of implementation we use the Getopt library~\footnote{Getopt (libc):
   \url{http://www.gnu.org/software/libc/manual/html_node/Getopt.html}}, included
 in C's Standard Library.
-
-%TODO args for the executable
 
 \subsubsection{Internal Error Handling}
 
@@ -160,9 +162,9 @@ allocated memory, print some information and set the return code of the
 process. The two last things are very important to let the user know what has
 happened, but also to debug the problem.
 
-With checks, errors can be invoked through a special logging macro {\tt
-  log\_err}, described in the \nameref{sec:implementation:core:debug} section
-below. %TODO hvad er checks?
+Errors can be invoked through a special logging macro {\tt log\_err}, described
+in the \nameref{sec:implementation:core:debug} section
+below.
 
 \subsubsection{ELF File Loading}
 
@@ -264,11 +266,9 @@ of the global state of the machine. The logging level sets the ``barrier'' for
 when a message should be printed. The available levels includes {\tt brief},
 {\tt normal} and {\tt verbose} which can be customized through command-line
 arguments, but defaults to {\tt normal}. As each log message is also categorized
-with a level, the logging module decides, given the current logging level, if it
-should be printed. The message level are {\tt error}, {\tt warning} and {\tt
-  info}.
-% TODO burde der ikke være et ``none'' level og burde log level og msg level
-% ikke hedde det samme?
+with a level of severity, the logging module compares the logging level and the
+message level to decide whether the message should be printed. The message
+levels are {\tt error}, {\tt warning} and {\tt info}.
 
 If the logging level is set to brief, only warnings will be printed, if set to
 normal, warnings will also be printed, and lastly, if set to verbose, everything
@@ -276,9 +276,10 @@ will be printed.
 
 A log message is sent through an interface of macros, exposed by the {\tt
   logger.h} header-file. Each message level has two logging macros, logging a
-message of the given level. The two macros include on which takes a string, and
-one, suffixed with ``f'', which takes a formatted string and a variable number
-of arguments.
+message of the given severity level. The two macros include one which takes a
+string, and a formatted version, suffixed with ``f'', which takes a formatted
+string and a variable number of arguments (in the same fashion as
+\code{printf}).
 
 \begin{ccode}
 #define log_warn(msg)                             \
@@ -290,16 +291,16 @@ of arguments.
 \end{ccode}
 
 The {\tt log\_err} macro, will in addition to logging an error message also
-clean up and stop the machine, as it cannot safely continue.
+clean up and stop the machine, as it cannot safely continue. The message will be
+printed to {\tt stderr} instead of {\tt stdout}, so the overlaying environment
+running \thename{} can act accordingly.
 
-For debugging during development there is an extra macro for printing a message
-prefixed with file name, function name and line number. In addition there are
-one suffixes with ``f'', which takes a formatted string in the same manner as
-the logging macros. %TODO forvirrende
-
-The logging messages are only displayed if the {\tt DEBUG} macro value is
-defined. This value is automatically set through the build system, if not making
-a release build through the {\tt release} target.
+For debugging during development there is two extra macros for printing a
+message prefixed with file name, function name and line number. One of which is
+suffixes with ``f'', denoting it takes a formatted string in the same manner as
+the logging macros. The debug messages are only displayed if the {\tt DEBUG} macro value is
+defined. This value is automatically set through the build system, for
+convenience during development.
 
 \subsection{Stacks}
 \label{sec:implementation:stacks}
@@ -311,18 +312,18 @@ a release build through the {\tt release} target.
 The three information tables available in \thename{} are all implemented in the
 most simplistic way possible, with the intention being; less is more. With that
 being said, this might not be as apparent with the meta table, than with the
-string- and constants table. As for the reasons explained in TODO. %XXX
+string- and constants table. As for the reasons explained later in
+section~\ref{sec:implementation:meta}.
 
-The constants- and string table are almost identical in implementation. They are
+The constant and string table are almost identical in implementation. They are
 both parsed from the executable file, where they are stored as static lists of
 elements. This means we can parse the size of each list and allocate internal
 arrays of the same size and type. The type for the internal string table will
 simply be a list of strings, or rather {\tt char *}'s, as they are encoded as
-Modified UTF-8, which are null-byte terminated. As for the constants table, they
+Modified UTF-8, which are null-byte terminated. As for the constant table, they
 are stored as simple arrays of bytes. It is the compilers job of keeping track
 of the bytes' encoding. Therefore, the same constant can be interpreted as
 different numbers, depending on the type it is expected to have.
-%TODO ^ stod der ikke tidligere at Modified UTF8 ikke var null terminated?
 
 For parsing bytes to numeric values whether as signed or unsigned integers, or
 floating-point numbers, there are special utility functions located in the {\tt
@@ -334,7 +335,7 @@ kept ``DRY'' by using macros to generate tests for multiple of edge cases. For
 more information on how we decode more complex encoding, as floating-point
 precision numbers, see Section~\ref{sec:implementation:meta:types}.
 
-Each element in the constants- and string table are parsed lazily. If we were to
+Each element in the constant and string table are parsed lazily. If we were to
 parse both tables on initialization, it would create an undesirable overhead,
 depending on their size. To mitigate this, each table has lookup functions which
 check if the element on the given index is {\tt NULL}, in which case it is first
@@ -434,6 +435,8 @@ collection of functions, one for each available run-time function. There are
 currently two functions available namely \code{push\_scope} and \code{iprint}
 which pushes a scope onto the current one and prints an integer value from the
 stack, respectively.
+
+% TODO: mention push scope as an example?
 
 \subsection{Testing}
 \input{sections/implementation-testing}

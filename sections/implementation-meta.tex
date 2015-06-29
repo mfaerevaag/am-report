@@ -1,16 +1,23 @@
 It is not only for stack and heap elements that we need to store type
-information. Sub-routines and object fields also have type information which we
-need to keep track of, but the information is not the same. For instance, a
-stack or heap element has types describing the type of its value. A sub-routing
-will need have a type signature, describing the types of it's parameters, a name
-and possible properties. Similarly an object field will have (TODO). %XXX
+information. Sub-routines and field definitions also have type information which
+we need to keep track of, but the information does not necessarily describe the
+same things. For instance, a stack or heap element has types describing the type
+of its value. A sub-routine will need have a type signature, describing the
+types of it's parameters, a name and possible properties. Similarly a field
+definition will also have a name and other possible properties. In the eyes of
+the machine, all of these are regarded as types describing some internal
+structures.
 
-Therefore, we need to abstract our type information a level higher, letting us
-better describe different types of types. Instead of storing the different data
-different places, there is a centralized table, containing all meta
-information. This is named the \term{metadata table} and will need to be
-dynamically sized to support reflection and generating new types at run-time.
-%TODO lidt forvirrende
+Therefore, we need to abstract the way we store type information a level higher,
+letting us better describe different kinds of types, be it a sub-routine, field
+definition or a regular type from the type table discussed in earlier in
+section~\ref{sec:design:types}. Instead of storing the different kinds of
+information in different locations, there is a centralized table, containing
+all, what we call, meta information. This is named the \term{metadata table} and
+will need to be dynamically sized to support reflection and generation of new
+types at run-time.
+%TODO lidt forvirrende. watfix?
+% TODO: markus
 
 All metadata objects in the machine have a tag defining which type of
 information it contains.
@@ -74,12 +81,11 @@ heap. The exception is Composite types whose size is computed during run-time
 because it is not part of the type definition per s\'e.
 
 Types from the executable are mapped from its index in the binary type table to
-the machines meta table. As the executable meta table is of static size, this
-will be a simple integer array, mapping binary metadata indices to the machine's
-internal metadata table entries. The metadata entries will be parsed lazily,
+the machines meta table. As the ELF meta table is of static size, this will be a
+simple integer array, mapping binary metadata indices to the machine's internal
+metadata entries in the meta table. The metadata entries will be parsed lazily,
 i.e.~the first time the program tries to look up a metadata entry through its
-index in the binary meta table, it is parsed and stored in the machine's meta
-table. %TODO lidt forvirrende
+index in ELF meta table. %TODO lidt forvirrende. watfix?
 
 The machines internal metadata table is implemented through a hash map, where
 each meta entry can be looked up through it's hashed value. Having implemented
@@ -136,7 +142,7 @@ the IEEE 754 standard~\cite{ieee754}. This is a technical standard defining the
 arithmetic format, i.e.~the finite range and special values, rounding rules,
 operations, exception handling and interchange formats. Its values include
 finite numbers (within a certain maximum and minimum, depending on the size),
-two infinities (plus and minus) and a NaN (not a number).
+two infinities (positive and negative) and a NaN (not a number).
 
 A floating point number is represented by a sign, a fraction (also called
 significant or mantissa) and an exponent. A value can have multiple alternative
@@ -160,7 +166,7 @@ into separate numbers. We can then apply the following formula to get its
 decimal value.
 
 \begin{equation}
-  value = (-1)^{sign} \cdot (1 + \sum^{23}_{i=1} b_{23-i}2^{-i}) \cdot 2^{e - 127}
+  value = (-1)^{sign} \cdot (1 + \sum^{23}_{i=1} frac_{23-i}2^{-i}) \cdot 2^{exp - 127}
 \end{equation}
 
 % type lattice
@@ -169,13 +175,16 @@ When performing arithmetic instruction on numbers, the machine enforces strong
 typing and will therefore throw an exception if the operands is not of the same
 type. This is to avoid common pitfalls, such as not handling overflow of
 numbers, but also when doing arithmetic operations of two different types of
-numbers. If a program, for instance, divides a floating point precision number
-by an integer number, will the result be an floating point or integer? The only
-case the machine itself needs to make a choice about is with stack elements of
-type {\tt AnyType}. Instead of having a long list of what do do in every case of
-all types, the choice will be defined by a type lattice. This type lattice will
-control what type the result is of, in a given operation between two numbers of
-different types.
+numbers. The compiler itself will have to truncate or convert values to matching
+types before performing arithmetic operations.
+
+Take, for instance, a program attempting to divide a floating-point precision
+number by an integer number, will the result be an floating point or integer?
+The only scenario where the machine itself needs to make a choice about is with
+stack elements of type {\tt AnyType}. Instead of having a long list of what do
+do in every case of all types, the choice will be defined by a type
+lattice. This type lattice will control what type the result is of, in a given
+operation between two numbers of different types.
 
 All binary arithmetic operations follow the same type lattice. The type lattice
 has the following set of rules matching which operand that is to be converted,
@@ -218,7 +227,7 @@ the form of a tag, and a unique hash. The field definition struct, {\tt
 table, an integer offset, which is the distance where its value is stores from
 the beginner of the heap object, and lastly a type describing its content. In
 addition to these it a has an arbitrary number of properties and versions, which
-are not implemented. The version element is to support dynamic languages (TODO)
+are not implemented. The version element is to support dynamic languages
 which can be extended or monkey patched, as Rubyists like to call it. Therefore,
 a number of similar fields can exist in memory, which are distinguished by
 version. % TODO

@@ -98,29 +98,27 @@ larger precision, one would have to use multi-precision numbers which would
 require some time to implement. We have chosen to note the short comings of the
 current solution and focus our attention else where.
 
-Both
-GCC~\footnote{\url{https://gcc.gnu.org/onlinedocs/gcc/Integer-Overflow-Builtins.html}}
-and
-Clang~\footnote{http://clang.llvm.org/docs/LanguageExtensions.html\#checked-arithmetic-builtins}
-has built-in functions for doing integer arithmetic while also detecting
-overflow. GCC's implementation (TODO: maybe also Clang) does this by converting
-the two operands into infinite precision numbers, where after doing the the
-operation on the promoted operands. The result is then cast to the original
-precision. If the casted result does not equal the infinite precision result,
-overflow has occurred, which is indicated by the functions return value. We have
-chosen to not use these to hold the implementation as library independent as
-possible TODO. %XXX
+Both GCC and Clang has built-in functions for doing integer arithmetic while
+also detecting
+overflow~\footnote{\url{https://gcc.gnu.org/onlinedocs/gcc/Integer-Overflow-Builtins.html}}\footnote{http://clang.llvm.org/docs/LanguageExtensions.html\#checked-arithmetic-builtins}. GCC's
+implementation does this by converting the two operands into infinite precision
+numbers, where after doing the the operation on the promoted operands. The
+result is then cast to the original precision. If the casted result does not
+equal the infinite precision result, overflow has occurred, which is indicated
+by the functions return value. We have chosen to not use these to hold the
+implementation as library independent as possible.
 
 Detecting overflow for floating-point precision numbers is somewhat more
-challenging, due to the more complex nature of its implementation. The C
-Standard Library has built-in constants for finding a float's maximum value;
-{\tt FLT\_MIN} and {\tt FLT\_MAX} for single precision, {\tt DBL\_MIN} and {\tt
+challenging, due to the more complex nature of its encoding. The C Standard
+Library has built-in constants for finding a float's maximum value; {\tt
+  FLT\_MIN} and {\tt FLT\_MAX} for single precision, {\tt DBL\_MIN} and {\tt
   DBL\_MAX} for double precision. These could in theory be used in the same
 fashion as above, creating an efficient solution, given that we could do
-built-in arithmetic operations on them. This is unfortunate, as {\tt FLT\_MAX -
-  1}, for instance, is regarded as undefined behavior and will on most platforms
-be equal to {\tt FLT\_MAX}. Inducing undefined behavior when trying to deduce
-whether an instruction is safe, renders it's point moot. %TODO lidt forvirrende
+built-in arithmetic operations on them. This is unfortunately not true, as {\tt
+  FLT\_MAX - 1}, for instance, is regarded as undefined behavior and will on
+most platforms be equal to {\tt FLT\_MAX}. Inducing undefined behavior when
+trying to deduce whether an instruction is safe, renders its point
+moot. %TODO lidt forvirrende. watfix?
 
 We have therefore chosen to use a simple but also sub-optimal solution. When,
 for instance, adding two floats together that should produce overflow, the
@@ -128,8 +126,7 @@ resulting value will become equal to {\tt FLT\_MAX} (in the case of single
 precision). We therefore check whether the result of each operation either
 equals the maximum or minimum value for the given precision. In cases where an
 operation equals exactly the maximum or minimum value, an overflow exception
-will be thrown, even though under- or overflow might not have occurred. TODO:
-need more comment?
+will be thrown, even though under- or overflow might not have occurred.
 
 \subsubsection{Arithmetic}
 
@@ -171,6 +168,7 @@ checking whether an overflow or underflow will occur in which case the value is
 bounded within the limits of the given type.
 %TODO it's not really
 
+% TODO: markus link with design fluent that shit
 Logical operations include {\tt and}, {\tt or}, {\tt xor}, {\tt not}, and left-
 and right-wise bit-shift ({\tt shl} and {\tt shr}) (TODO: {\tt ashr}). With the
 exception of {\tt not}, their corresponding instructions are implemented in a
