@@ -439,10 +439,32 @@ Appendix~\ref{NEEDED} documents how to compile and run the machine on a Unix
 system.
 
 \subsection{Future Development}
-% XXX
-%% What's missing
-%% What could be different
-%% What would next steps be
+
+Our \thename{} implementation lacks several key features that would be required
+in a practical system for actual use. Arguably the most important piece missing
+at the moment is a working garbage collector. No heap objects are ever freed
+which renders the whole system futile for real-world usages. Other shortcomings
+include a proper implementation of arrays, an exception handling system, support
+for unsafe code execution etc. Further there are many unimplemented variants of
+instructions left in the specification, especially in the family of heap object
+instructions.
+
+We would need better tooling to aid the development of language front-ends and
+for testing the machine continuously. This could potentially be in the form of a
+Binutils and GCC port for \thename{} which would provide a full-blown compiler
+for the C-family of languages, an assembler and a standard library ``for
+free''. The assembler would in itself be a very useful addition to the
+development work flow because programs could be hand-written without much effort
+and easily tested.
+
+From the benchmarks we can see that performance is not generally anywhere near
+the major players on the abstract machine field, which indicates that some heavy
+optimizations would be required. The addition of a JIT compiler would alleviate
+the performance problems, but is a large, complex piece of machinery.
+
+There is really no end to what features and functionality could be added and
+improved, which is true for almost any software project. We do however think
+that this is good start and could be the basis for further development.
 
 %%% Local Variables:
 %%% mode: latex
