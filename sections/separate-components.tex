@@ -9,9 +9,8 @@ system.
 \subsection{Garbage Collector}
 \label{sec:separate-components:gc}
 
-%TODO: needs citations
-Garbage is defined as heap objects to which there are no references, and so are
-unreachable. Such regions of memory can never be used again and have no useful
+Heap objects to which there are no references, and so are unreachable, are known
+as garbage. Such regions of memory can never be used again and have no useful
 purpose, hence the name. In languages that manually manage memory (e.g. C), such
 objects are regarded as a \textit{leak}, because the memory they inhibit can
 never be reclaimed and used for other things, but will continue to take up
@@ -20,21 +19,27 @@ memory until the program exits. The garbage collector's responsibility is to
 can be safely freed, relieving the programmer of the task of manually freeing
 allocations.
 
-% TODO something about circular deps in ref counting
 There are generally two types of garbage collectors: reference counters and
 tracing garbage collectors. Reference counting simply keeps track of how many
 references there are to a given object and when that count becomes zero, the
-object is regarded as garbage and will be freed. Tracing garbage collectors work
-by maintaining a graph representation of allocated objects that it can use to
-infer which objects are garbage and which are still in use. This is known as
-mark-and-sweep collection because the collector, upon collection, traverses the
-graph and marks objects that are still in use. It then sweeps the heap and
-reclaims the resources used by the objects that were not marked as being in use.
+object is regarded as garbage and will be freed. This is an efficient scheme for
+simple data structures but there is a critical issue with circular
+structures\cite{bruno}. Imagine a singly-linked circular linked list which is
+accessible only via some variable named \code{head}. If \code{head} becomes
+null, then all members of the list will still have a reference to them because
+the list is circular, only there is no way to access them. Thus the reference
+counter cannot determine that the list is garbage and a leak has occured.
+
+Tracing garbage collectors work by maintaining a graph representation of
+allocated objects that it can use to infer which objects are garbage and which
+are still in use. This is known as mark-and-sweep collection because the
+collector, upon collection, traverses the graph and marks objects that are still
+in use. It then sweeps the heap and reclaims the resources used by the objects
+that were not marked as being in use.
 
 \thename{} uses a garbage collector through the interface defined in
 \code{gc.h}, which essentially exposes four functions:
 
-% TODO i dont think this is accurate
 \begin{description}
 \item[allocate] Allocates memory for a new heap object
 \item[release] Releases a heap object for tracking by garbage collection,
