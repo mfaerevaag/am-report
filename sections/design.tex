@@ -540,7 +540,7 @@ Below is a description of the various kinds of simple types provided.
 
 The IEEE-753 and IEEE-754 standards does not specify an endianness for storing
 or transferring floating-points numbers, hence we will conform to the school of
-big-endian, as done through the entirety of \thenname{}.
+big-endian, as done through the entirety of \thename{}.
 
 % reference
 
@@ -574,9 +574,31 @@ To support compound types similar to a struct in C, there is a {\tt Composite
 describing its member. Though not visible from the type signature, each member
 has a name, allowing for convenient referencing.
 
-Lastly, the machine has a set of meta types, describing types by them
-selves. These include {\tt Type}, {\tt Signature} and {\tt
-  TypeSignature}. %XXX markus
+% meta
+
+% TODO: review
+Lastly, the machine has a set of meta types, describing various kinds of data in
+the machine, including types them selves. This is required for allowing programs
+to operate on types and to support concepts such as reflection. There will be a
+specific type of instructions designed for utilizing this feature, which will be
+explained further in the following section.
+
+Below we see a brief description for each meta type supported:
+
+\begin{description}
+\item[Type:] A kind of meta information describing one of the above types.
+
+% \item[Metadata:] \ \\ %TODO include?
+
+\item[Field definition:] Describing a heap object field, with name, type of
+  value and possible properties.
+
+\item[Sub-routine definition:] Describing a sub-routine with name, types of the
+  parameters, and address of its containing instructions.
+
+\item[Sub-routine reference:] Reference to a sub-routine by name.
+
+\end{description}
 
 \subsection{Instruction Set Architecture}
 \label{sec:design:isa}
