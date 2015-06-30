@@ -133,16 +133,16 @@ common feature to be able to modify the list of properties on an object during
 run-time. The current implementation however does not support this, but would
 likely be implemented via run-time library functions.
 
-\subsubsection{Floating Point Value Types}
+\subsubsection{Floating-Point Value Types}
 
-When handling floating point precision numbers we will, as aforementioned, use
+When handling floating-point precision numbers we will, as aforementioned, use
 the IEEE 754 standard\cite{ieee754}. This is a technical standard defining the
 arithmetic format, i.e.~the finite range and special values, rounding rules,
 operations, exception handling and interchange formats. Its values include
 finite numbers (within a certain maximum and minimum, depending on the size),
 two infinities (positive and negative) and a NaN (not a number).
 
-A floating point number is represented by a sign, a fraction (also called
+A floating-point number is represented by a sign, a fraction (also called
 significant or mantissa) and an exponent. A value can have multiple alternative
 representations, for instance $1.10 \cdot 10^2$ can also be written as
 $11.00 \cdot 10^1$. This though, should not have any effect on the result of
