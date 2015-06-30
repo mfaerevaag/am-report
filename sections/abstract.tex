@@ -1,19 +1,16 @@
-% TODO: review
-
-Recent trends show that programming language paradigms, such as functional and
-dynamic, are becoming increasingly popular. Today's industry standard abstract
-machines was originally designed without regard to other paradigms than one
-specific. This makes them lack the flexibility to properly handle languages of
-different paradigms. Current implementations offer ad-hoc solutions for fitting
-other paradigms into theirs, but as they do not fit into the fundamental design,
-the issues can never be properly be addressed. This thesis outlines the reasons
-for current implementation not being properly able to handle modern language
-paradigms, while also doing a serious effort in designing a new abstract from
-scratch, solving said challenges. This abstract machine will effectively
-supporting all modern language paradigms. The major challenges of this task
-being the design. How to make the machine low-level enough to handle all
-paradigms, while keeping the language expressive enough for being a convenient
-compilation target.
+Abstract machines are used everywhere that code is to be executed, be it web
+browsers, desktop applications or embedded devices. The industry standard
+abstract machines available today are predominantly designed with imperative and
+object-oriented languages in mind, often resulting in awkward ad-hoc
+implementations for trending paradigms like functional and dynamic
+languages. This thesis presents an attempt to design and implement a new
+abstract machine called \thename{} whose ambition is to efficiently and
+elegantly support both traditional and emerging paradigms. We describe the
+instruction set supported by \thename{} and detail how the implementation was
+developed. Finally we present a performance and architectural analysis which
+indicates that while \thename{} is not on par with industry standards, it has
+potential to fulfill its vision. The result is a working abstract machine that
+is capable of executing simple programs in an elegant and flexible manner.
 
 %%% Local Variables:
 %%% mode: latex
