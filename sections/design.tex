@@ -245,7 +245,7 @@ called Last In, First Out (LIFO).
   \centering
   \includegraphics[scale=0.6]{images/stack.png}
   \caption{Stack push and pop operations}
-  \label{fig:stack}
+\label{fig:stack}
 \end{figure}
 
 Although one cannot pop the second element from the top without first removing
@@ -256,10 +256,12 @@ as {\it peeking}.
 
 \subsubsection{Stack vs. Register Machine}
 
-Machines can implement the stack model virtually and execute it directly in
-hardware, but as we are designing an abstract machine, we will only discuss the
-virtual aspect. Regardless, such a machine is commonly called a \term{stack
-  machine}. %TODO forvirrende
+Machines can implement the stack model virtually through software, but also
+directly in
+hardware~\footnote{\url{https://en.wikipedia.org/wiki/Stack_machine#Commercial_stack_machines}}. As
+we are designing an abstract machine, we will disregard the hardware
+implementations and only discuss the virtual aspect. Regardless, such a machine
+is commonly called a \term{stack machine}. %TODO forvirrende. watfix?
 
 The most common notation in arithmetic formulas and statements are the infix
 notation, where the operator is written between its operands: $1 + 2$. One can
@@ -280,6 +282,7 @@ the result back onto the stack.
 
 As briefly discussed in Section~\ref{sec:background:stack-vs-register}, a
 register machine TODO %XXX
+% TODO: rename to stack machine and change scope therefor
 
 \subsubsection{Stack Organization}
 
@@ -582,7 +585,7 @@ has a name, allowing for convenient referencing.
 
 Lastly, the machine has a set of meta types, describing types by them
 selves. These include {\tt Type}, {\tt Signature} and {\tt
-  TypeSignature}. %XXX
+  TypeSignature}. %XXX markus
 
 \subsection{Instruction Set Architecture}
 \label{sec:design:isa}
@@ -689,6 +692,7 @@ which are described below.
 \end{description}
 
 \subsubsection{Numeric and Logical Operations}
+\label{sec:design:stack:logic}
 
 \thename{} supports the usual range of logic operations including \emph{and},
 \emph{or}, \emph{xor}, negation and bit-wise shifts along with the arithmetic

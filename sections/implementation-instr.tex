@@ -167,15 +167,15 @@ checking whether an overflow or underflow will occur in which case the value is
 bounded within the limits of the given type.
 %TODO it's not really
 
-% TODO: markus link with design fluent that shit
-Logical operations include {\tt and}, {\tt or}, {\tt xor}, {\tt not}, and left-
-and right-wise bit-shift ({\tt shl} and {\tt shr}) (TODO: {\tt ashr}). With the
-exception of {\tt not}, their corresponding instructions are implemented in a
-similar fashion as the arithmetic, through a macro, using C's built-in
+As explained in section~\ref{sec:design:stack:logic}, logical operations include
+{\tt and}, {\tt or}, {\tt xor}, {\tt not}, left- and right-wise bit-shift ({\tt
+  shl}, and {\tt shr}) and arithmetic right-wise bit-shift ({\tt ashr}). With
+the exception of {\tt not}, their corresponding instructions are implemented in
+a similar fashion as those of the arithmetic, through a macro using C's built-in
 operators. The {\tt not} instruction takes a {\tt Boolean} value, which is
 either {\tt 0x00} or {\tt 0x01}, and flips its value.
 
-In addition we also have two sets of compare instructions, either comparing two
+Lastly, we also have two sets of compare instructions, either comparing two
 numeric operands of matching type or comparing a single numeric operand to zero
 (or null). Each category includes equals, lesser-than and greater-than
 instructions, all of which push a {\tt Boolean} result value onto the stack.
