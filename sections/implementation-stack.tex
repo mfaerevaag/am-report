@@ -83,14 +83,14 @@ are ignorant of.
   exceeded\cite{rust:segmented-stack, go:segmented-stack}.
 \end{remark}
 
-Segments are implemented as a doubly linked list as shown in
-listing~\ref{lst:implementation:stack:segment}. Each segment keeps track of its
-length (i.e.~number of elements current in the segment) and the top element. The
-\code{content} field is the region allocated for storage of elements. The
-\code{data\_cursor} is maintained to always point to the byte following the top
-element's content bytes and is useful when pushing a new element. The
-\code{size} field simply represents the size of the memory region allocated for
-the segment and is used to check whether the segment has room for more elements.
+Segments are implemented as a doubly linked list, where each segment keeps track
+of its length (i.e.~number of elements current in the segment) and the top
+element. The \code{content} field is the region allocated for storage of
+elements. The \code{data\_cursor} is maintained to always point to the byte
+following the top element's content bytes and is useful when pushing a new
+element. The \code{size} field simply represents the size of the memory region
+allocated for the segment and is used to check whether the segment has room for
+more elements.
 
 \begin{figure}[h]
   \centering
@@ -116,9 +116,8 @@ available to the machine.
 
 Stack elements can be arbitrarily large. For instance fixed size arrays stored
 on the stack are as large as their type indicates, and might be bigger than the
-defined segment size. Thus, before pushing an element (as shown in
-Listing~\ref{lst:implementation:stack:operations}) we check whether the element
-can fit into a segment, and if not a segment is allocated with the size
+defined segment size. Thus, before pushing an element we check whether the
+element can fit into a segment, and if not a segment is allocated with the size
 explicitly given. The new segment is allocated the required size for the element
 plus the default segment size as to allow for more elements to be pushed and
 minimize the segment handling overhead.

@@ -125,8 +125,8 @@ that describes the field or sub-routine. The idea is that a heap object's (or
 stack object's or scope's) associated type includes its members, so modification
 of the heap object's actual data is possible by providing the definition of the
 desired member that maps to a field or sub-routine. See
-Section~\ref{implementation:meta:fields}
-and~\ref{implementation:meta:sub-routines} for details of how fields and
+Section~\ref{sec:implementation:meta:fields}
+and~\ref{sec:implementation:meta:sub-routines} for details of how fields and
 sub-routines are used to modify a heap object.
 
 The list of members is dynamic meaning that members can be added or removed
@@ -212,7 +212,7 @@ a risk of overflowing, changing the value of the number. The {\tt noOverflow}
 prefix defines if an exception should be thrown if overflow occurs.
 
 \subsubsection{Fields}
-\label{implementation:meta:fields}
+\label{sec:implementation:meta:fields}
 
 Fields are also a type of metadata, describing a member of a {\tt Composite}
 type, in the form of field definition. It is important to note that fields are
@@ -250,6 +250,7 @@ must be prefixed with the {\tt unsafe} flag.
 %TODO afaik, fields har ikke strick layout, kun composites
 
 \subsubsection{Sub-routines}
+\label{sec:implementation:meta:sub-routines}
 
 The last kind of metadata is a sub-routine which defines an executable set of
 instructions. It is similar to a function (as in C), with the exception that a

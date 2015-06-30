@@ -19,7 +19,7 @@ statically.
 
 \textbf{Note:} Because the specification is such a central document to the
 design we will not cite it directly throughout the thesis. Instead we refer to
-Appendix~\ref{appendix:spec} where it is included in its entirety.
+Appendix~\ref{sec:appendix:spec} where it is included in its entirety.
 
 \subsection{Memory and Object Model}
 
@@ -140,11 +140,11 @@ on.
 
 \thename{} reads executable files written in the Executable Linkable Format
 (ELF). ELF is a widely used format for executable binary files that is standard
-on Unix based systems (OpenBSD, Linux, Solaris, etc\cite{NEEDED}). It is a
-simple and very flexible format that is not specific to any platform or
-architecture but is a container format for such. That means that it provides
-structures for organizing bits and bytes into sections and defining headers that
-describe the file in terms of purpose and functionality.
+on Unix based systems\cite{wiki-elf}. It is a simple and very flexible format
+that is not specific to any platform or architecture but is a container format
+for such. That means that it provides structures for organizing bits and bytes
+into sections and defining headers that describe the file in terms of purpose
+and functionality.
 
 ELF files are not necessarily executable files, they can be only linkable (hence
 the name) meaning for instance, that there is no execution entry point
@@ -514,6 +514,7 @@ compact manner, one of which we will describe here. %XXX fjern eller skriv om
                                                     %LEB128
 
 \subsubsection{\thename{}'s Types System}
+\label{sec:design:type-system}
 
 \thename{} provides a set of built-in types, encompassing both primitive types
 as well as references, arrays and composite types. Further there is the concept
@@ -576,7 +577,7 @@ type.
 
 % composite
 
-To support custom types, similar to a struct in C, there is a {\tt Composite
+To support compound types similar to a struct in C, there is a {\tt Composite
   <t+>} type. This is a collection of an arbitrary number of other types,
 describing its member. Though not visible from the type signature, each member
 has a name, allowing for convenient referencing.
@@ -668,11 +669,11 @@ which are described below.
 
 \item[\instr{pushMeta}:]
 
-  Metadata is, as mentioned in Section~\ref{NEEDED}, a wrapping kind
-  encompassing type-, field- and sub-routine information. The \instr{pushMeta}
-  takes an index into the metadata table and places the a metadata reference on
-  the stack. This is required for many of the indirect instruction variants,
-  eg.~where a type reference is read from the stack.
+  Metadata is, as mentioned in Section~\ref{sec:design:type-system}, a wrapping
+  kind encompassing type-, field- and sub-routine information. The
+  \instr{pushMeta} takes an index into the metadata table and places the a
+  metadata reference on the stack. This is required for many of the indirect
+  instruction variants, eg.~where a type reference is read from the stack.
 
 \item[\instr{pushUninitialized}:]
 
@@ -748,8 +749,8 @@ instruction \instr{compareNull}.
 
 The heap related instructions form the interface to the object model of
 \thename{}. Several of the instructions are closely related to the composite
-type (see Section~\ref{NEEDED}) due to the fact that a composite type is used to
-describe and inspect a heap object's layout in memory.
+type (see Section~\ref{sec:design:type-system}) due to the fact that a composite
+type is used to describe and inspect a heap object's layout in memory.
 
 To create a new heap object, space must be allocated on the heap. This is done
 with the \instr{new} instruction which takes a type representation and delegates

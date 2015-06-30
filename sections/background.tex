@@ -1,7 +1,8 @@
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: "../report"
-%%% End:
+In this section we present the knowledge on which the rest of the thesis is
+based. We give a brief overview of modern computer architectures and then start
+to dissect the subject of abstract machines in more detail. Finally we present
+some of the existing solutions available today that have inspired much of the
+work presented in this report.
 
 \subsection{Computer Architectures}
 \label{sec:background:computer-architectures}
@@ -25,10 +26,11 @@ and ``tell'' the computer how to perform algorithms, read from and write to
 memory, communicate with peripheral devices and so on.
 
 Modern hardware-implemented computer architectures can execute instructions
-extremely fast\cite{NEEDED}. Being this fast comes at the cost of expressiveness
-in the instruction set, which are generally very low-level and specialized for a
-given CPU. This is where an abstract machine becomes relevant.
-%TODO some numbers
+extremely fast; the Tianhe-2 super computer performs more than
+$33 \cdot 10^{15}$ floating point operations per second\cite{ieee-tianhe}! Being
+this fast comes at the cost of expressiveness in the instruction set, which are
+generally very low-level and specialized for a given CPU. This is where an
+abstract machine becomes relevant.
 
 \subsection{Abstract Machines}
 \label{sec:background:abstract-machines}
@@ -45,8 +47,8 @@ give our own broad definitions.
 
 An \textbf{interpreter} is a program which reads high-level source code and
 directly executes the code without translation into another language or native
-code. Interpreters are easy to implement but often suffer from poor
-performance\cite{NEEDED}. Examples include Python~\footnote{The Python
+code. Interpreters are easy to implement but tend to suffer from slower
+performance\cite{circuitstoday}. Examples include Python~\footnote{The Python
   Programming Language: \url{https://www.python.org}} and Ruby~\footnote{The
   Ruby Programming Language: \url{https://www.ruby-lang.org}}.
 
@@ -221,7 +223,7 @@ model, which is inherently \term{Object-Oriented} and statically typed. As a
 result it is not a straightforward task to implement dynamically typed or
 functional languages on the JVM. Efforts have been made to asses this, most
 notably the introduction of the \texttt{invokedynamic} instruction through the
-Da Vinci project (see Section~\ref{sec:related:davinci} for details).
+Da Vinci project (see Section~\ref{sec:related-work:jvm} for details).
 
 \subsubsection{Common Language Runtime}
 
@@ -255,3 +257,8 @@ Turing complete systems.
 %TODO
 %% SECD Machine
 %% Examples of how functional code is translated to an object model (such as F# on .NET)
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../report"
+%%% End:
