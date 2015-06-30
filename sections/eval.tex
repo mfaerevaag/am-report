@@ -405,16 +405,17 @@ the modules interoperate.
 % JIT
 
 A common form of optimization in modern abstract machines is the process of
-compiling a program run-time, rather than prior to execution. This technique is
-called just-in-time compilation, or JIT.\@This allows sections of code to be
-translated to machine code which the host machine can execute directly. This is
-done just before the code is going to be executed, hence the name. The
-translated machine code can then be cached and reused. Therefore, if a function
-is called multiple times, the machine can save time by paying the overhead of
-translating it to machine code, but then saving time every time the same code is
-to be executed. A challenge with JITing is balancing the overhead of translating
-to machine code versus the saved time during execution. This overhead of
-just-in-time compilation is called the ``startup time delay''.
+compiling a program run-time, rather than prior to execution. As briefly
+mentioned in section~\ref{sec:background}, this technique is called just-in-time
+compilation, or JIT.~This allows sections of code to be translated to machine
+code which the host machine can execute directly. This is done just before the
+code is going to be executed, hence the name. The translated machine code can
+then be cached and reused. Therefore, if a function is called multiple times,
+the machine can save time by paying the overhead of translating it to machine
+code, but then saving time every time the same code is to be executed. A
+challenge with JITing is balancing the overhead of translating to machine code
+versus the saved time during execution. This overhead of just-in-time
+compilation is called the ``startup time delay''.
 
 In our earlier performance analysis, we have disabled all forms for such
 optimizations to make the execution process of the different machines closer to
