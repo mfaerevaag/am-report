@@ -16,24 +16,26 @@ information in different locations, there is a centralized table, containing
 all, what we call, meta information. This is named the metadata table and will
 need to be dynamically sized to support reflection and generation of new types
 at run-time.
-% TODO: markus
 
-xoAll metadata objects in the machine have a tag defining which type of
+All metadata objects in the machine have a tag defining which type of
 information it contains.
 
 \begin{ccode}
 enum meta_tag_e {
     TYPE,
-    METADATA,
-    FIELD,
+    FIELD_DEF,
+    SUBROUTINE_DEF,
+    SUBROUTINE_REF
 };
 typedef enum meta_tag_e meta_tag;
 
 struct meta_base_s {
-    meta_tag tag;
+    meta_tag tag;  ///< Kind of meta
+    uint32_t hash; ///< Unique hash for lookup
 };
 typedef struct meta_base_s meta;
 
+/** \brief meta describing a type */
 struct meta_type_s {
     meta base;
 
