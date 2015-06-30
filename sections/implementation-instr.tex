@@ -166,11 +166,10 @@ our selves. In summary this macro does the following:
 \end{enumerate}
 
 The saturated variants of the arithmetic instructions are implemented by
-checking whether an overflow or underflow will occur in which case the value is
-bounded within the limits of the given type.
-%TODO it's not really
+bounding the result of an arithmetic instruction within the range of the given
+type.
 
-As explained in section~\ref{sec:design:stack:logic}, logical operations include
+As explained in Section~\ref{sec:design:stack:logic}, logical operations include
 {\tt and}, {\tt or}, {\tt xor}, {\tt not}, left- and right-wise bit-shift ({\tt
   shl}, and {\tt shr}) and arithmetic right-wise bit-shift ({\tt ashr}). With
 the exception of {\tt not}, their corresponding instructions are implemented in
