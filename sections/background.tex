@@ -56,7 +56,7 @@ A \textbf{compiler} translates source code from one language to another without
 executing anything. The target language of compilers is typically an assembly
 language understood by a CPU, regardless whether it is a hardware CPU or, as is
 more relevant to this thesis, an abstract CPU implemented by an abstract
-machine. A abstract machine is concerned with executing code where the compiler
+machine. A abstract machine is concerned with executing code, while the compiler
 translates it. Examples include the GNU Compiler Collection\cite{gnu:gcc} and
 the Glasgow Haskell Compiler\footnote{The Glasgow Haskell Compiler:
   \url{https://www.haskell.org/ghc}}.
@@ -76,20 +76,20 @@ The term \textbf{virtual machine} is where some heavy debate can be sparked as
 to how it relates to abstract machines. Some distinguish the terms by defining
 an abstract machine to be a purely theoretical machine and virtual machine for
 the corresponding implementation. Others define the virtual machine as being a
-virtualization of an existing physical system and abstract machines as being a
-purely software implemented machine. For the purpose of this thesis we regard
+virtualization of an existing physical system and the abstract machine as being
+a purely software implemented machine. For the purpose of this thesis we regard
 the term ``abstract machine'' and ``virtual machine'' to cover both.
 
 Two overarching types of abstract machines exist, that serve two very different
 purposes. First there is the \textit{system} abstract machine, which is a
 program that emulates a full operating system, effectively running a copy of one
 operating system in another. The program which executes the guest operating
-system is called a HyperVisor, which VirtualBox\footnote{\url{Oracle VirtualBox:
-    https://www.virtualbox.org}} is a popular example of. The other type is the
-\textit{process} abstract machine which runs like a regular program in the host
-operating system and executes a single program. Typically when the execution of
-the program stops, the abstract machine also exists. In this thesis we are
-concerned solely with the process machine type.
+system is called a HyperVisor, which VirtualBox\footnote{Oracle VirtualBox:
+  \url{https://www.virtualbox.org}} is a popular example of. The other type is
+the \textit{process} abstract machine which runs like a regular program in the
+host operating system and executes a single program. Typically when the
+execution of the program stops, the abstract machine also exists. In this thesis
+we are concerned solely with the process machine type.
 
 \subsubsection{Components of an Abstract Machine}
 
@@ -234,8 +234,8 @@ project (see Section~\ref{sec:related-work:jvm} for details).
 \subsubsection{Common Language Runtime}
 
 Microsoft's Common Language Runtime (CLR) is the abstract machine that executes
-the Microsoft Common Intermediate Language (CIL). Like the JVM it is stack based
-and widely used on Microsoft Windows devices. An open-source port called
+the Microsoft Common Intermediate Language (CIL). Like the JVM, it is stack
+based and widely used on Microsoft Windows devices. An open-source port called
 Mono\footnote{The Mono Project: \url{http://www.mono-project.com}} is developed
 and maintained for Mac OSX and Linux systems.
 
@@ -258,7 +258,7 @@ value 0 or 1, and a read-write head that can either read or write the value of
 the cell currently being scanned\cite{sep-turing-machine}. The machine acts
 according to transition rules which describe what action will be performed,
 given a machine state and current cell value. The action can be either a read or
-write or a movement of the tape to the right or the left.
+write, or a movement of the tape to the right or the left.
 
 Given these simple mechanisms it is possible to perform any imaginable
 computation however complex. Because of this, systems that can do so are called

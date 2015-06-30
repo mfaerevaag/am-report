@@ -32,7 +32,7 @@ widespread adaptation must work on a multitude of devices, and not only are
 there scores of architectures on the market, they are also very different in
 terms of execution models and what technical primitives they provide.
 
-Altogether language and platform diversity has grown beyond what most would have
+Altogether, language and platform diversity has grown beyond what most would have
 believed when the first programmable machines appeared. That is why abstract
 machines are becoming increasingly relevant to modern computer science.
 
@@ -44,14 +44,14 @@ of expressiveness than the bare-metal counterpart.
 There are many abstract machines available today, and several are industrial
 strength systems that are in use on billions of devices. What they generally
 lack however, is flexibility in terms of language support. Usually they are
-designed with a specific language, or family or languages, in mind which
+designed with a specific language, or family or languages, in mind, which
 obviously comes at the cost of adaptability by other languages. Emerging
 paradigms such as dynamic and functional\footnote{Functional languages have been
   around for a long time, but are becoming increasingly popular} languages are
 not well suited for the currently available abstract machines.
 
 Having written a compiler for a functional language\footnote{In the course
-  ``02122 Software Technology Project F14'' at DTU Compute} we are aware of the
+  ``02122 Software Technology Project F14'' at DTU Compute}, we are aware of the
 issues faced by compiling code to traditional platforms, and have felt the need
 for something better.
 
@@ -60,7 +60,7 @@ for something better.
 In response to the issues of today's available systems, the main ambition of
 this project is to provide an abstract machine that is well suited for a
 multitude of programming languages of different paradigms. Our system exposes
-low level primitives that are relevant for system programming while being
+low level primitives that are relevant for system programming, while being
 efficient, expressive and secure enough as a higher level programming
 environment.
 
@@ -76,12 +76,12 @@ machine that we have named \thename{}.
 The \thename{} specification is an extensive document which covers a lot of
 features. We have focused on implementing a subset of the specification that
 enabled us to run simple programs and perform some benchmarking tests. Thus, the
-full specification as is found in Appendix~\ref{sec:appendix:spec} is not
+full specification as is found in Appendix~\ref{sec:appendix:spec}, is not
 implemented. The Design chapter (Section~\ref{sec:design}) presents a lot of
 knowledge both for abstract machines in general and specific to \thename{}, not
-all of which is implemented. However, everything presented in Implementation
-chapter (Section~\ref{sec:implementation}) has been developed unless otherwise
-noted.
+all of which is implemented. However, everything presented in the Implementation
+chapter (Section~\ref{sec:implementation}) has been developed, unless noted
+otherwise.
 
 \subsection{Structure of the report}
 
@@ -90,9 +90,9 @@ project, Section~\ref{sec:background} describes what components make up an
 abstract machine, and what existing solutions there are along with their
 shortcomings. Section~\ref{sec:design} presents the design of the abstract
 machine as well as the defined instruction set and a detailed explanation of the
-problems we believe it solves. Section~\ref{sec:implementation} describe the
+problems we believe it solves. Section~\ref{sec:implementation} describes the
 actual implementation of the machine and how we have dealt with various issues
-through process.
+throughout the process.
 
 Section~\ref{sec:evaluation} evaluates the status of the project and presents
 some code analysis as well as benchmarking data.
