@@ -74,15 +74,13 @@ possible to defer the look-up of the dispatch target to run-time and do it by
 providing either a class object (for static methods) or a class instance (for
 instance methods) along with the types of arguments that are given. A method
 handle is comparable to what is known as a function pointer in
-C\cite{friesen14}, i.e. something that designates a callable entity to which
+C\cite{friesen14}, i.e.\ something that designates a callable entity to which
 dispatches (or invocation) can be made. A method handle is looked up during
 run-time. Because a method can be looked up not only by the type of the object
 on which it resides, but also by the type of the arguments that it accepts, that
 naturally enables \term{multimethods}, which is similar to method overloading
 with the significant difference of relying on the types of arguments given
 rather than the static type of the object.
-
-%TODO: clearer and more
 
 \subsection{Dynamic Language Runtime and Roslyn Compiler}
 % Compiler-as-a-Service
