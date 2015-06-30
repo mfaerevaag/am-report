@@ -47,18 +47,20 @@ give our own broad definitions.
 
 An \textbf{interpreter} is a program which reads high-level source code and
 directly executes the code without translation into another language or native
-code. Interpreters are easy to implement but tend to suffer from slower
+code. Interpreters are easy to implement, but tend to suffer from slower
 performance\cite{circuitstoday}. Examples include Python\footnote{The Python
-  Programming Language: \url{https://www.python.org}} and Ruby\footnote{The
-  Ruby Programming Language: \url{https://www.ruby-lang.org}}.
+  Programming Language: \url{https://www.python.org}} and Ruby\footnote{The Ruby
+  Programming Language: \url{https://www.ruby-lang.org}}.
 
 A \textbf{compiler} translates source code from one language to another without
 executing anything. The target language of compilers is typically an assembly
 language understood by a CPU, regardless whether it is a hardware CPU or, as is
 more relevant to this thesis, an abstract CPU implemented by an abstract
 machine. A abstract machine is concerned with executing code where the compiler
-translates it. Examples include GCC\cite{gnu:gcc} and GHC\footnote{The Glasgow
-  Haskell Compiler: \url{https://www.haskell.org/ghc}}.
+translates it. Examples include the GNU Compiler Collection\cite{gnu:gcc} and
+the Glasgow Haskell Compiler\footnote{The Glasgow Haskell Compiler:
+  \url{https://www.haskell.org/ghc}}.
+
 
 Further there is the concept of \textbf{Just-in-Time} (JIT) and
 \textbf{Ahead-of-Time} (AOT) compilation which is often misunderstood as being
@@ -82,7 +84,7 @@ Two overarching types of abstract machines exist, that serve two very different
 purposes. First there is the \textit{system} abstract machine, which is a
 program that emulates a full operating system, effectively running a copy of one
 operating system in another. The program which executes the guest operating
-system is called a HyperVisor which VirtualBox\footnote{\url{Oracle VirtualBox:
+system is called a HyperVisor, which VirtualBox\footnote{\url{Oracle VirtualBox:
     https://www.virtualbox.org}} is a popular example of. The other type is the
 \textit{process} abstract machine which runs like a regular program in the host
 operating system and executes a single program. Typically when the execution of
@@ -128,7 +130,7 @@ which can make it easier to optimize the code for execution on hardware. The
 ``Parrot VM'' (details in Section~\ref{sec:related-work:parrot}) is an example
 of a register based abstract machine. The other model is the \textit{stack}
 based implementation. As usual, implementation details differ widely from
-project to project but generally it involves a single stack (per thread)
+project to project, but generally it involves a single stack (per thread)
 dedicated to operations on values, passing arguments, returning values and
 everything else that the machine might support. Many instructions do not accept
 any arguments but rather consume values from the stack which is expected to
@@ -160,7 +162,7 @@ stack based model. After execution of the three instructions the value
 will have been consumed by the \texttt{add}
 instruction. Listing~\ref{lst:background:register} shows the same computation
 using registers, where the result is the value \texttt{3} contained in register
-3 (\texttt{r3}) and the two operands remaining in \texttt{r1} and \texttt{r2}.
+\texttt{r3} and the two operands remaining in \texttt{r1} and \texttt{r2}.
 
 There is no definitive answer to which is best, it is largely a matter of
 preference and style. However, research done by rewriting the Java Virtual
@@ -184,11 +186,12 @@ Another compelling thing, arguably the main advantage, is that the instruction
 set provided by the abstract machine is much more expressive than regular
 assembly code. The details of hardware is abstracted away from the programmer
 (or compiler), and a more high-level and easy-to-use ISA is provided. However,
-some abstract machines are or were designed for a specific language or language
-paradigm, resulting in a system which is hard to use as a code generation target
-for other types of languages. An example is the Java Virtual Machine in which
-the underlying tools and mechanisms of the machine are not exposed, making it
-difficult to fit languages outside the original paradigm into the machinery.
+some abstract machines are, or were, designed for a specific language or
+language paradigm, resulting in a system which is hard to use as a code
+generation target for other types of languages. An example is the Java Virtual
+Machine in which the underlying tools and mechanisms of the machine are not
+exposed, making it difficult to fit languages outside the original paradigm into
+the machinery.
 
 It is easy to assume that abstract machines must suffer performance-wise because
 of the added abstraction layer, but interestingly that is not necessarily the
@@ -214,7 +217,10 @@ format and is available on a huge amount of platforms; everything from TVs
 through cell phones and media players to desktop PCs and Internet
 browsers\cite{aboutjava}. JVM was developed specifically for the Java
 programming language, hence the name, but due to its popularity a large amount
-of other languages now target the JVM as their main run-time.
+of other languages now target the JVM as their main run-time. Such an example,
+is the Scala Programming Language~\footnote{Scala Programming Language:
+  \url{http://www.scala-lang.org/}}, which is a hybrid of the Object-Oriented
+and functional paradigm.
 
 The JVM is a stack based machine and is heavily tied to the object oriented
 language paradigm. Most of the low-level mechanism are inaccesible through the
