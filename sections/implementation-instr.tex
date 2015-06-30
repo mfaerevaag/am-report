@@ -184,22 +184,20 @@ instructions, all of which push a {\tt Boolean} result value onto the stack.
 
 \subsubsection{Boxing}
 
-% TODO: review
 As explained in Section~\ref{sec:design:object-model}, all stacks are private to
 the thread owning, making the only possible mechanism of sharing data to move
 the data to the stack, i.e.~boxing it.
 
-When trying to box a stack element trough the \instr{box} instruction, the top
-element is popped off the stack and stored on the heap. An element with a
-reference to the heap object is in turn pushed onto the stack. The type of the
-new element will be a {\tt Reference<t>} type, where {\tt t} is the type of the
-stack element which was boxed. If this type is not found in the meta table
-already it is generated at run-time.
+When boxing a stack element trough the \instr{box} instruction, the top element
+is popped off the stack and stored on the heap. An element with a reference to
+the heap object is in turn pushed onto the stack. The type of the new element
+will be a {\tt Reference<t>} type, where {\tt t} is the type of the stack
+element which was boxed. If this type is not found in the meta table already it
+is generated at run-time.
 
 The \instr{unbox} instruction essentially does exactly the opposite, pushing the
 referenced value to stack and asking telling the garbage collector that its
 former heap object is not any longer used.
-
 
 %%% Local Variables:
 %%% mode: latex
