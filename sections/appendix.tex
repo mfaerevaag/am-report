@@ -11,15 +11,11 @@ analysis and gprof profiling is performed with \code{make analyze} and
 
 \subsection{\thename{} Specification}
 \label{sec:appendix:spec}
-\includepdf[pages=-]{lib/spec.pdf}
-
-\subsection{Project Inception Phase Artifact}
-\label{appendix:inception-artifact}
-\includepdf[pages=-]{lib/Inception.pdf}
+\includepdf[pages=-, scale=0.9, pagecommand={}]{lib/spec.pdf}
 
 \subsection{Benchmark Runner}
 \label{appendix:benchmark}
-\begin{minipage}{\linewidth}
+
 \begin{lstlisting}[language=bash]
 #!/usr/bin/bash
 # benchmark runner
@@ -65,7 +61,6 @@ run_tests() {
             printf "%s/%s: %-48s %3s%%\r" "$(($j + 1))" "$repeat" "$l" "$p"
         done
     done
-
     echo -ne '\n'
 }
 
@@ -108,7 +103,11 @@ fi
 
 run_tests
 \end{lstlisting}
-\end{minipage}
+
+\subsection{Project Inception Phase Artifact}
+\label{appendix:inception-artifact}
+\includepdf[pages=-, scale=0.9, pagecommand={}]{lib/Inception.pdf}
+
 
 %%% Local Variables:
 %%% mode: latex
