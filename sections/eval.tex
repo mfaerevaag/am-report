@@ -366,7 +366,9 @@ while (i) {
 }
 return value;
 \end{lstlisting}
+\end{minipage}
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[language={[ANSI]C},%
   caption={The function \code{bytes2int} after optimization},%
   label={lst:eval:gprof-post}]
@@ -386,6 +388,7 @@ again we managed to more than triple the speed of some test programs! Currently
 the bottleneck of the machine seems to lie somewhere in the stack
 implementation, as shown in the following gprof output:
 
+\begin{minipage}{\linewidth}
 \begin{verbatim}
   %   cumulative   self              self     total
  time   seconds   seconds    calls  ms/call  ms/call  name
@@ -396,6 +399,7 @@ implementation, as shown in the following gprof output:
   5.06      1.18     0.13 17501491     0.00     0.00  stack_peek
 ...
 \end{verbatim}
+\end{minipage}
 
 Generally it is difficult to determine whether there is a problem with a part of
 the code or if it is just a frequent operation in the specific

@@ -20,6 +20,7 @@ at run-time.
 All metadata objects in the machine have a tag defining which type of
 information it contains.
 
+\begin{minipage}{\linewidth}
 \begin{ccode}
 enum meta_tag_e {
     TYPE,
@@ -43,6 +44,7 @@ struct meta_type_s {
 };
 typedef struct meta_type_s meta_type;
 \end{ccode}
+\end{minipage}
 
 Using this method of ``inheriting'' structs, a type pointer can be cast to the
 correct struct type based on the value of its \code{tag} field.

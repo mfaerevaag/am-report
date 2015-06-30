@@ -41,6 +41,7 @@ As an example, we will describe how we test parts of the stack implementation.
 Firstly, we create a mocked state of a stack which we can use for our tests.
 
 %XXX assertions shouldn't happen in setup
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[language={[ANSI]C},caption={Unit-test setup procedure}]
   static int setup(void **state)
   {
@@ -56,12 +57,14 @@ Firstly, we create a mocked state of a stack which we can use for our tests.
     return 0;
   }
 \end{lstlisting}
+\end{minipage}
 
 In the above code listing, we initialize a stack object, do some simple
 assertions, and store it in the {\tt state} variable passed with the setup
 function. As we see below, this state is given as argument to all test cases
 which easily allows us to retrieve it by dereferencing.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[language={[ANSI]C},caption={Unit-test of {\tt stack\_pop}}]
   static void test_pop(void **state)
   {
@@ -80,6 +83,7 @@ which easily allows us to retrieve it by dereferencing.
     assert_int_equal(sum, sum_stack(s));
   }
 \end{lstlisting}
+\end{minipage}
 
 After having retrieved the stack for the {\tt state} parameter, we create an XOR
 sum of the stack. When having tested the specific function, we assert that the
@@ -128,6 +132,7 @@ standard out. In our test cases we can then, by using the alias, store the
 output and exit code in variables and do assertions based on their expected
 values.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[language={sh},caption={shUnit2 underflow test case}]
 test_stack_underflow()
 {
@@ -139,6 +144,7 @@ test_stack_underflow()
   "contains \"$output\" \"underflow\""
 }
 \end{lstlisting}
+\end{minipage}
 
 In the above test case we run the machine with the underflow program, asserting
 that the process exits with the correct code and that the output contains the

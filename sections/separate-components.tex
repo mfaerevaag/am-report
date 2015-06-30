@@ -200,6 +200,7 @@ Listing~\ref{lst:separate-components:dead-code} in high-level pseudo code for
 readability. Dead code is redundant and can safely be removed from the program,
 a process known as \textbf{dead code elimination}.
 
+\begin{minipage}{\linewidth}
 \begin{ccode}[
   caption={Example of dead code},
   label={lst:separate-components:dead-code}]
@@ -214,6 +215,7 @@ else {
   statement 3
 }
 \end{ccode}
+\end{minipage}
 
 Sub-routine calls carry significant overhead, especially when small code blocks
 are frequently executed. This can be mitigated by \textbf{inlining} sub-routine
@@ -228,6 +230,7 @@ computation. This is known as \textbf{constant
   folding}. Listing~\ref{lst:separate-components:inline-constant-folding} shows
 and example of inlining and constant folding.
 
+\begin{minipage}{\linewidth}
 \begin{ccode}[
   caption={Sub-routine inlining and constant folding},
   label={lst:separate-components:inline-constant-folding}]
@@ -251,6 +254,7 @@ y = 4 + 4
 // Resulting in another case of constant folding
 y = 8
 \end{ccode}
+\end{minipage}
 
 A lot of so-called \textbf{peephole optimizations} can be done on small snippets
 of code. They are generally very isolated cases of optimization that either

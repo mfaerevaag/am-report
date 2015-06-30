@@ -446,6 +446,7 @@ present. Listing~\ref{lst:design:dwarf:basic} shows how we can use DWARF to
 express a 32-bit signed integer. Note that the name ``int'' has no special
 meaning in DWARF, but consumers of DWARF may put special meaning into names.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[
   caption={A simple DWARF DIE describing a 32-bit signed integer},
   label={lst:design:dwarf:basic}]
@@ -454,6 +455,7 @@ meaning in DWARF, but consumers of DWARF may put special meaning into names.
         DW_AT_byte_size = 4
         DW_AT_encoding = signed
 \end{lstlisting}
+\end{minipage}
 
 In the above, there is a single tag with three attributes that describe the
 type's name, size and encoding. The \code{DW\_TAG\_base\_type} essentially
@@ -470,6 +472,7 @@ Listing~\ref{lst:design:dwarf:complex} shows a more complex example with a
 subprogram (i.e.~a sub-routine) that returns a pointer to the integer type
 defined above.
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[
   caption={A more complex example of DWARF types referencing each other},
   label={lst:design:dwarf:complex}]
@@ -483,6 +486,7 @@ defined above.
         DW_AT_low_pc = 0x1
         DW_AT_high_pc = 0x10
 \end{lstlisting}
+\end{minipage}
 
 It is shown how type \code{<2>} is defined as a pointer to the type \code{<1>},
 which in C lingo would be \code{int*}. Type \code{<3>} defines a sub-routine

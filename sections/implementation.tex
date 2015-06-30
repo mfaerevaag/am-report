@@ -192,6 +192,7 @@ instructions that are parsed and interpreted from byte code. Each thread runs
 their own cycle, the essence of which is shown in
 Listing~\ref{lst:implementation:instruction-cycle}
 
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[%
   caption={Pseudo representation of the instruction cycle},%
   label={lst:implementation:instruction-cycle}]
@@ -202,6 +203,7 @@ while (thread is running) {
   execute instruction corresponding to opcode
 }
 \end{lstlisting}
+\end{minipage}
 
 All instruction functions take a \code{thread\_state*} argument that they use to
 manipulate the thread's stack, change the program counter, access scopes and so
@@ -281,6 +283,7 @@ string, and a formatted version, suffixed with ``f'', which takes a formatted
 string and a variable number of arguments (in the same fashion as
 \code{printf}).
 
+\begin{minipage}{\linewidth}
 \begin{ccode}
 #define log_warn(msg)                             \
   do {                                            \
@@ -289,6 +292,7 @@ string and a variable number of arguments (in the same fashion as
       }                                           \
   } while (0)
 \end{ccode}
+\end{minipage}
 
 The {\tt log\_err} macro, will in addition to logging an error message also
 clean up and stop the machine, as it cannot safely continue. The message will be
