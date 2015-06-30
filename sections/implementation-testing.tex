@@ -9,7 +9,7 @@ integration-tests have a much larger scope, in that their purpose is to test the
 whole machine without any regard to any specific component. This effectively
 ensures each component is wired together correctly.
 
-\subsubsection{Unit-tests}
+\subsubsection{Unit-Tests}
 
 Unit-testing in C is a fairly simple process and essentially does not require
 any framework or library. While not required, a simple set of macros will
@@ -96,7 +96,7 @@ After all test cases has completed, a teardown function is run, reversing that
 of the setup function. In the case of the stack tests, it simply frees the
 memory allocated to the state of the stack.
 
-\subsubsection{Integration-tests}
+\subsubsection{Integration-Tests}
 
 We want our integration tests to test the implementation in the fashion of
 black-box testing, i.e.~given some input, the program should produce a specific
