@@ -154,32 +154,28 @@ types will result in run-time errors.
 
 \subsection{Assembler and Linker}
 
-%TODO remove first paragraph? at least don't mention that svenka didnt finish his sheit
-The assembler and linker will be implemented through porting (TODO: define?)
-parts of the GNU Toolchain. The necessary components are the GNU
-Assembler\cite{gnu:as}, {\bf as}, commonly known as GAS, and the GNU Linker,
-{\bf ld}\cite{gnu:ld}. These ports are not yet finished, and are therefore not
-yet used in the machine.
+An assembler is a program that transforms a mnemonic representation of a program
+into an executable file. The mnemonic representation is called assembly code and
+is usually the output of a compiler. Assemblers can compute branching offsets by
+use of labels, so the compiler or programmer does not have to manually calculate
+how far a certain instruction is from a branch pointer, but rather uses named
+locations.
 
-A linker combines several compiled object files into a single binary file,
-executable by \thename{}. This often occurs as the last step of the compilation
-process, where each file are compiled separately and finally linked together
-with a linker. {\bf ld} is the standard linker for GCC, TODO.
+Assemblers are generally integrated into the compiler toolchain in such a way
+that assembling of the executable happens automatically. In our case the
+assembler would generate an ELF file ready for execution by \thename{}.
 
-The GNU Assembler is actually a family of assemblers, supporting many
-front-ends, or languages. Many other assemblers need to pass over the source
-code multiple times to be able to produce a valid output, while {\bf as} was
-designed to do assemble in a single pass. This makes for a more complex assembly
-process, but in turn removes the overhead of passing over the source code
-multiple times.
-
-The reason for choosing to port new implementation of both of these components
-is to make use of their arguably, good performance and
-configurability\cite{NEEDED}. Creating something new from scratch would have
-taken a significant amount of time to be able to create something that could
-even compare in performance.
-
-% TODO: more
+It is possible to compile code that does not include all definitions of the
+symbols it references, but only declares their type. This creates a file known
+as an object file, which is in machine or byte code format, but cannot be
+executed until those symbols can be properly resolved. Using a linker one can
+``combine'' multiple such files to create the final executable. It is however
+possible to execute an object file if the operating system supports dynamic
+linking, meaning that the linking phase can happen during run-time. This avoids
+the need to embed commonly used symbols reducing the executable's size, but
+requiring that those symbols are present on the machine that is going to execute
+it. An example is the use of C standard library functions such as \code{printf}
+or \code{malloc}.
 
 \subsection{Byte Code Optimizer}
 

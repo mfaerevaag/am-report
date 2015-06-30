@@ -14,8 +14,8 @@ lowest memory address.
 
 Arguably the most intuitive way to construct a stack is to use a simple array of
 a fixed initial size and handle operations by keeping track of the number of
-elements in the stack. A push operation would thus increments the number of
-elements and assigns a value to the new top-most slot. A pop operation will
+elements in the stack. A push operation thus increments the number of elements
+and assigns a value to the new top-most slot. A pop operation will
 correspondingly decrement the number of elements in the stack and potentially
 return the element that is being removed. When the number of elements in the
 stack exceeds the initial size of the containing array more memory must be
@@ -23,11 +23,11 @@ allocated. This can be done simply by use of \code{realloc} where the common
 approach is to double the amount of allocated memory, to adapt to quickly
 growing stacks. However, \code{realloc} can be a performance issue because it
 will create a new allocation, copy over the current data and free the old
-allocation, in the case the there is no more space directly following what is
-being reallocated\cite{man-realloc}. This is arguably an expensive operation,
-and since the stack is by far the most frequently used means of operation in
-\thename{}, it is critical that it performs well.
-% TODO: agree ^ realloc not _always_ moves memory, but etc?
+allocation, if the case the operating system determines that there is no more
+space directly following what is already allocated\cite{man-realloc}. This is
+arguably an expensive operation, and since the stack is by far the most
+frequently used means of operation in \thename{}, it is critical that it
+performs well.
 
 An important thing to consider is that the content of a stack element depends on
 the type of the element, and thus have varying sizes. An element whose type is
