@@ -2,24 +2,24 @@
 
   % Segments
   \drawstruct{(-10,0)}
-  \structcell[freecell]{\code{size}}         \coordinate (seg_start) at (currentcell.east);
+  \structcell[freecell]{\code{size}}         \coordinate (seg_start) at (-8.4,\value{structnb});
   \structcell[freecell]{\code{length}}
-  \structcell[freecell]{\code{content}}      \coordinate (seg_content) at (currentcell.east);
-  \structcell[freecell]{\code{head}}         \coordinate (seg_head) at (currentcell.east);
-  \structcell[freecell]{\code{data\_cursor}} \coordinate (seg_cursor) at (currentcell.east);
-  \structcell[freecell]{\code{next}}         \coordinate (seg_next) at (currentcell.east);
+  \structcell[freecell]{\code{content}}      \coordinate (seg_content) at (-8.4,\value{structnb});
+  \structcell[freecell]{\code{head}}         \coordinate (seg_head) at (-8.4,\value{structnb});
+  \structcell[freecell]{\code{data\_cursor}} \coordinate (seg_cursor) at (-8.4,\value{structnb});
+  \structcell[freecell]{\code{next}}         \coordinate (seg_next) at (-8.4,\value{structnb});
   \structcell[freecell]{\code{prev}}
   \structname{Stack segment}
 
   \drawstruct{(-10,-10)}
-  \structcell[freecell]{\code{size}}         \coordinate (seg1_start) at (currentcell.east);
+  \structcell[freecell]{\code{size}}         \coordinate (seg1_start) at (-8.4,-10+\value{structnb});
   \structcell[freecell]{\code{...}}
-  \structcell[freecell]{\code{prev}}         \coordinate (seg1_prev) at (currentcell.east);
+  \structcell[freecell]{\code{prev}}         \coordinate (seg1_prev) at (-8.4,-10+\value{structnb});
   \structname{Stack segment}
 
   % Segment content
   \startframe{}
-  \cell{\code{declared\_type}} \coordinate (stack_el1_e) at (2,\value{cellnb});
+  \cell{\code{declared\_type}} \cellcom{low memory address} \coordinate (stack_el1_e) at (2,\value{cellnb});
                                \coordinate (stack_el1_w) at (-2,\value{cellnb});
   \cell{\code{actual\_type}}
   \cell{\code{next}}
@@ -34,18 +34,18 @@
   \padding{1}{\code{data}}
   \finishframe{Stack element}
 
-  \cell{...} \coordinate (stack_cursor) at (-2,\value{cellnb});
+  \cell{...} \cellcom{high memory address} \coordinate (stack_cursor) at (-2,\value{cellnb});
 
   % element next ptr
   \draw[*->, thick, bend right=20] (stack_el0_e) to (stack_el1_e);
   % segment content ptr
   \draw[*->, thick] (seg_content) to (stack_el1_w);
   % segment cursor ptr
-  \draw[*->, thick] (seg_cursor) to (stack_cursor);
+  \draw[*->, thick, bend right=20] (seg_cursor) to (stack_cursor);
   % segment head ptr
   \draw[*->, thick] (seg_head) to (stack_el0_start);
   % segment ll
-  \draw[*->, thick] (seg_next) to (seg1_start);
+  \draw[*->, thick, bend left=20] (seg_next) to (seg1_start);
   \draw[*->, thick, bend right=30] (seg1_prev) to (seg_start);
 
 \end{tikzpicture}
