@@ -103,14 +103,6 @@ new meta entry if not found. This is especially useful for looking up types that
 are not guaranteed to already be found in the meta table, such as reference
 types used when boxing (see Section~\ref{NEEDED}).
 
-%TODO: this should be under instructions?
-% When trying to box a stack element trough the {\tt box} instruction, the top
-% element is popped off the stack and stored on the heap. An element with a
-% reference to the heap object is in turn pushed onto the stack. The type of the new
-% element will be a {\tt Reference<t>} type, where {\tt t} is the type of the
-% stack element which was boxed. If this type is not found in the meta table
-% already it is generated at run-time.
-
 % TODO how to structure this?
 
 \subsubsection{Composite Types}
