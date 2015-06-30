@@ -11,12 +11,11 @@ structures.
 Therefore, we need to abstract the way we store type information a level higher,
 letting us better describe different kinds of types, be it a sub-routine, field
 definition or a regular type from the type table discussed in earlier in
-section~\ref{sec:design:types}. Instead of storing the different kinds of
+Section~\ref{sec:design:types}. Instead of storing the different kinds of
 information in different locations, there is a centralized table, containing
 all, what we call, meta information. This is named the \term{metadata table} and
 will need to be dynamically sized to support reflection and generation of new
 types at run-time.
-%TODO lidt forvirrende. watfix?
 % TODO: markus
 
 All metadata objects in the machine have a tag defining which type of
@@ -81,11 +80,11 @@ heap. The exception is Composite types whose size is computed during run-time
 because it is not part of the type definition per s\'e.
 
 Types from the executable are mapped from its index in the binary type table to
-the machines meta table. As the ELF meta table is of static size, this will be a
-simple integer array, mapping binary metadata indices to the machine's internal
-metadata entries in the meta table. The metadata entries will be parsed lazily,
-i.e.~the first time the program tries to look up a metadata entry through its
-index in ELF meta table. %TODO lidt forvirrende. watfix?
+the machine's meta table. As the ELF meta table is of static size, this will be
+a simple integer array, mapping binary metadata indices to the machine's
+internal metadata entries in the meta table. The metadata entries will be parsed
+lazily, i.e.~the first time the program tries to look up a metadata entry
+through its index in ELF meta table.
 
 The machines internal metadata table is implemented through a hash map, where
 each meta entry can be looked up through it's hashed value. Having implemented
@@ -93,22 +92,21 @@ the meta table as a hash table lets us look up entries in constant time,
 avoiding the overhead of iterating. The only requirement of the hashing function
 is that it makes unique hashes for metadata entries that are equal. This is
 currently done with a simple implementation of Bob Jenkins' One-at-a-time
-hash~\footnote{\url{https://en.wikipedia.org/wiki/Jenkins_hash_function\#one-at-a-time}}. We
-have chosen this hash function due to relatively good speed and uniqueness,
-compared to more complex hashing functions. Bob Jenkins himself has written
-article comparing several similar functions and their running speed, which we
-used as reference~\cite{jenkins}. To get a reference to a built-in type, one can
-look it up through a look-up function, which takes a metadata hash. This can be
-done through a strict function which thrown an exception if the hash is not
-found, or a lazy function which will generate the new meta entry if not
-found. This is especially useful for looking up types that are not guaranteed to
-already be found in the meta table, such as reference types used when boxing
-(see Section~\ref{NEEDED}).
+hash\cite{jenkins}. We have chosen this hash function due to relatively good
+speed and uniqueness, compared to more complex hashing functions. Bob Jenkins
+himself has written article comparing several similar functions and their
+running speed, which we used as reference\cite{jenkins}. To get a reference to a
+built-in type, one can look it up through a look-up function, which takes a
+metadata hash. This can be done through a strict function which thrown an
+exception if the hash is not found, or a lazy function which will generate the
+new meta entry if not found. This is especially useful for looking up types that
+are not guaranteed to already be found in the meta table, such as reference
+types used when boxing (see Section~\ref{NEEDED}).
 
 %TODO: this should be under instructions?
 % When trying to box a stack element trough the {\tt box} instruction, the top
 % element is popped off the stack and stored on the heap. An element with a
-% reference to the heap object is in turn pushed to the stack. The type of the new
+% reference to the heap object is in turn pushed onto the stack. The type of the new
 % element will be a {\tt Reference<t>} type, where {\tt t} is the type of the
 % stack element which was boxed. If this type is not found in the meta table
 % already it is generated at run-time.
@@ -138,7 +136,7 @@ likely be implemented via run-time library functions.
 \subsubsection{Floating Point Value Types}
 
 When handling floating point precision numbers we will, as aforementioned, use
-the IEEE 754 standard~\cite{ieee754}. This is a technical standard defining the
+the IEEE 754 standard\cite{ieee754}. This is a technical standard defining the
 arithmetic format, i.e.~the finite range and special values, rounding rules,
 operations, exception handling and interchange formats. Its values include
 finite numbers (within a certain maximum and minimum, depending on the size),
@@ -157,9 +155,10 @@ in size. Their binary representation is called {\tt binary32} and {\tt
 \begin{figure}[H]
   \centering
   \includegraphics[scale=0.7]{images/ieee32.png}
-  \caption[Caption for LOF]{IEEE-754 binary32 encoding~\footnotemark}
+  \caption[Caption for LOF]{IEEE-754 binary32 encoding\footnotemark}
 \end{figure}
-\footnotetext{\url{https://en.wikipedia.org/wiki/Single-precision_floating-point_format}}
+\footnotetext{IEEE-754 binary32 encoding:
+  \url{https://en.wikipedia.org/wiki/Single-precision_floating-point_format}}
 
 When parsing a {\tt binary32} we start by extracting all the relevant bits out
 into separate numbers. We can then apply the following formula to get its
@@ -274,7 +273,7 @@ execution continues as before, meaning that the semantics from the running
 program's point of view are identical to that of usual sub-routines. The machine
 distinguishes between run-time sub-routines and normal ones by their name;
 language implementations are required to mangle the names of all symbols
-(i.e.~field, subroutines and type names) and prepend them with the ``\_''
+(i.e.~field, sub-routines and type names) and prepend them with the ``\_''
 characters. Upon invocation, if the name of the sub-routine does not start with
 ``\_'' then it is dispacted as a run-time function and if not the program
 counter is changed to the sub-routines entry address.

@@ -25,8 +25,8 @@ greatly improve the readability and ease of writing tests.
 % cmocka
 In spite of this, we have chosen to use a unit-testing library called {\it
   Cmocka}\cite{cmocka}. It is a well tested and documented library, also used by
-large projects like {\it libssh}~\footnote{Implementation of the SSH protocol:
-  \url{http://libssh.org/}}. It offers several features which makes unit-testing
+large projects like {\it libssh}\footnote{Implementation of the SSH protocol:
+  \url{http://libssh.org}}. It offers several features which makes unit-testing
 more powerful and simpler to write. For instance, it offers test suites and
 \term{mocking} of objects which enabled us to set up a specific state of the
 machine. With this state, we can run isolated tests, manipulating the state and
@@ -96,7 +96,7 @@ this is not a guarantee, as different states of the stack may compute the same
 sum, but will however catch most such problems.
 
 In the body of a test case, the {\tt stack\_pop} function in this case, we push
-several elements to the stack and assert that they are popped off again in the
+several elements onto the stack and assert that they are popped off again in the
 correct order.
 
 After all test cases has completed, a teardown function is run, reversing that

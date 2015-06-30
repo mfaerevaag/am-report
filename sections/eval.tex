@@ -114,7 +114,7 @@ value in a local variable and then loading it again, done with {\tt stloc} and
 {\tt ldloc}. %TODO er det måske overkill at forklare, evt vise koden?
 
 The result can be seen in the seen below, in
-figure~\ref{fig:eval:benchmark:stack}.
+Figure~\ref{fig:eval:benchmark:stack}.
 \begin{figure}[H]
   \centering
   \scalebox{0.8}[0.6]{\input{figures/stack}}
@@ -149,7 +149,7 @@ as:
 The implementation is intentionally na\"ive, resulting in exponential running
 time $O(2^n)$, which could be proved by induction. We will not include the proof
 here, as it is irrelevant for this discussion. The benchmark result is shown
-below, in figure~\ref{fig:eval:benchmark:fib}.
+below, in Figure~\ref{fig:eval:benchmark:fib}.
 
 \begin{figure}[H]
   \centering
@@ -174,7 +174,7 @@ executed in constant time, which given the resulting running time of
 $T(n) = O(n) \cdot O(k) = O(n)$, where $k$ is the constant number of stack
 operations. For invoking the sub-routine we use the \instr{invoke} instructions,
 while CLR uses {\tt call} and JVM uses {\tt invokestatic}. The result of the
-benchmark can be seen below, in figure~\ref{fig:eval:benchmark:invoc}.
+benchmark can be seen below, in Figure~\ref{fig:eval:benchmark:invoc}.
 
 \begin{figure}[H]
   \centering
@@ -193,11 +193,11 @@ to say.
 The last benchmark focuses on field operations on heap objects, namely the
 \instr{pushFieldHeapObject} and \instr{popFieldHeapObject} instructions. It does
 this by initially creating an instance of a simple heap object with a single
-integer field. It then does $n$ iterations of pushing it's field to the stack,
+integer field. It then does $n$ iterations of pushing it's field onto the stack,
 incrementing it and popping it back to the heap object. The running time becomes
 the same as the sub-routine benchmark; $T(n) = O(n) \cdot O(k) = O(n)$, where
-$k$ is the constant number of stack operations. The result of the
-benchmark can be seen below, in figure~\ref{fig:eval:benchmark:heap}.
+$k$ is the constant number of stack operations. The result of the benchmark can
+be seen below, in Figure~\ref{fig:eval:benchmark:heap}.
 
 \begin{figure}[H]
   \centering
@@ -217,12 +217,12 @@ CLR, but continues to be have a better startup time.
 % TODO: missing review
 
 When analyzing the memory footprint of \thename{} we used the absolutely
-brilliant instrumentation tool Valgrind~\footnote{Valgrind:
+brilliant instrumentation tool Valgrind\footnote{Valgrind:
   \url{http://valgrind.org}}. It takes the program which is to be run as
 argument, and does so in a sand-boxed environment, allowing it to analyze the
 programs resource consumption together with multitudes of other things. To
 target the machine's memory consumption specifically, we utilize one of
-Valgrind's many built-in tools, one of which is called Massif~\footnote{Massif
+Valgrind's many built-in tools, one of which is called Massif\footnote{Massif
   Heap Profiler: \url{http://valgrind.org/docs/manual/ms-manual.html}}. This is
 a heap profiler, able of analyzing the amount of allocated memory of each
 function in the given program.
@@ -230,8 +230,8 @@ function in the given program.
 We have made a heap profile of \thename{} running the Fibonacci recursion
 benchmark, shown in the previous section. We have run Valgrind with the
 following arguments, and the result can be seen in
-figure~\ref{fig:heap-profile}, generated with
-Massif-Visualizer~\footnote{Massif-Visualizer:
+Figure~\ref{fig:heap-profile}, generated with
+Massif-Visualizer\footnote{Massif-Visualizer:
   \url{http://milianw.de/tag/massif-visualizer}}.
 
 {\tt valgrind --tool=massif --time-unit=B bin/am}

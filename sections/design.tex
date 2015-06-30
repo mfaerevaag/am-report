@@ -56,7 +56,7 @@ implementation of class methods, polymorphism, etc.
 
 The model of execution defines how, where and by whom code is executed during
 run-time. All code in \thename{} is executed in the context of a thread (details
-in Section\ref{sec:design:threading}), and all threads are spawned from the
+in Section~\ref{sec:design:threading}), and all threads are spawned from the
 initial ``main'' thread in which execution begins. This allows language
 implementations to use the multi-threading features of \thename{}, but also to
 ignore them and run everything in a single thread without having to worry about
@@ -163,7 +163,7 @@ purpose desired. There are no restrictions by the format per s\'e.
 An ELF file is described by headers defined in the file itself. The overarching
 file header that describes the remaining file organization is the `ELF
 header`. It details the attributes of the file such as the architecture on which
-the file can be executed, endianess, ELF format version and so on. Further it
+the file can be executed, endianness, ELF format version and so on. Further it
 defines where in the file that section and segment headers are located, their
 size and how many there are. In turn the section and segment headers describe
 their entries in the same manner. The general idea is that the starting
@@ -206,7 +206,7 @@ derivative version named Modified UTF-8. This encoding has the UTF-8 character
 {\tt U+0000} encoded as the bytes {\tt 0xC0}, {\tt 0x80}, rather than a null
 byte ({\tt 0x00}). This enables functions to interpret UTF-8 strings as regular
 null-terminating strings, which is how the C Programming Language handles
-them. %TODO wat? watfix?
+them.
 
 Next is the constant table that contains any type of value for use in
 programs. Values are retrieved by a program by use of the \instr{pushConstant}
@@ -234,7 +234,7 @@ run-time.''\cite[Section 2.5.5]{jvm-spec}.
 
 A stack is an abstract data structure, fundamental for many fields of computer
 science. At its core it is a simple model consisting of two essential functions,
-{\it push} and {\it pop}, as visualized in figure~\ref{fig:stack}. Push adds an
+{\it push} and {\it pop}, as visualized in Figure~\ref{fig:stack}. Push adds an
 element to the top of a stack, while pop removes the top-most element. As an
 analogy, imagine a pile of dishes: when adding a new dish it becomes the new
 top-most dish in the pile, and you can only remove the most recently added
@@ -287,7 +287,7 @@ and that stack overflows can never occur (if the machine runs out of memory
 entirely it is treated as a memory error, not a stack overflow). Throughout the
 report, we will say that the stacks \term{grows downwards}. This is because
 physically, the top most element of the stack is located at the highest address
-in memory. Therefore, as more elements are pushed to the stack, they will get
+in memory. Therefore, as more elements are pushed onto the stack, they will get
 higher addresses, making the stack grow downwards in memory.
 
 A stack element consists of some type information along with the actual data
@@ -296,7 +296,7 @@ statically typed languages, these will most likely be the same. For dynamic
 languages this is useful for keeping track of an element's type, as it, in some
 cases, is allowed to assign a value to an element which is different from the
 originally declared type. This only concerns abstract data types, which we will
-get back to in section~\ref{sec:design:types}, when discussing the type system.
+get back to in Section~\ref{sec:design:types}, when discussing the type system.
 
 \subsubsection{Stack Manipulation}
 
@@ -307,11 +307,11 @@ tedious. Therefore we will need more expressive instructions that simplifies
 complex stack manipulations.
 
 When we later describe the execution model of the machine, we will see that we
-need instructions for pushing an popping elements further up the stack. For
+need instructions for storing and retrieving elements further up the stack. For
 instance, if we want to access the arguments given to a sub-routine, they will
 be located upward in the stack. The compiler will need an effective method of
 duplicating those elements onto the top of the stack, making it accessible for
-further computation. Also it will need to push an element back to a specific
+further computation. Also it will need to store an element back to a specific
 position up the stack, i.e.~replacing an element, effectively returning a value
 to the caller.
 
@@ -323,15 +323,15 @@ element and so on.
 
 To address this, we have the instructions \instr{pushElement} and
 \instr{storeElement}. The former will take the element at the given
-displacement, without removing it, and push it to the top of the stack. The
+displacement, without removing it, and push it onto the top of the stack. The
 latter will pop off the top-most element and push it to the given displacement,
 effectively overwriting that element. This convention requires that the caller
-has pushed an element to the stack with the sole purpose of being
-overwritten. %TODO wat? watfix?
+has pushed an element onto the stack with the sole purpose of being
+overwritten.
 
-There will be separate instructions for adding new elements onto the
-stack, namely \instr{pushLiteral} and \instr{pushConstant}, making the
-\instr{push} instruction obsolete.
+There are separate instructions for adding new elements onto the stack, namely
+\instr{pushLiteral} and \instr{pushConstant}, which are \thename{}'s version of
+the simple \instr{push} instruction.
 
 Here we can see some simple operations using the \instr{pushElement} and
 \instr{storeElement} instructions.
@@ -341,8 +341,6 @@ Here we can see some simple operations using the \instr{pushElement} and
   \op{storeElement 2}{3,\ 3,\ 1}
 \end{stackops}
 
-%XXX jeg synes at hele det her afsnit mangler noget arbejde. watfix?
-
 \subsection{Threading}
 \label{sec:design:threading}
 
@@ -350,18 +348,17 @@ Big chip manufacturers like Intel, have always been under big pressure to
 deliver ever faster processors, year after year. For around the last decade, the
 technological development of processors has been focused on adding cores rather
 than increasing the clock speed, which already started to stagnate around
-2004~\cite{sutter}. With multiple cores per processing unit, popularly called a
+2004\cite{sutter}. With multiple cores per processing unit, popularly called a
 multi-core processor, processes may actually run in parallel, i.e.~running at
 the same time, rather than just concurrently where multiple processes actually
 share the same processor.
 
-%TODO wat? @første sætning watfix?
 A thread is typically the smallest sequence of executable instructions handled
 by a processor. A process being run by an operating system therefore has one
 thread which the operating system's scheduler delegates CPU-time to, allowing it
 to execute said instructions. With multi-core processors, the notion of a single
 process having multiple threads arose, making it possible for tasks to run
-concurrently. A process utilizing this feature is called multi-threaded. %XXX watfix?
+concurrently. A process utilizing this feature is called multi-threaded.
 
 Although multi-threading is a very interesting feature, it also raises a lot of
 challenges when designing the execution model. Different threads cannot directly
@@ -519,7 +516,7 @@ compact manner, one of which we will describe here. %XXX fjern eller skriv om
 \thename{} provides a set of built-in types, encompassing both primitive types
 as well as references, arrays and composite types. Further there is the concept
 of a meta kinds which essentially wraps type definitions, type references,
-subroutines, etc.~into a unified metadata kind which are all stored in a single
+sub-routines, etc.~into a unified metadata kind which are all stored in a single
 table in the executable.
 
 Compilers can map their primitive types to the ones provided by \thename{}, and
@@ -663,7 +660,7 @@ which are described below.
 
   Works just as \instr{pushLiteral} except that the value is read via an index
   into the constant table rather than read from the byte code stream. This
-  allows arbitrarily large literal values to be pushed to the stack, required
+  allows arbitrarily large literal values to be pushed onto the stack, required
   for any value bigger than 32-bits. This is both useful for 64-bit numeric
   values but can also be used for static arrays and object literals.
 
@@ -755,7 +752,7 @@ type is used to describe and inspect a heap object's layout in memory.
 To create a new heap object, space must be allocated on the heap. This is done
 with the \instr{new} instruction which takes a type representation and delegates
 the task of actual memory allocation to the garbage collector. A reference to
-the newly created memory region is then pushed to the stack. Constructor code
+the newly created memory region is then pushed onto the stack. Constructor code
 can be run to initialize the object and finally the \instr{release} instruction
 must be executed so as to mark the object ready for garbage collection. Note
 that releasing an object does \emph{not} free its memory region, but rather
@@ -777,8 +774,8 @@ scope, but the information applies to the whole set of field instructions:
 \item[\instr{pushField}:]
 
   Takes a field reference as argument and looks up the corresponding memory
-  location in the global scope. The value of the field is pushed to the stack as
-  a stack element with the same type as the field's type.
+  location in the global scope. The value of the field is pushed onto the stack
+  as a stack element with the same type as the field's type.
 
 \item[\instr{popField}:]
 

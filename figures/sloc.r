@@ -23,7 +23,7 @@
 ## 113  scope
 ## 61   consttab
 ## 49   strtab
-## 19   subroutine
+## 19   sub-routine
 ## 450  meta
 ## 478  types
 ## [1170]

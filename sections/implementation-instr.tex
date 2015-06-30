@@ -99,7 +99,7 @@ current solution and focus our attention else where.
 
 Both GCC and Clang has built-in functions for doing integer arithmetic while
 also detecting
-overflow~\footnote{\url{https://gcc.gnu.org/onlinedocs/gcc/Integer-Overflow-Builtins.html}}\footnote{http://clang.llvm.org/docs/LanguageExtensions.html\#checked-arithmetic-builtins}. GCC's
+overflow\footnote{\url{https://gcc.gnu.org/onlinedocs/gcc/Integer-Overflow-Builtins.html}}\footnote{http://clang.llvm.org/docs/LanguageExtensions.html\#checked-arithmetic-builtins}. GCC's
 implementation does this by converting the two operands into infinite precision
 numbers, where after doing the the operation on the promoted operands. The
 result is then cast to the original precision. If the casted result does not
@@ -117,7 +117,7 @@ built-in arithmetic operations on them. This is unfortunately not true, as {\tt
   FLT\_MAX - 1}, for instance, is regarded as undefined behavior and will on
 most platforms be equal to {\tt FLT\_MAX}. Inducing undefined behavior when
 trying to deduce whether an instruction is safe, renders its point
-moot. %TODO lidt forvirrende. watfix?
+moot.
 
 We have therefore chosen to use a simple but also sub-optimal solution. When,
 for instance, adding two floats together that should produce overflow, the
@@ -159,7 +159,7 @@ our selves. In summary this macro does the following:
   \item Perform the arithmetic operation
   \item If the {\tt noOverflow} prefix is set, check for overflow
   \item Encode result back to machine type
-  \item Push the result to the stack
+  \item Push the result onto the stack
 \end{enumerate}
 
 The saturated variants of the arithmetic instructions are implemented by
@@ -178,7 +178,7 @@ either {\tt 0x00} or {\tt 0x01}, and flips its value.
 In addition we also have two sets of compare instructions, either comparing two
 numeric operands of matching type or comparing a single numeric operand to zero
 (or null). Each category includes equals, lesser-than and greater-than
-instructions, all of which push a {\tt Boolean} result value to the stack.
+instructions, all of which push a {\tt Boolean} result value onto the stack.
 
 %%% Local Variables:
 %%% mode: latex

@@ -1,7 +1,7 @@
 \subsection{Tools and Languages}
 
 We have implemented \thename{} in the C Programming Language, more specifically
-using the C99 standard with GNU extensions by use of GCC~\cite{gnu:gcc}. There
+using the C99 standard with GNU extensions by use of GCC\cite{gnu:gcc}. There
 are both pros and cons of using a relatively low-level language (as compared to
 other available languages), but we found that the benefits outweighed the
 disadvantages.
@@ -125,20 +125,20 @@ The common way, and arguably the only way the makes sense, of customizing the
 parameters of an executable is through command-line arguments, given directly to
 the executable when run. These arguments can be extended to do a number of
 things, but essentially we only require the name of the binary file to be
-executed and optionally customizing the level of verbosity, i.e. the amount of
-logging information to display. %TODO første del lidt derp? watfix?
+executed and optionally customizing the level of verbosity, i.e.\ the amount of
+logging information to display.
 
 The input file is set with the {\tt --file} (or {\tt -f}) argument, and the
-verbosity level is set with either {\tt --brief} ({\tt -b}) or {\tt--versbose}
+verbosity level is set with either {\tt --brief} ({\tt -b}) or {\tt --versbose}
 ({\tt -v}). For more information on logging, see
-section~\ref{sec:implementation:core:debug} below.
+Section~\ref{sec:implementation:core:debug} below.
 
 We follow common conventions by having two special arguments for displaying
 useful meta information about the \thename{} binary. These include the {\tt
   --help} argument for printing information on the different arguments, and {\tt
   --version}, for simply printing the version of the binary.
 
-For ease of implementation we use the Getopt library~\footnote{Getopt (libc):
+For ease of implementation we use the Getopt library\footnote{Getopt (libc):
   \url{http://www.gnu.org/software/libc/manual/html_node/Getopt.html}}, included
 in C's Standard Library.
 
@@ -312,8 +312,8 @@ convenience during development.
 The three information tables available in \thename{} are all implemented in the
 most simplistic way possible, with the intention being; less is more. With that
 being said, this might not be as apparent with the meta table, than with the
-string- and constants table. As for the reasons explained later in
-section~\ref{sec:implementation:meta}.
+string- and constant table. As for the reasons explained later in
+Section~\ref{sec:implementation:meta}.
 
 The constant and string table are almost identical in implementation. They are
 both parsed from the executable file, where they are stored as static lists of
@@ -361,7 +361,7 @@ handle, to the location of the data.
 
 The garbage collector is responsible for making sure the following memory is
 already allocated and is large enough to hold the value of its given type. As
-explained later in section~\cite{sec:separate-components:gc}, the garbage
+explained later in Section~\ref{sec:separate-components:gc}, the garbage
 collector has a set interface, separated from the actual implementation. With
 this encapsulation, only a type is needed to get a reference to an allocated
 piece of memory with the appropriate size.

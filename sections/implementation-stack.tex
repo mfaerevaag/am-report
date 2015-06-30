@@ -6,9 +6,9 @@ and retrieved by the Last-In, First-Out (LIFO) principle.
 
 Each element on a stack holds information about both the \textit{declared} and
 \textit{actual} type of data that it contains. Details on this is described in
-\ref{NEEDED}. The data part of a stack element is a simple array of bytes,
-stored in big endian order, i.e.~the most significant bit is at the lowest
-memory address.
+Section~\ref{NEEDED}. The data part of a stack element is a simple array of
+bytes, stored in big endian order, i.e.~the most significant bit is at the
+lowest memory address.
 
 \subsubsection{Memory Layout}
 
@@ -24,7 +24,7 @@ approach is to double the amount of allocated memory, to adapt to quickly
 growing stacks. However, \code{realloc} can be a performance issue because it
 will create a new allocation, copy over the current data and free the old
 allocation, in the case the there is no more space directly following what is
-being reallocated~\cite{man-realloc}. This is arguably an expensive operation,
+being reallocated\cite{man-realloc}. This is arguably an expensive operation,
 and since the stack is by far the most frequently used means of operation in
 \thename{}, it is critical that it performs well.
 % TODO: agree ^ realloc not _always_ moves memory, but etc?

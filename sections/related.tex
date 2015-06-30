@@ -91,7 +91,7 @@ rather than the static type of the object.
 % Interaction with other language (IronRuby, IronPython, etc. SCSS compiler was ``ported'')
 % btw DLR is dead
 
-The Dynamic Language Runtime~\cite{dlr} was developed by Microsoft and ran on
+The Dynamic Language Runtime\cite{dlr} was developed by Microsoft and ran on
 top of the Common Language Runtime. It provided support for several dynamic
 language features such as a dynamic type system, dynamic method dispatch and
 dynamic code generation.
@@ -103,7 +103,7 @@ make the running time of dynamic languages slow. DLR remedies this by using
 dynamic call sites with method caching. This technique is often referred to as
 inline caching, where the results of method look-ups are stored in a limited
 data-structure. This saves the machine of many consecutive look-ups. This
-optimization technique was first developed by Smalltalk 80~\cite{deutsch}.
+optimization technique was first developed by Smalltalk 80\cite{deutsch}.
 
 Dynamic types are handled by the meta class {\tt DynamicMetaObject}. These
 classes provide dynamic functionality to objects by having several virtual
@@ -113,11 +113,11 @@ abstraction and convenience with the two sub-classes {\tt DynamicObject} and
 
 Through the .NET Framework, DLR was used by popular implementations of dynamic
 languages, such as Python and Ruby, named
-IronPython~\footnote{\url{http://ironpython.net/}} and
-IronRuby~\footnote{\url{http://ironruby.net/}}. The development of DLR has been
+IronPython\footnote{IronPython: \url{http://ironpython.net}} and
+IronRuby\footnote{IronRuby: \url{http://ironruby.net}}. The development of DLR has been
 discontinued since 2010. According to a former Microsoft developer, this has to
 do with Microsoft's lack of commitment towards dynamic
-languages~\cite{schementi}\cite{cooper}. In spite of this and as a result of
+languages\cite{schementi}\cite{cooper}. In spite of this and as a result of
 being in the .NET Framework, DLR has made its way into the new Roslyn compiler.
 
 Most compilers are ``black-boxed'', where one gives the compiler some source
