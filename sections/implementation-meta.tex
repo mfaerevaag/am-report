@@ -18,7 +18,7 @@ need to be dynamically sized to support reflection and generation of new types
 at run-time.
 % TODO: markus
 
-All metadata objects in the machine have a tag defining which type of
+xoAll metadata objects in the machine have a tag defining which type of
 information it contains.
 
 \begin{ccode}
@@ -54,13 +54,13 @@ The executable file that contains the program to be run, defines a type table
 for the types created needed during run-time. Throughout the executable, these
 types are referenced by the type's index in this table. This table is static, so
 the machine can analyze how many types it contains. The types will be parsed
-from the executable and added to the global meta table lazily. This reduces the
-initial overhead of parsing the executable and avoids loading types that will
-not be used during run-time.
+from the executable and added to the global metadata table lazily. This reduces
+the initial overhead of parsing the executable and avoids loading types that
+will not be used during run-time.
 
 The machine's built-in types are described by a type tag, implemented as an enum
 in the same way as the \code{meta\_tag}. The enum's integer value is used to
-describe its index in the meta table, and there will always only be a single
+describe its index in the metadata table, and there will always only be a single
 instance of each type, so two equal types can never be referenced by two
 different pointers, similar to how DWARF types are stored (as described in
 Section~\ref{sec:design:types:dwarf}). This lets the machine check type equality
@@ -80,15 +80,15 @@ heap. The exception is Composite types whose size is computed during run-time
 because it is not part of the type definition per s\'e.
 
 Types from the executable are mapped from its index in the binary type table to
-the machine's meta table. As the ELF meta table is of static size, this will be
-a simple integer array, mapping binary metadata indices to the machine's
-internal metadata entries in the meta table. The metadata entries will be parsed
-lazily, i.e.~the first time the program tries to look up a metadata entry
-through its index in ELF meta table.
+the machine's metadata table. As the ELF meta table is of static size, this will
+be a simple integer array, mapping binary metadata indices to the machine's
+internal metadata entries in the metadata table. The metadata entries will be
+parsed lazily, i.e.~the first time the program tries to look up a metadata entry
+through its index in the ELF metadata table.
 
 The machines internal metadata table is implemented through a hash map, where
 each meta entry can be looked up through it's hashed value. Having implemented
-the meta table as a hash table lets us look up entries in constant time,
+the metadata table as a hash table lets us look up entries in constant time,
 avoiding the overhead of iterating. The only requirement of the hashing function
 is that it makes unique hashes for metadata entries that are equal. This is
 currently done with a simple implementation of Bob Jenkins' One-at-a-time
@@ -100,7 +100,7 @@ built-in type, one can look it up through a look-up function, which takes a
 metadata hash. This can be done through a strict function which thrown an
 exception if the hash is not found, or a lazy function which will generate the
 new meta entry if not found. This is especially useful for looking up types that
-are not guaranteed to already be found in the meta table, such as reference
+are not guaranteed to already be found in the metadata table, such as reference
 types used when boxing (see Section~\ref{NEEDED}).
 
 % TODO how to structure this?
