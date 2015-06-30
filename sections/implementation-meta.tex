@@ -125,6 +125,13 @@ common feature to be able to modify the list of properties on an object during
 run-time. The current implementation however does not support this, but would
 likely be implemented via run-time library functions.
 
+Composite types also include a list of properties that defines certain aspects
+of its behavior. These are not current implemented, but one such property is
+{\em strict layout}, which tells the machine that the members of an object
+instantiated with the composite type must be laid out in memory in the order
+which they are defined. This can be useful for compilers that run unsafe code to
+manually get and set data on members.
+
 \subsubsection{Floating-Point Value Types}
 
 When handling floating-point precision numbers we will, as aforementioned, use
@@ -232,13 +239,6 @@ abstract class, implementing its already defined fields and methods.
 Another property is {\em final}, where the the specific content of the field
 cannot be changed. If the content is a reference, for instance, the referenced
 value will always be the same, but the value of reference may still be mutated.
-
-The last property is {\em strict layout}, where the value of the field is
-guaranteed to be placed directly preceding to the field definition on the
-heap. This enabled the compiler to the {\tt offset} element to reference the
-content of the field. This is though considered unsafe, and thus the instruction
-must be prefixed with the {\tt unsafe} flag.
-%TODO afaik, fields har ikke strick layout, kun composites
 
 \subsubsection{Sub-routines}
 \label{sec:implementation:meta:sub-routines}
