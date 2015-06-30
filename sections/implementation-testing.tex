@@ -40,22 +40,17 @@ As an example, we will describe how we test parts of the stack implementation.
 
 Firstly, we create a mocked state of a stack which we can use for our tests.
 
-%XXX assertions shouldn't happen in setup
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[language={[ANSI]C},caption={Unit-test setup procedure}]
-  static int setup(void **state)
-  {
-    stack_t *s = malloc(sizeof(stack_t));
-    stack_init(s, 100);
-
-    assert_non_null(s->elements);
-    assert_int_equal(100, s->max_size);
-    assert_int_equal(0, sum_stack(s));
+static int setup(void **state)
+{
+    stack *s = malloc(sizeof(stack));
+    stack_init(s);
 
     *state = s;
 
     return 0;
-  }
+}
 \end{lstlisting}
 \end{minipage}
 
@@ -66,22 +61,22 @@ which easily allows us to retrieve it by dereferencing.
 
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[language={[ANSI]C},caption={Unit-test of {\tt stack\_pop}}]
-  static void test_pop(void **state)
-  {
-    stack_t *s = *state;
+static void test_pop(void **state)
+{
+    stack *s = *state;
 
     uint32_t sum = sum_stack(s);
 
-    stack_push(s, make_se_int(1));
-    stack_push(s, make_se_int(2));
-    stack_push(s, make_se_int(3));
+    push_literal_int_stack(s, INT8, 1);
+    push_literal_int_stack(s, INT8, 2);
+    push_literal_int_stack(s, INT8, 3);
 
-    assert_int_equal(3, SE_INT(stack_pop(s)));
-    assert_int_equal(2, SE_INT(stack_pop(s)));
-    assert_int_equal(1, SE_INT(stack_pop(s)));
+    assert_int_equal(3, se_to_int(stack_pop(s)));
+    assert_int_equal(2, se_to_int(stack_pop(s)));
+    assert_int_equal(1, se_to_int(stack_pop(s)));
 
     assert_int_equal(sum, sum_stack(s));
-  }
+}
 \end{lstlisting}
 \end{minipage}
 
@@ -134,14 +129,14 @@ values.
 
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[language={sh},caption={shUnit2 underflow test case}]
-test_stack_underflow()
+test_fibonacci()
 {
-  output=$(am --file ${PDIR}/underflow.amb)
-  ret=$?
+    output=$(am --file elfs/fib)
+    ret=$?
 
-  assertEquals "return code should be 4" 4 $ret
-  assertTrue "output should include underflow" \
-  "contains \"$output\" \"underflow\""
+    assertEquals "return code should be 0" 0 $ret
+    assertTrue "output should include 610" \
+               "contains \"$output\" \"610\""
 }
 \end{lstlisting}
 \end{minipage}
