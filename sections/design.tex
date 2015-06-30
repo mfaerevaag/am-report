@@ -527,7 +527,7 @@ Below is a description of the various kinds of simple types provided.
 \item[Floating-point numbers] \hfill\\
   Non-integer numbers will be represented by floating-point precision numbers,
   either 32-bit or 64-bit, named {\tt Ieee32} and {\tt Ieee64}. These will
-  respectively follow the IEEE~753-1985 and IEEE~755-1985 standard of
+  respectively follow the IEEE~753-1985 and IEEE~754-1985 standard of
   representation.
 
 \item[Address] \hfill\\
@@ -537,6 +537,10 @@ Below is a description of the various kinds of simple types provided.
   A type which can take any value at run-time, named {\tt AnyType}. Large stack
   initialized values will be boxed on the heap to make space for them.
 \end{description}
+
+The IEEE-753 and IEEE-754 standards does not specify an endianness for storing
+or transferring floating-points numbers, hence we will conform to the school of
+big-endian, as done through the entirety of \thenname{}.
 
 % reference
 
@@ -694,7 +698,7 @@ instruction performs an \textit{arithmetic shift} to the right which means that
 the sign-bit of an integer value is extended. The sign-bit is simply the
 left-most bit (we are using big endian representation) and is extended
 regardless of the sign of the type. In effect, that gives the following results
-(numbers are in binary representation): % TODO: mention endianness earlier
+(numbers are in binary representation):
 \begin{align*}
   {\tt 0b1001}\ \ \ shl\  2 &= {\tt 0b0100} \\
   {\tt 0b1001}\ \ \ shr\  2 &= {\tt 0b0010} \\
@@ -717,7 +721,7 @@ overflowing or underflowing results. Consider adding the values $255$ and $2$ as
 8-bit unsigned integral values (UInt8). The maximum value of a UInt8 is $255$
 meaning that $255+2=257$ will result in an overflow. Using the normal
 \instr{add} instruction the result will be truncated to $1$ because the excess
-bytes are ignored, but with the saturated variant the result will remain $256$
+bytes are ignored, but with the saturated variant the result will remain $255$
 because the overflow is detected and the value is capped at the maximum
 possible. The same is true for underflowing values with both signed and unsigned
 values.
