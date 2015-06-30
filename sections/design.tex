@@ -254,15 +254,6 @@ operations. For instance, a common stack operation is that of reading the value
 of an element a number of slots into the stack without modifying anything, known
 as {\it peeking}.
 
-\subsubsection{Stack vs. Register Machine}
-
-Machines can implement the stack model virtually through software, but also
-directly in
-hardware~\footnote{\url{https://en.wikipedia.org/wiki/Stack_machine\#Commercial_stack_machines}}. As
-we are designing an abstract machine, we will disregard the hardware
-implementations and only discuss the virtual aspect. Regardless, such a machine
-is commonly called a \term{stack machine}. %TODO forvirrende. watfix?
-
 The most common notation in arithmetic formulas and statements are the infix
 notation, where the operator is written between its operands: $1 + 2$. One can
 express the same statement with prefix notation, also called \term{Polish
@@ -279,10 +270,6 @@ $1\ 2\ +$ becomes:
 
 Here the {\tt add} operation pops two elements, adds them together and pushes
 the result back onto the stack.
-
-As briefly discussed in Section~\ref{sec:background:stack-vs-register}, a
-register machine TODO %XXX
-% TODO: rename to stack machine and change scope therefor
 
 \subsubsection{Stack Organization}
 
