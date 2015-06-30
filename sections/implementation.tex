@@ -197,6 +197,7 @@ Listing~\ref{lst:implementation:instruction-cycle}
   caption={Pseudo representation of the instruction cycle},%
   label={lst:implementation:instruction-cycle}]
 while (thread is running) {
+  fetch prefixes
   fetch opcode
   fetch potential arguments
   update program counter
