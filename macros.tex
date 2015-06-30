@@ -77,9 +77,6 @@
  {\lstset{language={[ANSI]C},#1}}
  {}
 
-\let\oldcite=\cite
-\renewcommand\cite[1]{\ifthenelse{\equal{#1}{NEEDED}}{[citation~needed]}{\oldcite{#1}}}
-
 \newenvironment{stackops}
 {%
   \newcommand{\op}[2]{
