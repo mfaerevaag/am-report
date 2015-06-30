@@ -104,16 +104,8 @@ accomplishing this is by taking the actual machine executable and running it
 with certain programs and arguments. We have therefor created several different
 programs, from which we know the desired output.
 
-As an example we can check that the machine fails when stack underflow occurs,
-i.e.\ popping more values off the stack then there are actual values.
-
-A valid test program for this would consist of a single instruction, \instr{POP,
-  1}, producing a stack underflow error. We can test the output of the machine
-by both asserting the exit code of the process, where we will have specified the
-meanings of different exit codes, and by asserting what is written to standard
-out and error ({\tt stdout} and {\tt stderr}). In the case of stack underflow
-the exit code should be 4 and the output should match ``underflow'' (TODO:
-update).
+For instance we test that an execution of a fibonacci sequence program outputs
+the expected value and that the return code is indicating success.
 
 To automate this process we use shell scripting. For convenience, we have chosen
 to utilize a shell testing framework, called shUnit2\footnote{shUnit2, unit
