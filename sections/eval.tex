@@ -218,21 +218,18 @@ on the logarithmic x-axis. We see the same pattern as previous benchmarks,
 without many irregularities. \thename{} is still being outperformed by JVM and
 CLR, but continues to be have a better startup time.
 
-
 \subsubsection{Memory Footprint}
-
-% TODO: missing review
 
 When analyzing the memory footprint of \thename{} we used the absolutely
 brilliant instrumentation tool Valgrind\footnote{Valgrind:
   \url{http://valgrind.org}}. It takes the program which is to be run as
 argument, and does so in a sand-boxed environment, allowing it to analyze the
-programs resource consumption together with multitudes of other things. To
+program's resource consumption together with multitudes of other things. To
 target the machine's memory consumption specifically, we utilize one of
-Valgrind's many built-in tools, one of which is called Massif\footnote{Massif
-  Heap Profiler: \url{http://valgrind.org/docs/manual/ms-manual.html}}. This is
-a heap profiler, able of analyzing the amount of allocated memory of each
-function in the given program.
+Valgrind's many built-in tools, which is called Massif\footnote{Massif Heap
+  Profiler: \url{http://valgrind.org/docs/manual/ms-manual.html}}. This is a
+heap profiler, able of analyzing the amount of allocated memory of each function
+in the given program.
 
 We have made a heap profile of \thename{} running the Fibonacci recursion
 benchmark, shown in the previous section. We have run Valgrind with the
@@ -259,17 +256,17 @@ the machine's stack, while the outer linings are information tables, threads
 etc. This shows us that during start-up, memory is consumed by the information
 tables and other core infrastructure, but following memory is solely consumed by
 the stack. This makes good sense, as the Fibonacci benchmark does not mutate the
-machines state, with exception of the main thread's stack. The stack keeps
+machine's state, with exception of the main thread's stack. The stack keeps
 growing til half way into the program, and thereafter it declines at the same
 pace. This pattern occurs because of how the Fibonacci program generates a very
 deep recursion tree, as mentioned in the previous section. For each recursion,
 two sub-routine invocations occur, resulting in two new activation frames being
 pushed to the stack. When the the recursion tree finally ends in a leaf, the
-value of $F(n)$ is found, and the value is returned all the way up the recursion
-tree, popping activation elements as it goes, until eventually being returned to
-the original caller.
+value of $fib(n)$ is found, and the value is returned all the way up the
+recursion tree, popping activation elements as it goes, until eventually being
+returned to the original caller.
 
-The result are in summary showing no unnecessary or unexpected use of memory.
+The result are indicating no unnecessary or unexpected use of memory.
 
 \subsubsection{Optimization}
 

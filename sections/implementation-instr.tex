@@ -34,11 +34,14 @@ without having to search through the stack. Among others, it is used to check
 whether the program counter is exceeding the address bounds of the current
 sub-routine, which will result in an implicit return.
 
-\subsubsection{Prefixes and Suffixes}
+\subsubsection{Prefixes}
 
-Instructions can be prefixed or suffixed to modify the behavior of certain
-instructions.
-%TODO note om large prefix
+Instructions can be prefixed to modify the behavior of certain instructions.
+
+Integer arguments to instruction are by default 8-bit integer values meaning
+that a single code byte is consumes from the byte code stream. The {\tt large}
+prefix extends this to 32-bits, i.e.~four bytes, which will likewise be consumed
+and the program counter incremented accordingly.
 
 The {\tt noOverflow} prefix signals the machine to throw exceptions if overflow
 occurs when executing the following arithmetic instruction. Overflow is detected
