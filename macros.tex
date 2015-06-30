@@ -53,26 +53,6 @@
   escapeinside={(*@}{@*)}
 }
 
- % TODO
-\lstdefinelanguage{bytecode}{
-  keywords={fn, pop},
-  keywordstyle=\color{blue}\bfseries,
-  ndkeywords={class, export, boolean, throw, implements, import, this},
-  ndkeywordstyle=\color{darkgray}\bfseries,
-  identifierstyle=\color{black},
-  sensitive=false,
-  comment=[l]{//},
-  morecomment=[s]{/*}{*/},
-  commentstyle=\color{purple}\ttfamily,
-  stringstyle=\color{red}\ttfamily,
-  morestring=[b]',
-  morestring=[b]"
-}
-
-\lstnewenvironment{bytecode}[1][]
- {\lstset{language={bytecode},#1}}
- {}
-
 \lstnewenvironment{ccode}[1][]
  {\lstset{language={[ANSI]C},#1}}
  {}
