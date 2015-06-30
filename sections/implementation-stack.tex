@@ -56,7 +56,7 @@ The C language does not support variable length arrays, which means that an
 array must have its length declared, otherwise the type is regarded as
 incomplete. However, line~\ref{code:stack-element:flexible-data} in
 Listing~\ref{lst:implementation:stack:element} shows a feature known as a
-\term{flexible array} that allows the last field of a struct to be declared as a
+flexible array that allows the last field of a struct to be declared as a
 size-less array. We take advantage of exactly that so that we can easily
 interpret the \code{data} field of an element as an array of bytes of any size.
 

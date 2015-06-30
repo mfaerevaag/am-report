@@ -257,12 +257,11 @@ as {\it peeking}.
 
 The most common notation in arithmetic formulas and statements are the infix
 notation, where the operator is written between its operands: $1 + 2$. One can
-express the same statement with prefix notation, also called \term{Polish
-  notation}: $+\ 1\ 2$, a style commonly used in the family of Lisp
-languages. When programming stack machines, one uses what is called the
-\term{reverse Polish notation}, which is in fact postfix notation: $1\ 2\ +$. By
-using this notation, one can easily convert this into stack operations, where
-$1\ 2\ +$ becomes:
+express the same statement with prefix notation, also called Polish notation:
+$+\ 1\ 2$, a style commonly used in the family of Lisp languages. When
+programming stack machines, one uses what is called the reverse Polish notation,
+which is in fact postfix notation: $1\ 2\ +$. By using this notation, one can
+easily convert this into stack operations, where $1\ 2\ +$ becomes:
 \begin{stackops}
   \op{push 1}{1}
   \op{push 2}{2,\ 1}
@@ -277,9 +276,9 @@ the result back onto the stack.
 Stacks in \thename{} are unbounded, meaning that they can be arbitrarily large
 and that stack overflows can never occur (if the machine runs out of memory
 entirely it is treated as a memory error, not a stack overflow). Throughout the
-report, we will say that the stacks \term{grows downwards}. This is because
-physically, the top most element of the stack is located at the highest address
-in memory. Therefore, as more elements are pushed onto the stack, they will get
+report, we will say that the stacks grows downwards. This is because physically,
+the top most element of the stack is located at the highest address in
+memory. Therefore, as more elements are pushed onto the stack, they will get
 higher addresses, making the stack grow downwards in memory.
 
 A stack element consists of some type information along with the actual data
@@ -359,8 +358,8 @@ races into account, which is a common mistake when writing multi-threaded
 programs. If multiple threads are reading and writing to the same memory, it is
 impossible for the threads to base any logic on it, as another thread can change
 its value at any time, effectively pulling the rug out from under you. This
-problem as been named the \term{mutual exclusion problem}, and is solved by
-using synchronization structures, such as semaphores and monitors.
+problem as been named the mutual exclusion problem, and is solved by using
+synchronization structures, such as semaphores and monitors.
 
 \thename{} supports threading and synchronization structures therefor. As we are
 using a stack machine, each thread has to have its own state, including its own
@@ -374,11 +373,11 @@ Creating and destroying system threads is not free. If a new thread is created
 on demand it would create significant overhead. Another problem with this model
 is the risk of resource thrashing. If there is no limit to the number of threads
 that can be created, it can intentionally or unintentionally be exposed to heavy
-abuse. A solution to both of these challenges is having what is called a
-\term{thread pool}. Upon machine initialization, a fixed number of threads is
-pre-initialized and stored in a data structure. When a thread tries to spawn a
-new thread, it is given one from the thread pool, and if the thread pool is
-empty, it has to wait for a thread to become vacant.
+abuse. A solution to both of these challenges is having what is called a thread
+pool. Upon machine initialization, a fixed number of threads is pre-initialized
+and stored in a data structure. When a thread tries to spawn a new thread, it is
+given one from the thread pool, and if the thread pool is empty, it has to wait
+for a thread to become vacant.
 
 This model, although effective, also brings with it some
 challenges. Specifically, when the thread pool is empty, the spawning thread
@@ -401,13 +400,13 @@ cannot safely continue. If the error occurs in the process' original thread, we
 will in most cases still be able to catch the signal sent by the operating
 system and exit gracefully.
 
-When the program being executed produces an \term{exception} it will percolate
-up through a defined set of user-defined exception handlers until it is
-handled. If there is no way of handling the exception it is called an uncaught
-exception, and the machine will print some information on the exception and
-stop. It will not attempt to join all threads as it cannot know how long this
-would take. Therefore all threads are exited and memory is freed, ensuring no
-memory leaks.
+When the program being executed produces an exception it will percolate up
+through a defined set of user-defined exception handlers until it is handled. If
+there is no way of handling the exception it is called an uncaught exception,
+and the machine will print some information on the exception and stop. It will
+not attempt to join all threads as it cannot know how long this would
+take. Therefore all threads are exited and memory is freed, ensuring no memory
+leaks.
 
 \subsection{Types}
 \label{sec:design:types}

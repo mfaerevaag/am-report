@@ -1,18 +1,18 @@
 Throughout the project we have made heavy use of testing to ensure the
 correctness of the implementation, i.e.~whether it strictly follows the machine
-specification. We have both made use of \term{unit}- and
-\term{integration-tests}. Here unit-tests have the purpose of testing a single
-isolated component, typically a single function. We mock a specific state of the
-machine, or the state of a component in the machine, and then run isolated
-functions where we {\it know} what the result should be, which can easily be
-asserted. By comparison, the integration-tests have a much larger scope, in that
-their purpose is to test the whole machine without any regard to any specific
-component. This effectively ensures each component is wired together correctly.
+specification. We have both made use of unit- and integration-tests. Here
+unit-tests have the purpose of testing a single isolated component, typically a
+single function. We mock a specific state of the machine, or the state of a
+component in the machine, and then run isolated functions where we {\it know}
+what the result should be, which can easily be asserted. By comparison, the
+integration-tests have a much larger scope, in that their purpose is to test the
+whole machine without any regard to any specific component. This effectively
+ensures each component is wired together correctly.
 
 \subsubsection{Unit-tests}
 
 Unit-testing in C is a fairly simple process and essentially does not require
-any framework or library. While not required, a simple set of \term{macros} will
+any framework or library. While not required, a simple set of macros will
 greatly improve the readability and ease of writing tests.
 
 % cmocka
@@ -21,7 +21,7 @@ In spite of this, we have chosen to use a unit-testing library called {\it
 large projects like {\it libssh}\footnote{Implementation of the SSH protocol:
   \url{http://libssh.org}}. It offers several features which makes unit-testing
 more powerful and simpler to write. For instance, it offers test suites and
-\term{mocking} of objects which enabled us to set up a specific state of the
+mocking of objects which enabled us to set up a specific state of the
 machine. With this state, we can run isolated tests, manipulating the state and
 thereafter asserting that the correct transformations and output has occurred.
 

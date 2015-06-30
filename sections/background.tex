@@ -66,11 +66,11 @@ Further there is the concept of \textbf{Just-in-Time} (JIT) and
 \textbf{Ahead-of-Time} (AOT) compilation which is often misunderstood as being
 part of a compiler. JIT and AOT compilation is about \textit{when} compilation
 takes place, not how. JIT compilers are implemented as part of abstract machines
-or runtimes, and will compile an \term{intermediate representation} into native
-code during run-time. For instance a language X may be compiled into language Y
-which is understood by an abstract machine. Upon execution by the abstract
-machine, language Y will be translated into native code and only then executed
-on the hardware.
+or runtimes, and will compile an intermediate representation into native code
+during run-time. For instance a language X may be compiled into language Y which
+is understood by an abstract machine. Upon execution by the abstract machine,
+language Y will be translated into native code and only then executed on the
+hardware.
 
 The term \textbf{virtual machine} is where some heavy debate can be sparked as
 to how it relates to abstract machines. Some distinguish the terms by defining
@@ -225,11 +225,11 @@ and functional paradigm.
 The JVM is a stack based machine and is heavily tied to the object oriented
 language paradigm. Most of the low-level mechanism are inaccesible through the
 ISA, which forces language implementors to fit everything into the Java object
-model, which is inherently \term{Object-Oriented} and statically typed. As a
-result it is not a straightforward task to implement dynamically typed or
-functional languages on the JVM. Efforts have been made to asses this, most
-notably the introduction of the \texttt{invokedynamic} instruction through the
-Da Vinci project (see Section~\ref{sec:related-work:jvm} for details).
+model, which is inherently Object-Oriented and statically typed. As a result it
+is not a straightforward task to implement dynamically typed or functional
+languages on the JVM. Efforts have been made to asses this, most notably the
+introduction of the \texttt{invokedynamic} instruction through the Da Vinci
+project (see Section~\ref{sec:related-work:jvm} for details).
 
 \subsubsection{Common Language Runtime}
 
