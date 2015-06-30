@@ -31,25 +31,26 @@ which a thread can make data from its stack available to others is by boxing it,
 i.e.~moving it to the heap and track it by a reference. The heap is a single
 globally shared memory region where data is stored and modified by use of
 references. It is managed fully by the garbage collector, which means that all
-allocations and deallocations are made through an interface. Internally the
-garbage collector is regarded as a ``black box'', meaning that no assumptions to
-its inner workings are made, and it is assumed to efficiently free unused memory
-when possible. The only exception to this is that the object model defines a
-sub-routine on heap objects called \code{finalize} which is called before the
-garbage collector releases the object's memory. It is used for an object to be
-able to properly free any resources it might be using, such as open files or
-network connections, and is directly analogous to C++'s destructor method on
-classes.
+allocations and deallocations are made through a single interface. Internally
+the garbage collector is regarded as a ``black box'', meaning that no
+assumptions to its inner workings are made, and it is assumed to efficiently
+free unused memory when possible. The only exception to this is that the object
+model defines a sub-routine on heap objects called \code{finalize} which is
+called before the garbage collector releases the object's memory. It is used for
+an object to be able to properly free any resources it might be using, such as
+open files or network connections, and is directly analogous to C++'s destructor
+method on classes.
 
-The object model defines how objects are laid out in heap and how their content
-is described by the type system. \thename{} uses a simple but very flexible
-object model. The general idea is that a heap object is described by the
-\code{Composite} type which is capable of expressing arbitrarily complex data
-structures. In addition to what is described by the type, a heap object includes
-a reference to an object of the \code{AnyType} type. The purpose of this is to
-provide language implementations the means to associate some arbitrary
-information to objects. It could used for any kind of metadata storage,
-implementation of class methods, polymorphism, etc.
+The object model defines how objects are laid out in the heap, how their content
+is described by the type system and how it is referenced from the
+stack. \thename{} uses a simple but very flexible object model. The general idea
+is that a heap object is described by the \code{Composite} type which is capable
+of expressing arbitrarily complex data structures. In addition to what is
+described by the type, a heap object includes a reference to an object of the
+\code{AnyType} type. The purpose of this is to provide language implementations
+the means to associate some arbitrary information to objects. It could used for
+any kind of metadata storage, implementation of class methods, polymorphism,
+etc.
 
 \subsection{Execution Model}
 \label{sec:design:exec}
