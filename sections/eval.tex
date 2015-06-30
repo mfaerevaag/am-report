@@ -100,18 +100,25 @@ object. We will go through each in turn, analyzing the results.
 
 To benchmark the stack we made a simple program which essentially just does a
 lot of trivial stack operations. A simple way to achieve this was to take a
-large number and decrement it until it becomes zero. More specifically, we start
-by using \instr{pushLiteral} with the \instr{large} prefix to get a large number
-on the stack. We there after push the literal one, push the large number again
-with \instr{pushElement} and perform subtraction with \instr{sub}. To store the
-result, we duplicate it and use \instr{storeElement} to overwrite the initial
-number. Lastly we check if the result is zero, in which case it is not, we
-branch back to the top, starting over. This induces 10 stack operation per
-iteration, plus the initial one, which equals $10n + 1$, where
-$n = 1\ ...\ (2^{31} -1)$, giving the complexity of $O(n)$. CIL does not have an
-\instr{storeElement} instruction, but achieves the same effect by storing the
-value in a local variable and then loading it again, done with {\tt stloc} and
-{\tt ldloc}. %TODO er det måske overkill at forklare, evt vise koden?
+large number and decrement it until it becomes zero.
+
+\begin{stackops}
+  \op{large pushLiteral i32 n}{n}
+  \op{pushLiteral i32 1}{n,\ 1}
+  \op{pushElement 1}{n,\ 1,\ n}
+  \op{sub}{n,\ (n-1)}
+  \op{pushElement 0}{n,\ (n-1),\ (n-1)}
+  \op{storeElement 2}{(n-1),\ (n-1)}
+  \op{cmpZero}{(n-1),\ b}
+  \op{brFalse -13}{(n-1)}
+  \op{halt}{-}
+\end{stackops}
+
+This induces 9 stack operation per iteration, plus the initial one, which
+equals $9n + 1$, where $n = 1\ ...\ (2^{31} -1)$, giving the complexity of
+$O(n)$. CIL does not have an \instr{storeElement} instruction, but achieves the
+same effect by storing the value in a local variable and then loading it again,
+done with {\tt stloc} and {\tt ldloc} (store / load local variable).
 
 The result can be seen in the seen below, in
 Figure~\ref{fig:eval:benchmark:stack}.
