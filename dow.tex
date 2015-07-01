@@ -1,0 +1,79 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage[utf8]{inputenc}
+\usepackage[american]{babel}
+\usepackage{csquotes}
+\usepackage{listings}
+\usepackage[table]{xcolor}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{parskip}
+\usepackage{abstract}
+\usepackage{url}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{fancybox}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[bottom]{footmisc}
+\usepackage{makecell}
+\usepackage{ifthen}
+\usepackage{listings}
+\usepackage{parcolumns}
+\usepackage{subcaption}
+\usepackage{drawstack}
+\usepackage{pdfpages}
+\usepackage{makecell}
+\usepackage{setspace}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{hyperref}
+
+
+\setcounter{secnumdepth}{3} % only chapter and sections will be numbered
+\setcounter{tocdepth}{3}    % entries down to \subsubsections in the TOC
+
+% constants
+\newcommand{\COURSE}{Bachelor Thesis}
+\newcommand{\TITLE}{Abstract Machine for Modern Languages}
+\newcommand{\DATE}{June 2015}
+\newcommand{\thename}{Matisse}
+
+\addto\captionsamerican{\renewcommand{\contentsname}{Table of Contents}}
+
+\input{macros}
+
+\pagestyle{fancy}
+\fancyhf{}
+\setlength{\parindent}{0pt}
+\setlength{\headheight}{15pt}
+\setlength{\headsep}{25pt}
+\lhead{\TITLE}
+\chead{}
+\rhead{\leftmark}
+\cfoot{Page \thepage{} of~\pageref{LastPage}}
+
+\begin{document}
+
+\onehalfspacing{}
+
+\section*{Division of Work}
+
+During the development of \thename{} we have distributed responsibility for
+certain areas of the project, and shared others. The division of work is roughly the following:
+
+\begin{description}
+\item[Simon] Instruction cycle, Execution model, ELF
+\item[Markus] Type system, Threads, Information tables
+\item[Shared] Object model, Stack, Core architecture, Testing, Debugging facilities
+\end{description}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
