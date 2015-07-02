@@ -1,0 +1,71 @@
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usepackage{drawstack}
+\usepackage{listings}
+
+\usetikzlibrary{shapes.multipart,arrows}
+
+% Setup
+\title{Abstract Machine~\\for Modern Programming Languages}
+\author[Altschuler, Færevaag]{Simon Altschuler \and Markus Færevaag}
+\date{Software Technology Bachelor Thesis, Spring 2015}
+\subject{Computer Science}
+
+% Style
+\usetheme{Berlin}
+\usecolortheme{beaver}
+\usefonttheme{structuresmallcapsserif}
+\beamertemplatenavigationsymbolsempty{}
+\setbeamertemplate{footline}[frame number]
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+  \frametitle{Hello yes this is dog}
+
+  \begin{block}{I'm a header}
+    I'm in yer loop
+  \end{block}
+
+  \begin{itemize}
+  \item Foo
+  \item Bar
+  \item Baz
+  \end{itemize}
+
+  Then, profit!
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{This is the second slide}
+  \framesubtitle{A bit more information about this}
+
+  %\input{../figures/stack-layout}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{This is the second slide}
+  \framesubtitle{A bit more information about this}
+
+  \begin{lstlisting}[basicstyle=\small]
+large pushLiteral 7, 1337
+pushLiteral 7, 1
+pushElement 1
+sub
+pushElement 0
+storeElement 2
+pushElement 1
+ceqZero
+brFalse -15
+halt
+  \end{lstlisting}
+
+\end{frame}
+
+\end{document}
