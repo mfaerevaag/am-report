@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[handout]{beamer}
 
 \usepackage[utf8]{inputenc}
 \usepackage{tikz}
@@ -9,7 +9,7 @@
 
 % Setup
 \title{Abstract Machine~\\for Modern Programming Languages}
-\author[Altschuler, Færevaag]{Simon Altschuler \and Markus Færevaag}
+\author[Altschuler, Færevaag]{Simon Altschuler (s123563) \and Markus Færevaag (s123692)}
 \date{Software Technology Bachelor Thesis, Spring 2015}
 \subject{Computer Science}
 
@@ -19,53 +19,205 @@
 \usefonttheme{structuresmallcapsserif}
 \beamertemplatenavigationsymbolsempty{}
 \setbeamertemplate{footline}[frame number]
+\setbeamertemplate{itemize item}[circle]
+\setbeamertemplate{itemize subitem}[triangle]
+\setbeamertemplate{enumerate items}[default]
+
+\newcommand{\n}[1]{\\~\texttt{\color{red}\tiny #1}}
+% \newcommand{\n}[1]{}
 
 \begin{document}
 
 \frame{\titlepage}
 
 \begin{frame}
-  \frametitle{Hello yes this is dog}
+  \frametitle{Motivation}
+  \framesubtitle{Reasons for working on this project}
 
-  \begin{block}{I'm a header}
-    I'm in yer loop
-  \end{block}
-
+  Problem
   \begin{itemize}
-  \item Foo
-  \item Bar
-  \item Baz
+  \item Available machines are unsuitable for modern paradigms
+    \n{Not supporting dynamic and functional languages}
+  \item Heavy focus on object-orientated and imperative languages
   \end{itemize}
 
-  Then, profit!
+  \pause{}
+
+  \vspace{20pt}
+  Learning
+  \begin{itemize}
+  \item Abstract machines are used everywhere
+    \n{Browsers, mobile devices, desktop apps, embedded systems, similar to compilers/interpreters}
+  \item Embody a broad spectrum of computer science topics
+    \n{Compiler theory, lots of data structures, optimizations, low-level stuff}
+  \end{itemize}
 
 \end{frame}
 
 \begin{frame}
-  \frametitle{This is the second slide}
-  \framesubtitle{A bit more information about this}
+  \frametitle{Contributions}
+  \framesubtitle{Division of Responsibility}
 
-  %\input{../figures/stack-layout}
+  \begin{columns}[onlytextwidth, t]
+    \begin{column}{0.33\textwidth}
+      Shared
+      \fontsize{9pt}{15}\selectfont
+      \begin{itemize}
+      \item Object model
+      \item Stack
+      \item Core architecture
+      \item Testing
+      \item Debugging facilities
+      \end{itemize}
+    \end{column}
+
+    \pause{}
+
+    \begin{column}{0.33\textwidth}
+      Simon
+      \fontsize{9pt}{15}\selectfont
+      \begin{itemize}
+      \item Instruction cycle
+      \item Execution model
+      \item ELF
+      \end{itemize}
+    \end{column}
+
+    \pause{}
+
+    \begin{column}{0.33\textwidth}
+      Markus
+      \fontsize{9pt}{15}\selectfont
+      \begin{itemize}
+      \item Type system
+      \item Threads
+      \item Information tables
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \pause{}
+
+  \vspace{30pt}
+  \centering
+  We have both been involved in everything!
 
 \end{frame}
 
-\begin{frame}[fragile]
-  \frametitle{This is the second slide}
-  \framesubtitle{A bit more information about this}
+\begin{frame}
+  \frametitle{Agenda}
+  \fontsize{11pt}{20}\selectfont
+  \begin{enumerate}
+  \item Abstract machines 101
+    \pause{}
+  \item Existing systems
+    \pause{}
+  \item Matisse and the multi-paradigm approach
+    \pause{}
+  \item Implementation
+    \pause{}
+  \item Demo
+    \pause{}
+  \item Evaluation
+    \pause{}
+  \item Conclusions
+  \end{enumerate}
+\end{frame}
 
-  \begin{lstlisting}[basicstyle=\small]
-large pushLiteral 7, 1337
-pushLiteral 7, 1
-pushElement 1
-sub
-pushElement 0
-storeElement 2
-pushElement 1
-ceqZero
-brFalse -15
-halt
-  \end{lstlisting}
+\begin{frame}
+  \frametitle{Abstract machines 101}
 
+  \begin{itemize}
+  \item What is it
+  \item (Dis)advantages
+  \item How is it used
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Existing systems}
+  \framesubtitle{And their shortcomings}
+
+  \begin{itemize}
+  \item Two most popular/widespread/sick: JVM and CIL
+  \item Why they are insufficient for modern paradigms like seriously, uKnow
+  \item Interesting case: Parrot
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Matisse}
+  \framesubtitle{The Multi-Paradigm Approach}
+
+  what is up compared to others
+  \begin{itemize}
+  \item Exposed primitives
+  \item Simple construction
+  \item Opt-in features (threading, scopes)
+  \item Flexible type system
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Implementation}
+
+  \begin{itemize}
+  \item Note: Reasons for using C
+  \item Overview diagram
+  \item Explanation of steps taken from loading a file to executing an
+    instruction to shutting down
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Demo}
+
+  \begin{itemize}
+  \item Demo program 1:
+    \begin{itemize}
+    \item push two ints
+    \item add
+    \item show stack
+    \item make one int a float
+    \item type error!
+    \item box
+    \item make sub-routine that takes the boxed int and adds one (and returns nothing)
+    \item unbox the reference
+    \item use `iprint' to print the result (strtab 4 is iprint)
+    \end{itemize}
+
+  \item Demo program 2:
+    \begin{itemize}
+    \item new heap object (new, `person')
+    \item push field `age' (should be 0)
+    \item push an int
+    \item pop to field `age'
+    \end{itemize}
+
+  \item Show the fibo program as an example of a more complex thing
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Performance Evaluation}
+
+  WE DIDN'T TURN OFF JIT IN MONO
+
+  \begin{itemize}
+    \item Show and explain fibo graph
+    \item Show and explain heap graph
+    \item Show and explain heap profile (try running it again to get an exponential version)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Conclusions}
+
+  \begin{itemize}
+  \item Did we succeed?
+  \item What did we learn
+  \item Future of Matisse
+  \end{itemize}
 \end{frame}
 
 \end{document}
