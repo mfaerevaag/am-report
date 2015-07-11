@@ -107,25 +107,19 @@
 \begin{frame}
   \frametitle{Agenda}
   \fontsize{11pt}{20}\selectfont
-  \begin{enumerate}
+  \begin{enumerate}[<+->]
   \item Abstract machines 101
     \n{Simon}
-    \pause{}
   \item Existing systems
     \n{Markus}
-    \pause{}
   \item Matisse and the multi-paradigm approach
     \n{Simon}
-    \pause{}
   \item Implementation
     \n{Markus}
-    \pause{}
   \item Demo
     \n{Simon}
-    \pause{}
   \item Evaluation
     \n{Markus}
-    \pause{}
   \item Conclusions
     \n{Foo bar}
   \end{enumerate}
@@ -134,11 +128,57 @@
 \begin{frame}
   \frametitle{Abstract machines 101}
 
-  \begin{itemize}
-  \item What is it
-  \item (Dis)advantages
-  \item How is it used
+  Fundamentals
+
+  \begin{itemize}[<+->]
+  \item Virtual computer architecture
+    \n{PROCESS not SYSTEM! Computer arch: organization of components}
+  \item Hardware implemented in software
+    \n{Shares properties of hardware like CPU/Memory mgmt/clock cycles}
+  \item Executes low-level machine code
+    \n{Machine code vary from very-low level to relatively high-level}
   \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Abstract machines 101}
+
+  Advantages
+  \begin{itemize}[<+->]
+  \item Platform independence
+    \n{Unified ISA, Just compile for new platforms}
+  \item Expressive instruction set
+    \n{Main reason, high-level constructs}
+  \item Security
+    \n{Sandboxed environment, cannot control access to system resources}
+  \end{itemize}
+
+  Disadvantages
+  \begin{itemize}[<+->]
+  \item Performance overhead
+    \n{JIT = GG, but still some compilation overhead}
+  \item Users must have the machine installed
+    \n{Must be retrieved from somewhere, it must be available for the system}
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Abstract machines 101}
+
+  How and where are they used
+  \begin{itemize}[<+->]
+  \item Web browsers
+    \n{Java applet}
+  \item Desktop applications
+    \n{JVM, CIL, Parrot}
+  \item Embedded devices
+    \n{Hmm?}
+  \item Virtualization
+    \n{Hmm?}
+  \end{itemize}
+
 \end{frame}
 
 \begin{frame}
