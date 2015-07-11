@@ -22,6 +22,9 @@
 \setbeamertemplate{itemize item}[circle]
 \setbeamertemplate{itemize subitem}[triangle]
 \setbeamertemplate{enumerate items}[default]
+\definecolor{lered}{rgb}{0.58, 0.02, 0.03}
+\setbeamercolor{itemize item}{fg=lered}
+\setbeamercolor{itemize subitem}{fg=lered}
 
 \newcommand{\n}[1]{\\~\texttt{\color{red}\tiny #1}}
 % \newcommand{\n}[1]{}
@@ -196,12 +199,18 @@
   \frametitle{Matisse}
   \framesubtitle{The Multi-Paradigm Approach}
 
-  what is up compared to others
+  What distinguishes Matisse
   \begin{itemize}
-  \item Exposed primitives
-  \item Simple construction
-  \item Opt-in features (threading, scopes)
+  \item No paradigm assumptions
+    \n{Attempted to be flexible enough to cover all}
+  \item Achieved by exposing primitives
+    \n{Building blocks for compilers, to use however they like. Scopes, fields, types, sub-routines}
+  \item Opt-in features
+    \n{Threading, scopes}
+  \item Sub-routines are simple and sharable
+    \n{They are just references and anon. could be generated easily}
   \item Flexible type system
+    \n{AnyType is awesome for dynamic}
   \end{itemize}
 \end{frame}
 
@@ -218,31 +227,44 @@
 
 \begin{frame}
   \frametitle{Demo}
-
   \begin{itemize}
-  \item Demo program 1:
+  \item Program 1
     \begin{itemize}
-    \item push two ints
-    \item add
-    \item show stack
-    \item make one int a float
-    \item type error!
-    \item box
-    \item make sub-routine that takes the boxed int and adds one (and returns nothing)
-    \item unbox the reference
-    \item use `iprint' to print the result (strtab 4 is iprint)
+    \item Stack manipulation
+    \item Sub-routines
+    \item Arithmetic
     \end{itemize}
 
-  \item Demo program 2:
+  \item Program 2
     \begin{itemize}
-    \item new heap object (new, `person')
-    \item push field `age' (should be 0)
-    \item push an int
-    \item pop to field `age'
+    \item Heap object
+    \item Field manipulation
     \end{itemize}
 
-  \item Show the fibo program as an example of a more complex thing
+  \item Complex program
   \end{itemize}
+    % \item Demo program 1:
+    %   \begin{itemize}
+    %   \item push two ints
+    %   \item add
+    %   \item show stack
+    %   \item make one int a float
+    %   \item type error!
+    %   \item box
+    %   \item make sub-routine that takes the boxed int and adds one (and returns nothing)
+    %   \item unbox the reference
+    %   \item use `iprint' to print the result (strtab 4 is iprint)
+    %   \end{itemize}
+
+    % \item Demo program 2:
+    %   \begin{itemize}
+    %   \item new heap object (new, `person')
+    %   \item push field `age' (should be 0)
+    %   \item push an int
+    %   \item pop to field `age'
+    %   \end{itemize}
+
+    % \item Show the fibo program as an example of a more complex thing
 \end{frame}
 
 \begin{frame}
@@ -251,9 +273,9 @@
   WE DIDN'T TURN OFF JIT IN MONO
 
   \begin{itemize}
-    \item Show and explain fibo graph
-    \item Show and explain heap graph
-    \item Show and explain heap profile (try running it again to get an exponential version)
+  \item Show and explain fibo graph
+  \item Show and explain heap graph
+  \item Show and explain heap profile (try running it again to get an exponential version)
   \end{itemize}
 \end{frame}
 
