@@ -62,12 +62,12 @@
 \begin{frame}
   \frametitle{Agenda}
   \fontsize{11pt}{20}\selectfont
-  \begin{enumerate}[<+->]
-  \item Abstract machines 101
+  \begin{enumerate}
+  \item Abstract Machines 101
     \n{Simon}
-  \item Existing systems
+  \item Existing Systems
     \n{Markus}
-  \item Matisse and the multi-paradigm approach
+  \item Matisse and the Multi-Paradigm Approach
     \n{Simon}
   \item Implementation
     \n{Markus}
@@ -81,7 +81,7 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Abstract machines 101}
+  \frametitle{Abstract Machines 101}
 
   Fundamentals
 
@@ -97,7 +97,7 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Abstract machines 101}
+  \frametitle{Abstract Machines 101}
 
   Advantages
   \begin{itemize}[<+->]
@@ -121,27 +121,14 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Abstract machines 101}
-
-  How and where are they used
-  \begin{itemize}[<+->]
-  \item Web browsers
-    \n{Java applet}
-  \item Desktop applications
-    \n{JVM, CIL, Parrot}
-  \item Embedded devices
-    \n{Android/JVM is everywhere}
-  \end{itemize}
-
-\end{frame}
-
-\begin{frame}
-  \frametitle{Existing systems}
+  \frametitle{Existing Systems}
   \framesubtitle{And their shortcomings}
 
-  \begin{itemize}
-  \item JVM and CLR
-    \n{JVM (Java bytecode): Java and Scala, CLR (CIL): C\#, F\#, and more}
+  \begin{itemize}[<+->]
+  \item Java Virtual Machine (JVM)
+    \n{JVM (Java bytecode): Java and Scala}
+  \item Common Language Runtime (CLR)
+    \n{CLR (CIL): C\#, F\#, and more}
   \item Insufficient for modern paradigms
     \n{Object-Oriented by design, no flexibility\\
        Attempts to remedy: {\tt invokedynamic} and DLR
@@ -229,7 +216,8 @@
   \frametitle{Performance Evaluation}
   \framesubtitle{Running time}
 
-  \n{JIT with Mono}
+  \n{no AOT, butJIT with Mono}
+  \n{JVM in interpreter mode}
 
   \begin{figure}
     \centering
@@ -260,7 +248,7 @@
 \begin{frame}
   \frametitle{Conclusions}
 
-  \begin{itemize}
+  \begin{itemize}[<+->]
   \item Did we succeed?
     \n{A good proof-of-concept, basics work, performance is bad (expected)}
   \item What we learned
