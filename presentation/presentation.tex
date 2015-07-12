@@ -10,7 +10,8 @@
 
 % Setup
 \title{Abstract Machine~\\for Modern Programming Languages}
-\author[Altschuler, Færevaag]{Simon Altschuler (s123563) \and Markus Færevaag (s123692)}
+\author[Altschuler, Færevaag]{Simon Altschuler ({\tt s123563}) \and Markus
+  Færevaag ({\tt s123692})}
 \date{Software Technology Bachelor Thesis, Spring 2015}
 \subject{Computer Science}
 
@@ -64,19 +65,12 @@
   \fontsize{11pt}{20}\selectfont
   \begin{enumerate}
   \item Abstract Machines 101
-    \n{Simon}
   \item Existing Systems
-    \n{Markus}
   \item Matisse and the Multi-Paradigm Approach
-    \n{Simon}
   \item Implementation
-    \n{Markus}
   \item Demo
-    \n{Simon}
   \item Evaluation
-    \n{Markus}
   \item Conclusions
-    \n{Foo bar}
   \end{enumerate}
 \end{frame}
 
@@ -129,9 +123,9 @@
     \n{JVM (Java bytecode): Java and Scala}
   \item Common Language Runtime (CLR)
     \n{CLR (CIL): C\#, F\#, and more}
-  \item Insufficient for modern paradigms
-    \n{Object-Oriented by design, no flexibility\\
-       Attempts to remedy: {\tt invokedynamic} and DLR
+  \item Insuitable for modern paradigms
+    \n{Object-Oriented by design, offers little flexibility\\
+       Attempts to remedy: {\tt invokedynamic} and DLR, Ad-hoc solution
     }
   \item Interesting case: Parrot VM
     \n{Handled dynamic languages, but not static\\
@@ -161,8 +155,9 @@
   \frametitle{Implementation}
 
   \n{Note why C: Speed and low-level flexibility}
-  \n{Briefly each component}
-  \n{Step through execution}
+  \n{Engine: load file, allocate and setup AM}
+  \n{AM: init main thread, execute}
+  \n{Exec: read prefix, parse argument from info. tables, exec}
 
   \begin{figure}[H]
     \centering
@@ -216,8 +211,8 @@
   \frametitle{Performance Evaluation}
   \framesubtitle{Running time}
 
-  \n{no AOT, butJIT with Mono}
-  \n{JVM in interpreter mode}
+  \n{no AOT, but JIT with Mono, JVM in interpreter mode}
+  \n{test programs, bad perf., startup time}
 
   \begin{figure}
     \centering
