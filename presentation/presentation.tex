@@ -1,4 +1,4 @@
-\documentclass[handout]{beamer}
+\documentclass{beamer}
 
 \usepackage[utf8]{inputenc}
 \usepackage{tikz}
@@ -26,6 +26,7 @@
 \definecolor{lered}{rgb}{0.58, 0.02, 0.03}
 \setbeamercolor{itemize item}{fg=lered}
 \setbeamercolor{itemize subitem}{fg=lered}
+\setbeamercovered{transparent}
 
 \newcommand{\n}[1]{\leavevmode\\~\texttt{\color{red}\tiny #1}}
 % \newcommand{\n}[1]{}
@@ -53,7 +54,7 @@
   \item Abstract machines are used everywhere
     \n{Browsers, mobile devices, desktop apps, embedded systems, similar to compilers/interpreters}
   \item Embody a broad spectrum of computer science topics
-    \n{Compiler theory, lots of data structures, optimizations, low-level stuff}
+    \n{Compiler theory, lots of data structures, optimizations, low-level stuff, complex system}
   \end{itemize}
 
 \end{frame}
@@ -136,9 +137,9 @@
 
   \begin{itemize}[<+->]
   \item Virtual computer architecture
-    \n{PROCESS not SYSTEM! Computer arch: organization of components}
+    \n{design and organization of components, PROCESS not SYSTEM!}
   \item Hardware implemented in software
-    \n{Shares properties of hardware like CPU/Memory mgmt/clock cycles}
+    \n{Shares properties of hardware like CPU/Memory mgmt/instruction cycles}
   \item Executes low-level machine code
     \n{Machine code vary from very-low level to relatively high-level}
   \end{itemize}
@@ -157,6 +158,7 @@
   \item Security
     \n{Sandboxed environment, cannot control access to system resources}
   \end{itemize}
+
 
   Disadvantages
   \begin{itemize}[<+->]
@@ -178,9 +180,7 @@
   \item Desktop applications
     \n{JVM, CIL, Parrot}
   \item Embedded devices
-    \n{Hmm?}
-  \item Virtualization
-    \n{Hmm?}
+    \n{Android/JVM is everywhere}
   \end{itemize}
 
 \end{frame}
@@ -208,14 +208,12 @@
   \framesubtitle{The Multi-Paradigm Approach}
 
   What distinguishes Matisse
-  \begin{itemize}
+  \begin{itemize}[<+->]
   \item No paradigm assumptions
     \n{Attempted to be flexible enough to cover all}
   \item Achieved by exposing primitives
     \n{Building blocks for compilers, to use however they like. Scopes, fields, types, sub-routines}
-  \item Opt-in features
-    \n{Threading, scopes}
-  \item Sub-routines are simple and sharable
+  \item Sub-routines are simple and shareable
     \n{They are just references and anon. could be generated easily}
   \item Flexible type system
     \n{AnyType is awesome for dynamic}
