@@ -4,6 +4,7 @@
 \usepackage{tikz}
 \usepackage{drawstack}
 \usepackage{listings}
+\usepackage{caption}
 
 \usetikzlibrary{shapes.multipart,arrows}
 
@@ -26,7 +27,7 @@
 \setbeamercolor{itemize item}{fg=lered}
 \setbeamercolor{itemize subitem}{fg=lered}
 
-\newcommand{\n}[1]{\\~\texttt{\color{red}\tiny #1}}
+\newcommand{\n}[1]{\leavevmode\\~\texttt{\color{red}\tiny #1}}
 % \newcommand{\n}[1]{}
 
 \begin{document}
@@ -189,9 +190,16 @@
   \framesubtitle{And their shortcomings}
 
   \begin{itemize}
-  \item Two most popular/widespread/sick: JVM and CIL
-  \item Why they are insufficient for modern paradigms like seriously, uKnow
-  \item Interesting case: Parrot
+  \item JVM and CLR
+    \n{JVM (Java bytecode): Java and Scala, CLR (CIL): C\#, F\#, and more}
+  \item Insufficient for modern paradigms
+    \n{Object-Oriented by design, no flexibility\\
+       Attempts to remedy: {\tt invokedynamic} and DLR
+    }
+  \item Interesting case: Parrot VM
+    \n{Handled dynamic languages, but not static\\
+       Does not solve our goals
+     }
   \end{itemize}
 \end{frame}
 
@@ -217,12 +225,14 @@
 \begin{frame}
   \frametitle{Implementation}
 
-  \begin{itemize}
-  \item Note: Reasons for using C
-  \item Overview diagram
-  \item Explanation of steps taken from loading a file to executing an
-    instruction to shutting down
-  \end{itemize}
+  \n{Note why C: Speed and low-level flexibility}
+  \n{Briefly each component}
+  \n{Step through execution}
+
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{../figures/arch.pdf}
+  \end{figure}
 \end{frame}
 
 \begin{frame}
@@ -269,14 +279,34 @@
 
 \begin{frame}
   \frametitle{Performance Evaluation}
+  \framesubtitle{Running time}
 
-  WE DIDN'T TURN OFF JIT IN MONO
+  \n{JIT with Mono}
 
-  \begin{itemize}
-  \item Show and explain fibo graph
-  \item Show and explain heap graph
-  \item Show and explain heap profile (try running it again to get an exponential version)
-  \end{itemize}
+  \begin{figure}
+    \centering
+    \begin{minipage}{.5\textwidth}
+      \centering
+          \scalebox{0.36}[0.3]{\input{../figures/fib}}
+      \captionof{figure}{Fibonacci}
+    \end{minipage}%
+    \begin{minipage}{.5\textwidth}
+      \centering
+          \scalebox{0.36}[0.3]{\input{../figures/heap}}
+      \captionof{figure}{Heap Workout}
+    \end{minipage}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Performance Evaluation}
+  \framesubtitle{Memory Footprint}
+
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.23]{../figures/fig-mem}
+    \caption{Fibonacci}
+  \end{figure}
 \end{frame}
 
 \begin{frame}
@@ -293,3 +323,7 @@
 \end{frame}
 
 \end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
